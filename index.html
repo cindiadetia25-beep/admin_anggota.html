@@ -9,17 +9,120 @@
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); min-height: 100vh; color: #fff; padding: 20px; }
-        .container { max-width: 1000px; margin: 0 auto; }
-        header { text-align: center; margin-bottom: 30px; }
-        header h1 { color: #00f2fe; margin-bottom: 5px; font-size: 2.2rem; font-weight: 800; text-shadow: 0 0 15px rgba(0, 242, 254, 0.3); }
-        header p { color: #a1c4fd; font-size: 1rem; font-weight: 500; }
         
+        body { 
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); 
+            min-height: 100vh; 
+            color: #fff; 
+            padding: 20px; 
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Ambient Background Watermark 3 Logo */
+        .bg-watermark-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 5vw;
+            opacity: 0.08;
+        }
+
+        .bg-logo-side {
+            width: 250px;
+            height: 250px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 20px rgba(255,255,255,0.3));
+        }
+
+        .bg-logo-center {
+            width: 450px;
+            height: 450px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 30px rgba(0, 242, 254, 0.4));
+        }
+
+        @media (max-width: 768px) {
+            .bg-watermark-container {
+                flex-direction: column;
+                justify-content: space-around;
+            }
+            .bg-logo-side { width: 120px; height: 120px; }
+            .bg-logo-center { width: 220px; height: 220px; }
+        }
+
+        .container { 
+            max-width: 1000px; 
+            margin: 0 auto; 
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header Style */
+        header { 
+            text-align: center; 
+            margin-bottom: 30px; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+
+        .header-logo {
+            width: 75px;
+            height: 75px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #00f2fe;
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.5);
+        }
+
+        header h1 { 
+            color: #00f2fe; 
+            font-size: 2rem; 
+            font-weight: 800; 
+            text-shadow: 0 0 15px rgba(0, 242, 254, 0.3); 
+            text-align: left;
+        }
+        
+        header p { color: #a1c4fd; font-size: 0.95rem; font-weight: 500; margin-bottom: 12px; }
+
+        /* Widget Jam & Tanggal Digital Real-Time */
+        .clock-box {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(0, 242, 254, 0.12);
+            border: 1px solid rgba(0, 242, 254, 0.35);
+            backdrop-filter: blur(8px);
+            padding: 8px 20px;
+            border-radius: 20px;
+            color: #00f2fe;
+            font-size: 0.95rem;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0, 242, 254, 0.2);
+        }
+
         .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; flex-wrap: wrap; }
         .tab-btn { padding: 10px 20px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s ease; }
         .tab-btn.active { background: #00f2fe; color: #0f2027; border-color: #00f2fe; box-shadow: 0 0 12px rgba(0, 242, 254, 0.4); }
 
-        .card { background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 16px; padding: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); margin-bottom: 20px; }
+        .card { background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 16px; padding: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); margin-bottom: 20px; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
@@ -46,10 +149,27 @@
 </head>
 <body>
 
+<!-- Watermark Background 3 Logo -->
+<div class="bg-watermark-container">
+    <img src="logo_forbasi.jpg" class="bg-logo-side" alt="Logo FORBASI" onerror="this.style.display='none'">
+    <img src="logo_pasmanecis.jpg" class="bg-logo-center" alt="Logo PASMANECIS 3D" onerror="this.style.display='none'">
+    <img src="logo_paskib_ciamis.png" class="bg-logo-side" alt="Logo Paskibra Ciamis" onerror="this.style.display='none'">
+</div>
+
 <div class="container">
     <header>
-        <h1><i class="fas fa-flag"></i> Dashboard Manajemen PASKIBRA MAN 6 Ciamis</h1>
+        <div class="header-brand">
+            <!-- Logo Samping Judul -->
+            <img src="logo_pasmanecis.jpg" class="header-logo" alt="Logo Pasmanecis" onerror="this.src='https://via.placeholder.com/75'">
+            <h1>Dashboard Manajemen PASKIBRA MAN 6 Ciamis</h1>
+        </div>
         <p>Sistem Informasi Anggota, Presensi Latihan Rutin, dan Open Recruitment</p>
+        
+        <!-- Widget Jam & Tanggal Digital Real-Time -->
+        <div class="clock-box">
+            <i class="fas fa-clock"></i>
+            <span id="liveClock">--:--:-- WIB</span>
+        </div>
     </header>
 
     <div class="nav-tabs">
@@ -186,6 +306,25 @@
 
 <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxzQmY4XGvBLnoeHRo6W4gMFXQAbNESiv8ZLN0fkGIgtMxLA_riQmBRFp-hyCLXDG6D/exec";
+
+    // Fungsi Update Jam & Tanggal Real-Time
+    function updateLiveClock() {
+        const now = new Date();
+        const options = { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+        };
+        const dateStr = now.toLocaleDateString('id-ID', options);
+        const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        
+        document.getElementById("liveClock").innerText = `${dateStr} - ${timeStr} WIB`;
+    }
+
+    // Jalankan jam detik demi detik
+    setInterval(updateLiveClock, 1000);
+    updateLiveClock();
 
     function switchTab(tabId) {
         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
