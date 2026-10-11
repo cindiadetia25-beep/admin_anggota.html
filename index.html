@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Manajemen Anggota & Absensi</title>
+    <title>Dashboard Manajemen PASKIBRA MAN 6 Ciamis</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <!-- Library SheetJS untuk membaca file Excel -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -12,12 +12,12 @@
         body { background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); min-height: 100vh; color: #fff; padding: 20px; }
         .container { max-width: 1000px; margin: 0 auto; }
         header { text-align: center; margin-bottom: 30px; }
-        header h1 { color: #00f2fe; margin-bottom: 5px; }
-        header p { color: #a1c4fd; font-size: 0.95rem; }
+        header h1 { color: #00f2fe; margin-bottom: 5px; font-size: 2.2rem; font-weight: 800; text-shadow: 0 0 15px rgba(0, 242, 254, 0.3); }
+        header p { color: #a1c4fd; font-size: 1rem; font-weight: 500; }
         
         .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; flex-wrap: wrap; }
-        .tab-btn { padding: 10px 20px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 8px; cursor: pointer; font-weight: 600; }
-        .tab-btn.active { background: #00f2fe; color: #0f2027; border-color: #00f2fe; }
+        .tab-btn { padding: 10px 20px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s ease; }
+        .tab-btn.active { background: #00f2fe; color: #0f2027; border-color: #00f2fe; box-shadow: 0 0 12px rgba(0, 242, 254, 0.4); }
 
         .card { background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 16px; padding: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); margin-bottom: 20px; }
         .tab-content { display: none; }
@@ -48,19 +48,19 @@
 
 <div class="container">
     <header>
-        <h1><i class="fas fa-users-cog"></i> Dashboard Admin Organisasi</h1>
-        <p>Kelola Anggota, Absensi Mingguan, dan Open Recruitment</p>
+        <h1><i class="fas fa-flag"></i> Dashboard Manajemen PASKIBRA MAN 6 Ciamis</h1>
+        <p>Sistem Informasi Anggota, Presensi Latihan Rutin, dan Open Recruitment</p>
     </header>
 
     <div class="nav-tabs">
-        <button class="tab-btn active" onclick="switchTab('tab-anggota')"><i class="fas fa-address-book"></i> Daftar Anggota</button>
-        <button class="tab-btn" onclick="switchTab('tab-absensi')"><i class="fas fa-calendar-check"></i> Absensi Mingguan</button>
+        <button class="tab-btn active" onclick="switchTab('tab-anggota')"><i class="fas fa-address-book"></i> Daftar Anggota Paskibra</button>
+        <button class="tab-btn" onclick="switchTab('tab-absensi')"><i class="fas fa-calendar-check"></i> Absensi Latihan Rutin</button>
         <button class="tab-btn" onclick="switchTab('tab-recruitment')"><i class="fas fa-user-plus"></i> Open Recruitment</button>
     </div>
 
-    <!-- TAB 1: DAFTAR ANGGOTA -->
+    <!-- TAB 1: DAFTAR ANGGOTA PASKIBRA -->
     <div id="tab-anggota" class="card tab-content active">
-        <h2>Daftar Anggota Aktif</h2>
+        <h2>Daftar Anggota Aktif PASKIBRA</h2>
         
         <!-- Form Input Manual Anggota -->
         <form onsubmit="submitAnggotaManual(event)" style="margin-top: 15px;">
@@ -75,11 +75,11 @@
                 </div>
                 <div class="form-group">
                     <label>Kelas</label>
-                    <input type="text" id="manualKelas" placeholder="Contoh: 7A / 8B" required>
+                    <input type="text" id="manualKelas" placeholder="Contoh: X.1 / XI.A" required>
                 </div>
                 <div class="form-group">
-                    <label>Jabatan</label>
-                    <input type="text" id="manualJabatan" placeholder="Anggota / Pengurus" required>
+                    <label>Jabatan / Tingkatan</label>
+                    <input type="text" id="manualJabatan" placeholder="Mula / Madya / Utama / Pengurus" required>
                 </div>
             </div>
             <button type="submit" class="btn btn-primary"><i class="fas fa-plus-circle"></i> Tambah Anggota Manual</button>
@@ -111,16 +111,16 @@
         </table>
     </div>
 
-    <!-- TAB 2: ABSENSI KEHADIRAN (Senin, Selasa, Rabu) -->
+    <!-- TAB 2: ABSENSI LATIHAN RUTIN (Senin, Selasa, Rabu) -->
     <div id="tab-absensi" class="card tab-content">
-        <h2>Input Absensi Pertemuan</h2>
+        <h2>Input Absensi Latihan Rutin</h2>
         <form id="formAbsensi" onsubmit="submitAbsensi(event)" style="margin-top: 15px;">
             <div class="form-group">
                 <label>Pilih Anggota (Otomatis dari Data Anggota)</label>
                 <select id="absensiNama" required></select>
             </div>
             <div class="form-group">
-                <label>Pertemuan / Hari (3x Seminggu)</label>
+                <label>Hari Latihan Rutin (3x Seminggu)</label>
                 <select id="absensiPertemuan" required>
                     <option value="Pertemuan 1 (Senin)">Pertemuan 1 (Senin)</option>
                     <option value="Pertemuan 2 (Selasa)">Pertemuan 2 (Selasa)</option>
@@ -136,13 +136,13 @@
                     <option value="Alpha">Alpha</option>
                 </select>
             </div>
-            <button type="submit" class="btn btn-primary" style="width: 100%;"><i class="fas fa-save"></i> Simpan Absensi</button>
+            <button type="submit" class="btn btn-primary" style="width: 100%;"><i class="fas fa-save"></i> Simpan Absensi Latihan</button>
         </form>
     </div>
 
     <!-- TAB 3: OPEN RECRUITMENT -->
     <div id="tab-recruitment" class="card tab-content">
-        <h2>Pendaftar Anggota Baru (Open Recruitment)</h2>
+        <h2>Pendaftar Calon Anggota Paskibra Baru (OR)</h2>
 
         <!-- Form Input Manual OR -->
         <form onsubmit="submitORManual(event)" style="margin-top: 15px;">
@@ -153,10 +153,10 @@
                 </div>
                 <div class="form-group">
                     <label>Kelas</label>
-                    <input type="text" id="orKelas" placeholder="Contoh: 7C" required>
+                    <input type="text" id="orKelas" placeholder="Contoh: X.1" required>
                 </div>
                 <div class="form-group">
-                    <label>Alasan Bergabung</label>
+                    <label>Alasan Masuk Paskibra</label>
                     <input type="text" id="orAlasan" placeholder="Alasan berminat" required>
                 </div>
             </div>
@@ -175,7 +175,7 @@
 
         <table>
             <thead>
-                <tr><th>Tanggal</th><th>Nama Pendaftar</th><th>Kelas</th><th>Alasan</th><th>Status</th></tr>
+                <tr><th>Tanggal</th><th>Nama Pendaftar</th><th>Kelas</th><th>Alasan</th><th>Status Seleksi</th></tr>
             </thead>
             <tbody id="tableOR">
                 <tr><td colspan="5" style="text-align:center;">Memuat data...</td></tr>
@@ -220,7 +220,7 @@
                     selectAbsensi.innerHTML += `<option value="${a.Nama_Lengkap}" data-nis="${nisVal}">[${nisVal}] ${a.Nama_Lengkap} - Kelas ${a.Kelas}</option>`;
                 });
             } else {
-                tbodyAnggota.innerHTML = "<tr><td colspan='5' style='text-align:center;'>Belum ada data anggota.</td></tr>";
+                tbodyAnggota.innerHTML = "<tr><td colspan='5' style='text-align:center;'>Belum ada data anggota Paskibra.</td></tr>";
                 selectAbsensi.innerHTML = "<option value=''>Belum ada anggota terdaftar</option>";
             }
 
@@ -239,7 +239,7 @@
                         </tr>`;
                 });
             } else {
-                tbodyOR.innerHTML = "<tr><td colspan='5' style='text-align:center;'>Belum ada data pendaftar.</td></tr>";
+                tbodyOR.innerHTML = "<tr><td colspan='5' style='text-align:center;'>Belum ada data pendaftar calon Paskibra.</td></tr>";
             }
         } catch (err) {
             console.error("Gagal memuat data:", err);
@@ -280,7 +280,7 @@
                     status: "Aktif"
                 });
             }
-            alert("Berhasil mengimpor data Excel Anggota!");
+            alert("Berhasil mengimpor data Excel Anggota Paskibra!");
             loadData();
         };
         reader.readAsArrayBuffer(file);
@@ -296,7 +296,7 @@
         const keterangan = document.getElementById("absensiStatus").value;
 
         await sendDataToSheet({ action: "addAbsensi", nis, nama, pertemuan, keterangan });
-        alert(`Absensi ${nama} berhasil disimpan!`);
+        alert(`Absensi latihan untuk ${nama} berhasil disimpan!`);
     }
 
     // Input Manual OR
