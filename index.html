@@ -15,57 +15,14 @@
             min-height: 100vh; 
             color: #fff; 
             padding: 20px; 
-            position: relative;
-            overflow-x: hidden;
-        }
-
-        /* Ambient Background Watermark 3 Logo */
-        .bg-watermark-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            pointer-events: none;
-            z-index: 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 5vw;
-            opacity: 0.12;
-        }
-
-        .bg-logo-side {
-            width: 240px;
-            height: 240px;
-            object-fit: contain;
-            filter: drop-shadow(0 0 20px rgba(255,255,255,0.3));
-        }
-
-        .bg-logo-center {
-            width: 420px;
-            height: 420px;
-            object-fit: contain;
-            filter: drop-shadow(0 0 30px rgba(0, 242, 254, 0.4));
-        }
-
-        @media (max-width: 768px) {
-            .bg-watermark-container {
-                flex-direction: column;
-                justify-content: space-around;
-            }
-            .bg-logo-side { width: 110px; height: 110px; }
-            .bg-logo-center { width: 200px; height: 200px; }
         }
 
         .container { 
             max-width: 1000px; 
             margin: 0 auto; 
-            position: relative;
-            z-index: 1;
         }
 
-        /* Header Style dengan Logo di Samping Judul */
+        /* Header Style */
         header { 
             text-align: center; 
             margin-bottom: 30px; 
@@ -74,31 +31,12 @@
             align-items: center;
         }
 
-        .header-brand {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 18px;
-            margin-bottom: 10px;
-            flex-wrap: wrap;
-        }
-
-        .header-logo {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 3px solid #00f2fe;
-            box-shadow: 0 0 20px rgba(0, 242, 254, 0.6);
-            flex-shrink: 0;
-        }
-
         header h1 { 
             color: #00f2fe; 
-            font-size: 2rem; 
+            font-size: 2.2rem; 
             font-weight: 800; 
             text-shadow: 0 0 15px rgba(0, 242, 254, 0.3); 
-            text-align: center;
+            margin-bottom: 8px;
         }
         
         header p { color: #a1c4fd; font-size: 0.95rem; font-weight: 500; margin-bottom: 12px; }
@@ -150,20 +88,9 @@
 </head>
 <body>
 
-<!-- Watermark Background 3 Logo -->
-<div class="bg-watermark-container">
-    <img src="FORBASI.jpg" class="bg-logo-side" alt="Logo FORBASI" onerror="this.src='logo_forbasi.jpg'">
-    <img src="LOGO 3D PASMANECIS.jpg" class="bg-logo-center" alt="Logo PASMANECIS 3D" onerror="this.src='LOGO 3D PASMANECIS_2.jpg'">
-    <img src="paskib.jfif" class="bg-logo-side" alt="Logo Paskibra Ciamis" onerror="this.src='logo_paskib_ciamis.png'">
-</div>
-
 <div class="container">
     <header>
-        <div class="header-brand">
-            <!-- Logo Samping Judul (Pilihan file fleksibel agar dipastikan ter-load) -->
-            <img src="LOGO 3D PASMANECIS.jpg" class="header-logo" alt="Logo Pasmanecis" onerror="this.onerror=null; this.src='LOGO 3D PASMANECIS_2.jpg';">
-            <h1>Dashboard Manajemen PASKIBRA MAN 6 Ciamis</h1>
-        </div>
+        <h1><i class="fas fa-flag"></i> Dashboard Manajemen PASKIBRA MAN 6 Ciamis</h1>
         <p>Sistem Informasi Anggota, Presensi Latihan Rutin, dan Open Recruitment</p>
         
         <!-- Widget Jam & Tanggal Digital Real-Time -->
