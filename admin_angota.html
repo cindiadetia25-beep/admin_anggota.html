@@ -11,6 +11,7 @@
         .container { max-width: 1000px; margin: 0 auto; }
         header { text-align: center; margin-bottom: 30px; }
         header h1 { color: #00f2fe; margin-bottom: 5px; }
+        header p { color: #a1c4fd; font-size: 0.95rem; }
         
         .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; }
         .tab-btn { padding: 10px 20px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 8px; cursor: pointer; font-weight: 600; }
@@ -45,7 +46,7 @@
         <button class="tab-btn" onclick="switchTab('tab-recruitment')"><i class="fas fa-user-plus"></i> Open Recruitment</button>
     </div>
 
-    <!-- TAB 1: DAFTAR ANGGOTA (DENGAN NIS) -->
+    <!-- TAB 1: DAFTAR ANGGOTA -->
     <div id="tab-anggota" class="card tab-content active">
         <h2>Daftar Anggota Aktif</h2>
         <table>
@@ -122,40 +123,41 @@
             const res = await fetch(SCRIPT_URL);
             const data = await res.json();
 
-            // Render Tabel Anggota
             const tbodyAnggota = document.getElementById("tableAnggota");
             const selectAbsensi = document.getElementById("absensiNama");
             tbodyAnggota.innerHTML = "";
             selectAbsensi.innerHTML = "";
 
-            data.anggota.forEach(a => {
-                const nisVal = a.NIS || "-";
-                tbodyAnggota.innerHTML += `
-                    <tr>
-                        <td><strong>${nisVal}</strong></td>
-                        <td>${a.Nama_Lengkap}</td>
-                        <td>${a.Kelas}</td>
-                        <td>${a.Jabatan}</td>
-                        <td>${a.Status}</td>
-                    </tr>`;
-                
-                // Masukkan NIS dan Nama ke dalam pilihan Absensi
-                selectAbsensi.innerHTML += `<option value="${a.Nama_Lengkap}" data-nis="${nisVal}">[${nisVal}] ${a.Nama_Lengkap} - ${a.Kelas}</option>`;
-            });
+            if (data.anggota) {
+                data.anggota.forEach(a => {
+                    const nisVal = a.NIS || "-";
+                    tbodyAnggota.innerHTML += `
+                        <tr>
+                            <td><strong>${nisVal}</strong></td>
+                            <td>${a.Nama_Lengkap}</td>
+                            <td>${a.Kelas}</td>
+                            <td>${a.Jabatan}</td>
+                            <td>${a.Status}</td>
+                        </tr>`;
+                    
+                    selectAbsensi.innerHTML += `<option value="${a.Nama_Lengkap}" data-nis="${nisVal}">[${nisVal}] ${a.Nama_Lengkap} - ${a.Kelas}</option>`;
+                });
+            }
 
-            // Render Tabel Recruitment (OR)
             const tbodyOR = document.getElementById("tableOR");
             tbodyOR.innerHTML = "";
-            data.recruitment.forEach(r => {
-                tbodyOR.innerHTML += `
-                    <tr>
-                        <td>${new Date(r.Timestamp).toLocaleDateString('id-ID')}</td>
-                        <td>${r.Nama_Pendaftar}</td>
-                        <td>${r.Kelas}</td>
-                        <td>${r.Alasan_Bergabung}</td>
-                        <td>${r.Status_Seleksi}</td>
-                    </tr>`;
-            });
+            if (data.recruitment) {
+                data.recruitment.forEach(r => {
+                    tbodyOR.innerHTML += `
+                        <tr>
+                            <td>${new Date(r.Timestamp).toLocaleDateString('id-ID')}</td>
+                            <td>${r.Nama_Pendaftar}</td>
+                            <td>${r.Kelas}</td>
+                            <td>${r.Alasan_Bergabung}</td>
+                            <td>${r.Status_Seleksi}</td>
+                        </tr>`;
+                });
+            }
         } catch (err) {
             console.error("Gagal memuat data:", err);
         }
