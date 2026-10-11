@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Manajemen Anggota & Absensi</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Library SheetJS untuk membaca file Excel -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); min-height: 100vh; color: #fff; padding: 20px; }
@@ -13,23 +15,33 @@
         header h1 { color: #00f2fe; margin-bottom: 5px; }
         header p { color: #a1c4fd; font-size: 0.95rem; }
         
-        .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; }
+        .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; flex-wrap: wrap; }
         .tab-btn { padding: 10px 20px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 8px; cursor: pointer; font-weight: 600; }
         .tab-btn.active { background: #00f2fe; color: #0f2027; border-color: #00f2fe; }
 
-        .card { background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 16px; padding: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+        .card { background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 16px; padding: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); margin-bottom: 20px; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
+
+        .action-box { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; }
 
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 0.9rem; }
         th { background: rgba(0, 242, 254, 0.2); color: #00f2fe; }
 
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px; }
         .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; color: #a1c4fd; }
+        .form-group label { display: block; margin-bottom: 5px; color: #a1c4fd; font-size: 0.9rem; }
         .form-group input, .form-group select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); color: #fff; }
         .form-group option { background: #203a43; color: #fff; }
-        .btn { padding: 10px 20px; background: linear-gradient(45deg, #00c6ff, #0072ff); border: none; color: #fff; border-radius: 8px; cursor: pointer; font-weight: 600; width: 100%; }
+        
+        .btn { padding: 10px 18px; border: none; color: #fff; border-radius: 8px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: 0.3s; }
+        .btn-primary { background: linear-gradient(45deg, #00c6ff, #0072ff); }
+        .btn-excel { background: linear-gradient(45deg, #11998e, #38ef7d); }
+        .btn:hover { opacity: 0.9; transform: translateY(-2px); }
+
+        .file-input-wrapper { position: relative; overflow: hidden; display: inline-block; }
+        .file-input-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -49,6 +61,40 @@
     <!-- TAB 1: DAFTAR ANGGOTA -->
     <div id="tab-anggota" class="card tab-content active">
         <h2>Daftar Anggota Aktif</h2>
+        
+        <!-- Form Input Manual Anggota -->
+        <form onsubmit="submitAnggotaManual(event)" style="margin-top: 15px;">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>NIS</label>
+                    <input type="text" id="manualNis" placeholder="Contoh: 23241001" required>
+                </div>
+                <div class="form-group">
+                    <label>Nama Lengkap</label>
+                    <input type="text" id="manualNama" placeholder="Nama Anggota" required>
+                </div>
+                <div class="form-group">
+                    <label>Kelas</label>
+                    <input type="text" id="manualKelas" placeholder="Contoh: 7A / 8B" required>
+                </div>
+                <div class="form-group">
+                    <label>Jabatan</label>
+                    <input type="text" id="manualJabatan" placeholder="Anggota / Pengurus" required>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary"><i class="fas fa-plus-circle"></i> Tambah Anggota Manual</button>
+        </form>
+
+        <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 20px 0;">
+
+        <div class="action-box">
+            <span><strong>Import Data Anggota via Excel:</strong></span>
+            <div class="file-input-wrapper">
+                <button class="btn btn-excel"><i class="fas fa-file-excel"></i> Upload Excel Anggota</button>
+                <input type="file" accept=".xlsx, .xls, .csv" onchange="importExcelAnggota(event)">
+            </div>
+        </div>
+
         <table>
             <thead>
                 <tr>
@@ -65,20 +111,20 @@
         </table>
     </div>
 
-    <!-- TAB 2: ABSENSI KEHADIRAN -->
+    <!-- TAB 2: ABSENSI KEHADIRAN (Senin, Selasa, Rabu) -->
     <div id="tab-absensi" class="card tab-content">
         <h2>Input Absensi Pertemuan</h2>
-        <form id="formAbsensi" onsubmit="submitAbsensi(event)">
+        <form id="formAbsensi" onsubmit="submitAbsensi(event)" style="margin-top: 15px;">
             <div class="form-group">
-                <label>Pilih Anggota (NIS - Nama)</label>
+                <label>Pilih Anggota (Otomatis dari Data Anggota)</label>
                 <select id="absensiNama" required></select>
             </div>
             <div class="form-group">
                 <label>Pertemuan / Hari (3x Seminggu)</label>
                 <select id="absensiPertemuan" required>
                     <option value="Pertemuan 1 (Senin)">Pertemuan 1 (Senin)</option>
-                    <option value="Pertemuan 2 (Rabu)">Pertemuan 2 (Rabu)</option>
-                    <option value="Pertemuan 3 (Jumat)">Pertemuan 3 (Jumat)</option>
+                    <option value="Pertemuan 2 (Selasa)">Pertemuan 2 (Selasa)</option>
+                    <option value="Pertemuan 3 (Rabu)">Pertemuan 3 (Rabu)</option>
                 </select>
             </div>
             <div class="form-group">
@@ -90,13 +136,43 @@
                     <option value="Alpha">Alpha</option>
                 </select>
             </div>
-            <button type="submit" class="btn"><i class="fas fa-save"></i> Simpan Absensi</button>
+            <button type="submit" class="btn btn-primary" style="width: 100%;"><i class="fas fa-save"></i> Simpan Absensi</button>
         </form>
     </div>
 
     <!-- TAB 3: OPEN RECRUITMENT -->
     <div id="tab-recruitment" class="card tab-content">
-        <h2>Pendaftar Anggota Baru (OR)</h2>
+        <h2>Pendaftar Anggota Baru (Open Recruitment)</h2>
+
+        <!-- Form Input Manual OR -->
+        <form onsubmit="submitORManual(event)" style="margin-top: 15px;">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Nama Pendaftar</label>
+                    <input type="text" id="orNama" placeholder="Nama Calon Anggota" required>
+                </div>
+                <div class="form-group">
+                    <label>Kelas</label>
+                    <input type="text" id="orKelas" placeholder="Contoh: 7C" required>
+                </div>
+                <div class="form-group">
+                    <label>Alasan Bergabung</label>
+                    <input type="text" id="orAlasan" placeholder="Alasan berminat" required>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary"><i class="fas fa-user-plus"></i> Tambah Pendaftar Manual</button>
+        </form>
+
+        <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 20px 0;">
+
+        <div class="action-box">
+            <span><strong>Import Data Pendaftar OR via Excel:</strong></span>
+            <div class="file-input-wrapper">
+                <button class="btn btn-excel"><i class="fas fa-file-excel"></i> Upload Excel OR</button>
+                <input type="file" accept=".xlsx, .xls, .csv" onchange="importExcelOR(event)">
+            </div>
+        </div>
+
         <table>
             <thead>
                 <tr><th>Tanggal</th><th>Nama Pendaftar</th><th>Kelas</th><th>Alasan</th><th>Status</th></tr>
@@ -123,12 +199,13 @@
             const res = await fetch(SCRIPT_URL);
             const data = await res.json();
 
+            // Render Anggota
             const tbodyAnggota = document.getElementById("tableAnggota");
             const selectAbsensi = document.getElementById("absensiNama");
             tbodyAnggota.innerHTML = "";
             selectAbsensi.innerHTML = "";
 
-            if (data.anggota) {
+            if (data.anggota && data.anggota.length > 0) {
                 data.anggota.forEach(a => {
                     const nisVal = a.NIS || "-";
                     tbodyAnggota.innerHTML += `
@@ -137,32 +214,79 @@
                             <td>${a.Nama_Lengkap}</td>
                             <td>${a.Kelas}</td>
                             <td>${a.Jabatan}</td>
-                            <td>${a.Status}</td>
+                            <td>${a.Status || 'Aktif'}</td>
                         </tr>`;
                     
-                    selectAbsensi.innerHTML += `<option value="${a.Nama_Lengkap}" data-nis="${nisVal}">[${nisVal}] ${a.Nama_Lengkap} - ${a.Kelas}</option>`;
+                    selectAbsensi.innerHTML += `<option value="${a.Nama_Lengkap}" data-nis="${nisVal}">[${nisVal}] ${a.Nama_Lengkap} - Kelas ${a.Kelas}</option>`;
                 });
+            } else {
+                tbodyAnggota.innerHTML = "<tr><td colspan='5' style='text-align:center;'>Belum ada data anggota.</td></tr>";
+                selectAbsensi.innerHTML = "<option value=''>Belum ada anggota terdaftar</option>";
             }
 
+            // Render Recruitment (OR)
             const tbodyOR = document.getElementById("tableOR");
             tbodyOR.innerHTML = "";
-            if (data.recruitment) {
+            if (data.recruitment && data.recruitment.length > 0) {
                 data.recruitment.forEach(r => {
                     tbodyOR.innerHTML += `
                         <tr>
-                            <td>${new Date(r.Timestamp).toLocaleDateString('id-ID')}</td>
+                            <td>${r.Timestamp ? new Date(r.Timestamp).toLocaleDateString('id-ID') : '-'}</td>
                             <td>${r.Nama_Pendaftar}</td>
                             <td>${r.Kelas}</td>
                             <td>${r.Alasan_Bergabung}</td>
-                            <td>${r.Status_Seleksi}</td>
+                            <td>${r.Status_Seleksi || 'Pending'}</td>
                         </tr>`;
                 });
+            } else {
+                tbodyOR.innerHTML = "<tr><td colspan='5' style='text-align:center;'>Belum ada data pendaftar.</td></tr>";
             }
         } catch (err) {
             console.error("Gagal memuat data:", err);
         }
     }
 
+    // Input Manual Anggota
+    async function submitAnggotaManual(e) {
+        e.preventDefault();
+        const nis = document.getElementById("manualNis").value;
+        const nama = document.getElementById("manualNama").value;
+        const kelas = document.getElementById("manualKelas").value;
+        const jabatan = document.getElementById("manualJabatan").value;
+
+        await sendDataToSheet({ action: "addAnggota", nis, nama, kelas, jabatan, status: "Aktif" });
+        e.target.reset();
+    }
+
+    // Input Excel Anggota
+    function importExcelAnggota(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+
+            for (let row of jsonData) {
+                await sendDataToSheet({
+                    action: "addAnggota",
+                    nis: row.NIS || row.nis || "-",
+                    nama: row.Nama_Lengkap || row.Nama || row.nama || "",
+                    kelas: row.Kelas || row.kelas || "",
+                    jabatan: row.Jabatan || row.jabatan || "Anggota",
+                    status: "Aktif"
+                });
+            }
+            alert("Berhasil mengimpor data Excel Anggota!");
+            loadData();
+        };
+        reader.readAsArrayBuffer(file);
+    }
+
+    // Simpan Absensi
     async function submitAbsensi(e) {
         e.preventDefault();
         const selectElem = document.getElementById("absensiNama");
@@ -171,15 +295,56 @@
         const pertemuan = document.getElementById("absensiPertemuan").value;
         const keterangan = document.getElementById("absensiStatus").value;
 
+        await sendDataToSheet({ action: "addAbsensi", nis, nama, pertemuan, keterangan });
+        alert(`Absensi ${nama} berhasil disimpan!`);
+    }
+
+    // Input Manual OR
+    async function submitORManual(e) {
+        e.preventDefault();
+        const nama = document.getElementById("orNama").value;
+        const kelas = document.getElementById("orKelas").value;
+        const alasan = document.getElementById("orAlasan").value;
+
+        await sendDataToSheet({ action: "submitOR", nama, kelas, alasan });
+        e.target.reset();
+    }
+
+    // Input Excel OR
+    function importExcelOR(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+
+            for (let row of jsonData) {
+                await sendDataToSheet({
+                    action: "submitOR",
+                    nama: row.Nama_Pendaftar || row.Nama || row.nama || "",
+                    kelas: row.Kelas || row.kelas || "",
+                    alasan: row.Alasan_Bergabung || row.Alasan || row.alasan || ""
+                });
+            }
+            alert("Berhasil mengimpor data Excel Pendaftar OR!");
+            loadData();
+        };
+        reader.readAsArrayBuffer(file);
+    }
+
+    async function sendDataToSheet(payload) {
         try {
             await fetch(SCRIPT_URL, {
                 method: "POST",
-                body: JSON.stringify({ action: "addAbsensi", nis: nis, nama: nama, pertemuan: pertemuan, keterangan: keterangan })
+                body: JSON.stringify(payload)
             });
-            alert(`Absensi untuk ${nama} (${nis}) berhasil disimpan!`);
             loadData();
         } catch (err) {
-            alert("Gagal menyimpan absensi.");
+            alert("Gagal terhubung ke server Google Sheets.");
         }
     }
 
