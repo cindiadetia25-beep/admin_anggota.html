@@ -7,7 +7,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <!-- Google Font: American Captain -->
     <link href="https://fonts.cdnfonts.com/css/american-captain" rel="stylesheet">
-    <!-- Library SheetJS -->
+    <!-- Library SheetJS untuk Ekspor Excel -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
     <style>
@@ -170,7 +170,6 @@
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 0.95rem; word-break: break-word; }
         th { background: rgba(255, 215, 0, 0.2); color: #ffd700; font-size: 1.1rem; }
 
-        /* Style khusus baris pembatas absensi */
         tr.divider-pertemuan {
             background-color: rgba(255, 215, 0, 0.3);
             border-top: 3px solid #ffd700;
@@ -249,10 +248,11 @@
         <input type="file" id="logoInput" accept="image/png" style="display: none;" onchange="handleLogoUpload(event)">
     </header>
 
+    <!-- NAVIGASI TAB -->
     <div class="nav-tabs">
-        <button class="tab-btn active" onclick="switchTab('tab-anggota')"><i class="fas fa-address-book"></i> DAFTAR ANGGOTA PASKIBRA</button>
-        <button class="tab-btn" onclick="switchTab('tab-absensi')"><i class="fas fa-calendar-check"></i> ABSENSI LATIHAN RUTIN</button>
-        <button class="tab-btn" onclick="switchTab('tab-recruitment')"><i class="fas fa-user-plus"></i> OPEN RECRUITMENT</button>
+        <button class="tab-btn active" onclick="switchTab('tab-anggota', this)"><i class="fas fa-address-book"></i> DAFTAR ANGGOTA PASKIBRA</button>
+        <button class="tab-btn" onclick="switchTab('tab-absensi', this)"><i class="fas fa-calendar-check"></i> ABSENSI LATIHAN RUTIN</button>
+        <button class="tab-btn" onclick="switchTab('tab-recruitment', this)"><i class="fas fa-user-plus"></i> OPEN RECRUITMENT</button>
     </div>
 
     <!-- TAB 1: DAFTAR ANGGOTA PASKIBRA -->
@@ -388,13 +388,14 @@
                     <tr>
                         <th>Tanggal</th>
                         <th>Nama Pendaftar</th>
+                        <th>Alumni SMP/MTS</th>
                         <th>Kelas</th>
                         <th>Status Seleksi</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody id="tableOR">
-                    <tr><td colspan="5" style="text-align:center;">Memuat data...</td></tr>
+                    <tr><td colspan="6" style="text-align:center;">Memuat data...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -409,6 +410,32 @@
     let globalRecruitment = [];
     let currentLogoBase64 = "";
 
+    // 1. PERBAIKAN SWITCH TAB (Aman & Bebas Crash)
+    function switchTab(tabId, btnElement) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        
+        document.getElementById(tabId).classList.add('active');
+        if (btnElement) {
+            btnElement.classList.add('active');
+        }
+    }
+
+    // 2. PERBAIKAN JAM DIGITAL REAL-TIME
+    function updateLiveClock() {
+        try {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const dateStr = now.toLocaleDateString('id-ID', options);
+            const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            document.getElementById("liveClock").innerText = `${dateStr} - ${timeStr} WIB`;
+        } catch (e) {
+            console.error("Clock error:", e);
+        }
+    }
+    setInterval(updateLiveClock, 1000);
+    updateLiveClock();
+
     function triggerLogoUpload() {
         document.getElementById("logoInput").click();
     }
@@ -421,7 +448,7 @@
                 currentLogoBase64 = e.target.result;
                 document.getElementById("dashboardLogo").src = currentLogoBase64;
                 await sendDataToSheet({ action: "saveLogo", logoBase64: currentLogoBase64 });
-                alert("Logo PNG berhasil disimpan secara permanen di server!");
+                alert("Logo PNG berhasil disimpan secara permanen!");
             };
             reader.readAsDataURL(file);
         } else {
@@ -429,23 +456,7 @@
         }
     }
 
-    function updateLiveClock() {
-        const now = new Date();
-        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        const dateStr = now.toLocaleDateString('id-ID', options);
-        const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        document.getElementById("liveClock").innerText = `${dateStr} - ${timeStr} WIB`;
-    }
-    setInterval(updateLiveClock, 1000);
-    updateLiveClock();
-
-    function switchTab(tabId) {
-        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-        document.getElementById(tabId).classList.add('active');
-        event.currentTarget.classList.add('active');
-    }
-
+    // 3. FUNGSI TARIK DATA DARI APPS SCRIPT SPREADSHEET
     async function loadData() {
         try {
             const res = await fetch(SCRIPT_URL);
@@ -460,17 +471,13 @@
                 document.getElementById("dashboardLogo").src = currentLogoBase64;
             }
 
-            // 1. Render Data Master Anggota & Dropdown
             renderTableMaster();
             populateSelectAnggota();
-
-            // 2. Render Preview Absensi
             renderPreviewAbsensi();
-
-            // 3. Render Table Open Recruitment
             renderTableOR();
         } catch (err) {
-            console.error("Gagal memuat data:", err);
+            console.error("Gagal memuat data dari Spreadsheet:", err);
+            document.getElementById("tableAnggota").innerHTML = "<tr><td colspan='4' style='text-align:center; color:#ff6b6b;'>Gagal memuat data. Periksa koneksi Web App Apps Script Anda.</td></tr>";
         }
     }
 
@@ -479,12 +486,17 @@
         tbody.innerHTML = "";
         if (globalDataMaster.length > 0) {
             globalDataMaster.forEach(a => {
+                const nis = a["NIS/NISN"] || a["NIS"] || a["nis"] || "-";
+                const nama = a["NAMA LENGKAP"] || a["Nama_Lengkap"] || a["nama"] || "-";
+                const kelas = a["KELAS"] || a["Kelas"] || a["kelas"] || "-";
+                const jabatan = a["JABATAN"] || a["Jabatan"] || "Anggota";
+
                 tbody.innerHTML += `
                     <tr>
-                        <td><strong>${a["NIS/NISN"] || a.NIS || "-"}</strong></td>
-                        <td>${a["NAMA LENGKAP"] || a.Nama_Lengkap || "-"}</td>
-                        <td>${a.KELAS || a.Kelas || "-"}</td>
-                        <td>${a.JABATAN || a.Jabatan || "Anggota"}</td>
+                        <td><strong>${nis}</strong></td>
+                        <td>${nama}</td>
+                        <td>${kelas}</td>
+                        <td>${jabatan}</td>
                     </tr>`;
             });
         } else {
@@ -496,9 +508,9 @@
         const select = document.getElementById("absensiSelectNama");
         select.innerHTML = '<option value="">-- PILIH ANGGOTA BERURUTAN --</option>';
         globalDataMaster.forEach(a => {
-            const nis = a["NIS/NISN"] || a.NIS || "-";
-            const nama = a["NAMA LENGKAP"] || a.Nama_Lengkap || "-";
-            const kelas = a.KELAS || a.Kelas || "-";
+            const nis = a["NIS/NISN"] || a["NIS"] || a["nis"] || "-";
+            const nama = a["NAMA LENGKAP"] || a["Nama_Lengkap"] || a["nama"] || "-";
+            const kelas = a["KELAS"] || a["Kelas"] || a["kelas"] || "-";
             select.innerHTML += `<option value="${nama}" data-nis="${nis}">[${nis}] ${nama} - ${kelas}</option>`;
         });
     }
@@ -527,17 +539,16 @@
         const now = new Date();
         if (tipe === 'mingguan') {
             const limit = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-            filtered = globalAbsensi.filter(a => new Date(a.TimeStamp) >= limit);
+            filtered = globalAbsensi.filter(a => new Date(a.TimeStamp || a.Timestamp) >= limit);
         } else if (tipe === 'bulanan') {
             const limit = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-            filtered = globalAbsensi.filter(a => new Date(a.TimeStamp) >= limit);
+            filtered = globalAbsensi.filter(a => new Date(a.TimeStamp || a.Timestamp) >= limit);
         }
 
-        // Kelompokkan data absensi berdasar Pertemuan 1, 2, dan 3
         const pertemuanGroup = { "Pertemuan 1 (Senin)": [], "Pertemuan 2 (Selasa)": [], "Pertemuan 3 (Rabu)": [], "Lainnya": [] };
 
         filtered.forEach(item => {
-            const p = item["Pertemuan Ke -"] || item.Pertemuan || "";
+            const p = item["Pertemuan Ke -"] || item.Pertemuan || item.pertemuan || "";
             if (p.includes("Pertemuan 1")) pertemuanGroup["Pertemuan 1 (Senin)"].push(item);
             else if (p.includes("Pertemuan 2")) pertemuanGroup["Pertemuan 2 (Selasa)"].push(item);
             else if (p.includes("Pertemuan 3")) pertemuanGroup["Pertemuan 3 (Rabu)"].push(item);
@@ -546,20 +557,20 @@
 
         Object.keys(pertemuanGroup).forEach(groupTitle => {
             if (pertemuanGroup[groupTitle].length > 0) {
-                // Header Pembatas Kelompok Pertemuan
                 tbody.innerHTML += `
                     <tr class="divider-pertemuan">
                         <td colspan="5"><i class="fas fa-bookmark"></i> PEMBATAS: ${groupTitle.toUpperCase()}</td>
                     </tr>`;
 
                 pertemuanGroup[groupTitle].forEach(row => {
+                    const ts = row.TimeStamp || row.Timestamp;
                     tbody.innerHTML += `
                         <tr>
-                            <td>${row.TimeStamp ? new Date(row.TimeStamp).toLocaleDateString('id-ID') : '-'}</td>
-                            <td><strong>${row.NIS || '-'}</strong></td>
-                            <td>${row.Nama_Lengkap || '-'}</td>
+                            <td>${ts ? new Date(ts).toLocaleDateString('id-ID') : '-'}</td>
+                            <td><strong>${row.NIS || row.nis || '-'}</strong></td>
+                            <td>${row.Nama_Lengkap || row.nama_lengkap || row.Nama || '-'}</td>
                             <td>${row["Pertemuan Ke -"] || row.Pertemuan || '-'}</td>
-                            <td>${row.Keterangan || 'Hadir'}</td>
+                            <td>${row.Keterangan || row.keterangan || 'Hadir'}</td>
                         </tr>`;
                 });
             }
@@ -571,22 +582,27 @@
         tbody.innerHTML = "";
         if (globalRecruitment.length > 0) {
             globalRecruitment.forEach(r => {
-                const status = r.Status_Seleksi || 'Pending';
+                const status = r.Status_Seleksi || r.status_seleksi || 'Pending';
                 const isAccepted = status === 'Diterima' || status === 'Approved';
-                
+                const nama = r.Nama_Pendaftar || r.nama_pendaftar || '-';
+                const kelas = r.Kelas || r.kelas || '-';
+                const alumni = r["Alumni SMP/MTS"] || r.alumni_smp || '-';
+                const ts = r.TimeStamp || r.Timestamp;
+
                 tbody.innerHTML += `
                     <tr>
-                        <td>${r.TimeStamp ? new Date(r.TimeStamp).toLocaleDateString('id-ID') : '-'}</td>
-                        <td>${r.Nama_Pendaftar || r.nama_pendaftar || '-'}</td>
-                        <td>${r.Kelas || r.kelas || '-'}</td>
+                        <td>${ts ? new Date(ts).toLocaleDateString('id-ID') : '-'}</td>
+                        <td>${nama}</td>
+                        <td>${alumni}</td>
+                        <td>${kelas}</td>
                         <td><span style="color:${isAccepted ? '#2ecc71' : '#f39c12'}; font-weight:bold;">${status}</span></td>
                         <td>
-                            ${!isAccepted ? `<button class="btn btn-approve" onclick="approveOR('${r.Nama_Pendaftar \vert{}\vert{} r.nama_pendaftar}', '${r.Kelas || r.kelas}')"><i class="fas fa-check-circle"></i> APPROVE / TERIMA</button>` : `<i class="fas fa-user-check" style="color:#2ecc71;"></i> Terverifikasi`}
+                            ${!isAccepted ? `<button class="btn btn-approve" onclick="approveOR('${nama}', '${kelas}')"><i class="fas fa-check-circle"></i> APPROVE / TERIMA</button>` : `<i class="fas fa-user-check" style="color:#2ecc71;"></i> Terverifikasi`}
                         </td>
                     </tr>`;
             });
         } else {
-            tbody.innerHTML = "<tr><td colspan='5' style='text-align:center;'>Belum ada data pendaftar calon Paskibra.</td></tr>";
+            tbody.innerHTML = "<tr><td colspan='6' style='text-align:center;'>Belum ada data pendaftar calon Paskibra.</td></tr>";
         }
     }
 
@@ -743,6 +759,7 @@
         } catch (err) { alert("Gagal terhubung ke server Google Sheets."); }
     }
 
+    // Panggil Tarik Data Pertama Kali
     loadData();
 </script>
 
