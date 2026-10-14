@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pendaftaran Calon Anggota PASKIBRA MAN 6 Ciamis</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Font: American Captain -->
+    <link href="https://fonts.cdnfonts.com/css/american-captain" rel="stylesheet">
+
+    <style>
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            font-family: 'American Captain', 'Segoe UI', sans-serif;
+            letter-spacing: 1px;
+            font-weight: normal;
+        }
+
+        body { 
+            background: linear-gradient(135deg, #4a000b 0%, #2b0006 50%, #800000 100%);
+            min-height: 100vh; 
+            color: #fff; 
+            padding: 20px 15px; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .form-card { 
+            background: rgba(50, 0, 10, 0.75); 
+            backdrop-filter: blur(12px); 
+            border: 1px solid rgba(255, 215, 0, 0.3); 
+            border-radius: 16px; 
+            padding: 30px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6); 
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .header-box {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .header-box img {
+            width: 70px;
+            height: 70px;
+            object-fit: contain;
+            margin-bottom: 10px;
+        }
+
+        .header-box h1 {
+            color: #ffd700;
+            font-size: 2.2rem;
+            text-transform: uppercase;
+            line-height: 1.1;
+            margin-bottom: 5px;
+        }
+
+        .header-box p {
+            color: #ffcc66;
+            font-size: 1.1rem;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ffd700;
+            font-size: 1.1rem;
+        }
+
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 215, 0, 0.35);
+            background: rgba(0, 0, 0, 0.45);
+            color: #fff;
+            font-size: 1rem;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 90px;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            background: linear-gradient(45deg, #ffd700, #ffaa00);
+            color: #4a000b;
+            font-size: 1.3rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-submit:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+        }
+
+        @media (max-width: 600px) {
+            .form-card { padding: 20px 15px; }
+            .header-box h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="form-card">
+    <div class="header-box">
+        <img id="formLogo" src="https://via.placeholder.com/70/ffd700/4a000b?text=PASKIBRA" alt="Logo Paskibra">
+        <h1>FORMULIR PENDAFTARAN ANGGOTA PASKIBRA</h1>
+        <p>MAN 6 CIAMIS</p>
+    </div>
+
+    <form onsubmit="submitFormPublic(event)">
+        <div class="form-group">
+            <label><i class="fas fa-user"></i> NAMA LENGKAP PENDAFTAR</label>
+            <input type="text" id="publicNama" placeholder="Ketik Nama Lengkap Sesuai Ijazah" required>
+        </div>
+
+        <div class="form-group">
+            <label><i class="fas fa-school"></i> ALUMNI SMP / MTS</label>
+            <input type="text" id="publicAlumni" placeholder="Contoh: MTsN 1 Ciamis / SMPN 1" required>
+        </div>
+
+        <div class="form-group">
+            <label><i class="fas fa-graduation-cap"></i> KELAS SEKARANG</label>
+            <input type="text" id="publicKelas" placeholder="Contoh: X.1 / X.2" required>
+        </div>
+
+        <div class="form-group">
+            <label><i class="fas fa-comment-dots"></i> ALASAN MASUK PASKIBRA</label>
+            <textarea id="publicAlasan" placeholder="Tuliskan alasan dan motivasi Anda bergabung..." required></textarea>
+        </div>
+
+        <button type="submit" class="btn-submit"><i class="fas fa-paper-plane"></i> KIRIM PENDAFTARAN</button>
+    </form>
+</div>
+
+<script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxzQmY4XGvBLnoeHRo6W4gMFXQAbNESiv8ZLN0fkGIgtMxLA_riQmBRFp-hyCLXDG6D/exec";
+
+    // Muat Logo Server jika Ada
+    window.addEventListener("DOMContentLoaded", async () => {
+        try {
+            const res = await fetch(SCRIPT_URL);
+            const data = await res.json();
+            if (data.logoBase64) {
+                document.getElementById("formLogo").src = data.logoBase64;
+            }
+        } catch (e) { console.error("Gagal memuat logo"); }
+    });
+
+    async function submitFormPublic(e) {
+        e.preventDefault();
+        const nama = document.getElementById("publicNama").value;
+        const alumni = document.getElementById("publicAlumni").value;
+        const kelas = document.getElementById("publicKelas").value;
+        const alasan = document.getElementById("publicAlasan").value;
+
+        try {
+            await fetch(SCRIPT_URL, {
+                method: "POST",
+                body: JSON.stringify({
+                    action: "submitOR",
+                    nama_pendaftar: nama,
+                    alumni_smp: alumni,
+                    kelas: kelas,
+                    alasan_bergabung: alasan
+                })
+            });
+            alert("Selamat! Pendaftaran Anda berhasil dikirim.");
+            e.target.reset();
+        } catch (err) {
+            alert("Gagal mengirim data pendaftaran. Periksa koneksi internet Anda.");
+        }
+    }
+</script>
+
+</body>
+</html>
