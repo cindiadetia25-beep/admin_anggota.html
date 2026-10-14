@@ -134,6 +134,16 @@
         </div>
 
         <div class="form-group">
+            <label><i class="fas fa-calendar-alt"></i> TEMPAT TANGGAL LAHIR</label>
+            <input type="text" id="publicTtl" placeholder="Contoh: Ciamis, 15 Januari 2008" required>
+        </div>
+
+        <div class="form-group">
+            <label><i class="fab fa-whatsapp"></i> NOMOR HP / WHATSAPP</label>
+            <input type="tel" id="publicNoHp" placeholder="Contoh: 081234567890" required>
+        </div>
+
+        <div class="form-group">
             <label><i class="fas fa-school"></i> ALUMNI SMP / MTS</label>
             <input type="text" id="publicAlumni" placeholder="Contoh: MTsN 1 Ciamis / SMPN 1" required>
         </div>
@@ -155,7 +165,7 @@
 <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxzQmY4XGvBLnoeHRo6W4gMFXQAbNESiv8ZLN0fkGIgtMxLA_riQmBRFp-hyCLXDG6D/exec";
 
-    // Muat Logo Server jika Ada
+    // Muat Logo Server (Mengambil gambar logo permanen dari Spreadsheet Google Apps Script)
     window.addEventListener("DOMContentLoaded", async () => {
         try {
             const res = await fetch(SCRIPT_URL);
@@ -163,12 +173,14 @@
             if (data.logoBase64) {
                 document.getElementById("formLogo").src = data.logoBase64;
             }
-        } catch (e) { console.error("Gagal memuat logo"); }
+        } catch (e) { console.error("Gagal memuat logo server"); }
     });
 
     async function submitFormPublic(e) {
         e.preventDefault();
         const nama = document.getElementById("publicNama").value;
+        const ttl = document.getElementById("publicTtl").value;
+        const nohp = document.getElementById("publicNoHp").value;
         const alumni = document.getElementById("publicAlumni").value;
         const kelas = document.getElementById("publicKelas").value;
         const alasan = document.getElementById("publicAlasan").value;
@@ -179,6 +191,8 @@
                 body: JSON.stringify({
                     action: "submitOR",
                     nama_pendaftar: nama,
+                    ttl: ttl,
+                    no_hp: nohp,
                     alumni_smp: alumni,
                     kelas: kelas,
                     alasan_bergabung: alasan
