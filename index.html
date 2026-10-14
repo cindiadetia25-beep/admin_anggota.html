@@ -5,23 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Manajemen PASKIBRA MAN 6 Ciamis</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <!-- Google Font: American Captain alternative / custom web font -->
+    <!-- Google Font: American Captain -->
     <link href="https://fonts.cdnfonts.com/css/american-captain" rel="stylesheet">
-    <!-- Library SheetJS untuk Ekspor & Impor Excel -->
+    <!-- Library SheetJS untuk membaca file Excel -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
     <style>
+        /* Penerapan Font AMERICAN CAPTAIN untuk Seluruh Elemen Dashboard */
         * { 
             box-sizing: border-box; 
             margin: 0; 
             padding: 0; 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-        }
-
-        /* Penerapan Font American Captain untuk Judul dan Tombol Utama */
-        h1, h2, .tab-btn, .btn, .clock-box {
             font-family: 'American Captain', 'Segoe UI', sans-serif;
-            letter-spacing: 1.5px;
+            letter-spacing: 1px;
+            font-weight: normal; /* Menjaga teks kecil tidak tebal/bold */
         }
 
         /* Background Gradien Merah Maroon & Kuning Deep */
@@ -29,15 +26,16 @@
             background: linear-gradient(135deg, #4a000b 0%, #2b0006 50%, #800000 100%);
             min-height: 100vh; 
             color: #fff; 
-            padding: 20px; 
+            padding: 15px; 
         }
 
         .container { 
             max-width: 1050px; 
             margin: 0 auto; 
+            width: 100%;
         }
 
-        /* Header Style */
+        /* Header Style & Kustom Logo PNG */
         header { 
             text-align: center; 
             margin-bottom: 25px; 
@@ -46,20 +44,39 @@
             align-items: center;
         }
 
+        .header-title-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+        }
+
+        .custom-logo {
+            width: 65px;
+            height: 65px;
+            object-fit: contain;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .custom-logo:hover {
+            transform: scale(1.08);
+        }
+
         header h1 { 
             color: #ffd700; /* Deep Yellow / Gold */
-            font-size: 2.8rem; 
-            font-weight: 400; 
+            font-size: 2.5rem; 
             text-shadow: 0 0 15px rgba(255, 215, 0, 0.4); 
-            margin-bottom: 5px;
             text-transform: uppercase;
+            line-height: 1.1;
         }
         
         header p { 
             color: #ffcc66; 
-            font-size: 1rem; 
-            font-weight: 500; 
-            margin-bottom: 15px; 
+            font-size: 1.1rem; 
+            margin-bottom: 12px; 
         }
 
         /* Widget Jam & Tanggal Digital Real-Time */
@@ -70,30 +87,50 @@
             background: rgba(255, 215, 0, 0.15);
             border: 1px solid rgba(255, 215, 0, 0.4);
             backdrop-filter: blur(8px);
-            padding: 8px 22px;
+            padding: 6px 18px;
             border-radius: 20px;
             color: #ffd700;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
         }
 
+        .logo-uploader-btn {
+            margin-top: 10px;
+            background: rgba(255,215,0,0.1);
+            border: 1px dashed #ffd700;
+            color: #ffd700;
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .logo-uploader-btn:hover {
+            background: rgba(255,215,0,0.3);
+        }
+
+        /* Navigasi Tab Responsif */
         .nav-tabs { 
             display: flex; 
-            gap: 12px; 
-            margin-bottom: 25px; 
+            gap: 10px; 
+            margin-bottom: 20px; 
             justify-content: center; 
             flex-wrap: wrap; 
         }
 
         .tab-btn { 
-            padding: 12px 24px; 
+            padding: 10px 18px; 
             background: rgba(0, 0, 0, 0.4); 
             border: 1px solid rgba(255, 215, 0, 0.3); 
             color: #fff; 
             border-radius: 10px; 
             cursor: pointer; 
-            font-size: 1.2rem;
+            font-size: 1.15rem;
             transition: all 0.3s ease; 
+            flex: 1 1 auto;
+            text-align: center;
+            max-width: 100%;
         }
 
         .tab-btn.active, .tab-btn:hover { 
@@ -109,14 +146,14 @@
             -webkit-backdrop-filter: blur(12px); 
             border: 1px solid rgba(255, 215, 0, 0.25); 
             border-radius: 16px; 
-            padding: 25px; 
+            padding: 20px; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
             margin-bottom: 20px; 
         }
 
         .card h2 {
             color: #ffd700;
-            font-size: 2rem;
+            font-size: 1.8rem;
             margin-bottom: 15px;
             border-bottom: 2px solid rgba(255, 215, 0, 0.3);
             padding-bottom: 8px;
@@ -133,18 +170,26 @@
             align-items: center; 
             justify-content: space-between; 
             background: rgba(0, 0, 0, 0.3); 
-            padding: 15px; 
+            padding: 12px; 
             border-radius: 10px; 
             border: 1px solid rgba(255, 215, 0, 0.15);
         }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 0.95rem; }
-        th { background: rgba(255, 215, 0, 0.2); color: #ffd700; font-family: 'American Captain', sans-serif; font-size: 1.2rem; }
+        /* Tabel Responsif */
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
 
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px; }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; color: #ffcc66; font-size: 0.9rem; font-weight: 600; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; min-width: 600px; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 0.95rem; word-break: break-word; }
+        th { background: rgba(255, 215, 0, 0.2); color: #ffd700; font-size: 1.1rem; }
+
+        /* Form Grid Responsif */
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 12px; }
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; margin-bottom: 5px; color: #ffcc66; font-size: 0.95rem; }
         .form-group input, .form-group select { 
             width: 100%; 
             padding: 10px; 
@@ -152,37 +197,52 @@
             border: 1px solid rgba(255, 215, 0, 0.3); 
             background: rgba(0, 0, 0, 0.4); 
             color: #fff; 
+            font-size: 0.95rem;
         }
         .form-group option { background: #2b0006; color: #fff; }
         
         .btn { 
-            padding: 10px 20px; 
+            padding: 10px 18px; 
             border: none; 
             color: #4a000b; 
             border-radius: 8px; 
             cursor: pointer; 
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             display: inline-flex; 
             align-items: center; 
+            justify-content: center;
             gap: 8px; 
             transition: 0.3s; 
             text-transform: uppercase;
         }
 
-        .btn-primary { background: linear-gradient(45deg, #ffd700, #ffaa00); font-weight: bold; }
+        .btn-primary { background: linear-gradient(45deg, #ffd700, #ffaa00); }
         .btn-excel { background: linear-gradient(45deg, #27ae60, #2ecc71); color: #fff; }
         .btn-download { background: linear-gradient(45deg, #e67e22, #f39c12); color: #fff; }
         .btn:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
 
         .file-input-wrapper { position: relative; overflow: hidden; display: inline-block; }
         .file-input-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; }
+
+        /* Penyesuaian Media Query untuk Tampilan Ponsel (HP) */
+        @media (max-width: 600px) {
+            header h1 { font-size: 1.8rem; }
+            .custom-logo { width: 50px; height: 50px; }
+            .tab-btn { font-size: 1rem; padding: 8px 12px; }
+            .action-box { flex-direction: column; align-items: stretch; }
+            .btn { width: 100%; }
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
     <header>
-        <h1><i class="fas fa-flag"></i> DASHBOARD MANAJEMEN PASKIBRA MAN 6 CIAMIS</h1>
+        <div class="header-title-box">
+            <!-- Logo PNG Kustom Transparan -->
+            <img id="dashboardLogo" class="custom-logo" src="https://via.placeholder.com/65/ffd700/4a000b?text=PASKIBRA" alt="Logo Paskibra" onclick="triggerLogoUpload()">
+            <h1>DASHBOARD MANAJEMEN PASKIBRA MAN 6 CIAMIS</h1>
+        </div>
         <p>Sistem Informasi Anggota, Presensi Latihan Rutin, dan Open Recruitment</p>
         
         <!-- Widget Jam & Tanggal Digital Real-Time -->
@@ -190,6 +250,9 @@
             <i class="fas fa-clock"></i>
             <span id="liveClock">--:--:-- WIB</span>
         </div>
+
+        <button class="logo-uploader-btn" onclick="triggerLogoUpload()"><i class="fas fa-image"></i> GANTI LOGO PNG</button>
+        <input type="file" id="logoInput" accept="image/png" style="display: none;" onchange="handleLogoUpload(event)">
     </header>
 
     <div class="nav-tabs">
@@ -198,28 +261,53 @@
         <button class="tab-btn" onclick="switchTab('tab-recruitment')"><i class="fas fa-user-plus"></i> OPEN RECRUITMENT</button>
     </div>
 
-    <!-- TAB 1: DAFTAR ANGGOTA PASKIBRA (Terkoneksi DATA MASTER ANGGOTA) -->
+    <!-- TAB 1: DAFTAR ANGGOTA PASKIBRA -->
     <div id="tab-anggota" class="card tab-content active">
         <h2>DAFTAR ANGGOTA PASKIBRA (DATA MASTER)</h2>
         
+        <!-- Form Tambah Anggota Manual -->
+        <form onsubmit="submitAnggotaMasterManual(event)" style="margin-bottom: 20px;">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>NIS / NISN</label>
+                    <input type="text" id="masterNis" placeholder="Contoh: 23241001" required>
+                </div>
+                <div class="form-group">
+                    <label>NAMA LENGKAP</label>
+                    <input type="text" id="masterNama" placeholder="Nama Lengkap Anggota" required>
+                </div>
+                <div class="form-group">
+                    <label>KELAS</label>
+                    <input type="text" id="masterKelas" placeholder="Contoh: X.1 / XI.A" required>
+                </div>
+                <div class="form-group">
+                    <label>JABATAN</label>
+                    <input type="text" id="masterJabatan" placeholder="Mula / Madya / Utama / Pengurus" required>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary"><i class="fas fa-user-plus"></i> TAMBAH ANGGOTA MANUAL</button>
+        </form>
+
         <div class="action-box">
-            <span><strong>Data Anggota diambil langsung dari Sheet DATA MASTER ANGGOTA</strong></span>
-            <button class="btn btn-download" onclick="downloadExcelAnggota()"><i class="fas fa-file-download"></i> DOWNLOAD EXCEL ANGGOTA</button>
+            <span><strong>Terkoneksi dengan Sheet DATA MASTER ANGGOTA</strong></span>
+            <button class="btn btn-download" onclick="downloadExcelDenganKop('anggota')"><i class="fas fa-file-download"></i> DOWNLOAD EXCEL ANGGOTA</button>
         </div>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>NIS / NISN</th>
-                    <th>Nama Lengkap</th>
-                    <th>Kelas</th>
-                    <th>Jabatan</th>
-                </tr>
-            </thead>
-            <tbody id="tableAnggota">
-                <tr><td colspan="4" style="text-align:center;">Memuat data master anggota...</td></tr>
-            </tbody>
-        </table>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>NIS / NISN</th>
+                        <th>NAMA LENGKAP</th>
+                        <th>KELAS</th>
+                        <th>JABATAN</th>
+                    </tr>
+                </thead>
+                <tbody id="tableAnggota">
+                    <tr><td colspan="4" style="text-align:center;">Memuat data master anggota...</td></tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <!-- TAB 2: ABSENSI LATIHAN RUTIN -->
@@ -227,8 +315,11 @@
         <h2>INPUT ABSENSI LATIHAN RUTIN</h2>
         <form id="formAbsensi" onsubmit="submitAbsensi(event)">
             <div class="form-group">
-                <label>Pilih Anggota (Otomatis dari Data Master Anggota)</label>
-                <select id="absensiNama" required></select>
+                <label>Cari / Pilih Anggota (Ketik Nama atau NISN)</label>
+                <!-- Datalist pencarian anggota interaktif -->
+                <input type="text" id="absensiSearchInput" list="anggotaListOptions" placeholder="Ketik NISN atau Nama Anggota..." required onchange="syncNisFromSearch(this.value)">
+                <datalist id="anggotaListOptions"></datalist>
+                <input type="hidden" id="selectedNisHolder">
             </div>
             <div class="form-group">
                 <label>Hari / Pertemuan Latihan Rutin</label>
@@ -247,7 +338,7 @@
                     <option value="Alpha">Alpha</option>
                 </select>
             </div>
-            <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;"><i class="fas fa-save"></i> SIMPAN ABSENSI LATIHAN</button>
+            <button type="submit" class="btn btn-primary" style="width: 100%;"><i class="fas fa-save"></i> SIMPAN ABSENSI LATIHAN</button>
         </form>
 
         <hr style="border: 0; border-top: 1px solid rgba(255,215,0,0.2); margin: 25px 0;">
@@ -255,9 +346,9 @@
         <h2>REKAP ABSENSI LATIHAN</h2>
         <div class="action-box">
             <span><strong>Download Laporan / Rekap Absensi:</strong></span>
-            <div style="display: flex; gap: 10px;">
-                <button class="btn btn-download" onclick="downloadRekapAbsensi('mingguan')"><i class="fas fa-calendar-week"></i> REKAP MINGGUAN</button>
-                <button class="btn btn-download" onclick="downloadRekapAbsensi('bulanan')"><i class="fas fa-calendar-alt"></i> REKAP BULANAN</button>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button class="btn btn-download" onclick="downloadExcelDenganKop('absensi_mingguan')"><i class="fas fa-calendar-week"></i> REKAP MINGGUAN</button>
+                <button class="btn btn-download" onclick="downloadExcelDenganKop('absensi_bulanan')"><i class="fas fa-calendar-alt"></i> REKAP BULANAN</button>
             </div>
         </div>
     </div>
@@ -288,40 +379,72 @@
         <hr style="border: 0; border-top: 1px solid rgba(255,215,0,0.2); margin: 20px 0;">
 
         <div class="action-box">
-            <div style="display: flex; gap: 10px; align-items: center;">
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                 <span><strong>Opsi Data Recruitment:</strong></span>
                 <div class="file-input-wrapper">
                     <button class="btn btn-excel"><i class="fas fa-file-excel"></i> UPLOAD EXCEL OR</button>
                     <input type="file" accept=".xlsx, .xls, .csv" onchange="importExcelOR(event)">
                 </div>
             </div>
-            <button class="btn btn-download" onclick="downloadExcelOR()"><i class="fas fa-file-download"></i> DOWNLOAD DATA OR</button>
+            <button class="btn btn-download" onclick="downloadExcelDenganKop('recruitment')"><i class="fas fa-file-download"></i> DOWNLOAD DATA OR</button>
         </div>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Tanggal</th>
-                    <th>Nama Pendaftar</th>
-                    <th>Kelas</th>
-                    <th>Alasan Bergabung</th>
-                    <th>Status Seleksi</th>
-                </tr>
-            </thead>
-            <tbody id="tableOR">
-                <tr><td colspan="5" style="text-align:center;">Memuat data...</td></tr>
-            </tbody>
-        </table>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tanggal</th>
+                        <th>Nama Pendaftar</th>
+                        <th>Kelas</th>
+                        <th>Alasan Bergabung</th>
+                        <th>Status Seleksi</th>
+                    </tr>
+                </thead>
+                <tbody id="tableOR">
+                    <tr><td colspan="5" style="text-align:center;">Memuat data...</td></tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
 <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxzQmY4XGvBLnoeHRo6W4gMFXQAbNESiv8ZLN0fkGIgtMxLA_riQmBRFp-hyCLXDG6D/exec";
     
-    // Variabel Global penampung data
+    // Variabel Global Penampung Data
     let globalDataMaster = [];
     let globalAbsensi = [];
     let globalRecruitment = [];
+    let currentLogoBase64 = "";
+
+    // Inisialisasi Logo dari LocalStorage saat Halaman Dimuat
+    window.addEventListener("DOMContentLoaded", () => {
+        const savedLogo = localStorage.getItem("paskibra_logo_png");
+        if (savedLogo) {
+            currentLogoBase64 = savedLogo;
+            document.getElementById("dashboardLogo").src = savedLogo;
+        }
+    });
+
+    function triggerLogoUpload() {
+        document.getElementById("logoInput").click();
+    }
+
+    function handleLogoUpload(event) {
+        const file = event.target.files[0];
+        if (file && file.type === "image/png") {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                currentLogoBase64 = e.target.result;
+                document.getElementById("dashboardLogo").src = currentLogoBase64;
+                localStorage.setItem("paskibra_logo_png", currentLogoBase64);
+                alert("Logo PNG berhasil diganti!");
+            };
+            reader.readAsDataURL(file);
+        } else {
+            alert("Harap pilih file berformat PNG transparan.");
+        }
+    }
 
     // Jam Real-Time
     function updateLiveClock() {
@@ -350,11 +473,11 @@
             globalAbsensi = data.absensi || [];
             globalRecruitment = data.recruitment || [];
 
-            // 1. Render Table & Dropdown Anggota dari DATA MASTER ANGGOTA
+            // 1. Render Table & Datalist Anggota
             const tbodyAnggota = document.getElementById("tableAnggota");
-            const selectAbsensi = document.getElementById("absensiNama");
+            const listOptions = document.getElementById("anggotaListOptions");
             tbodyAnggota.innerHTML = "";
-            selectAbsensi.innerHTML = "";
+            listOptions.innerHTML = "";
 
             if (globalDataMaster.length > 0) {
                 globalDataMaster.forEach(a => {
@@ -371,11 +494,10 @@
                             <td>${jabatanVal}</td>
                         </tr>`;
 
-                    selectAbsensi.innerHTML += `<option value="${namaVal}" data-nis="${nisVal}">[${nisVal}] ${namaVal} - ${kelasVal}</option>`;
+                    listOptions.innerHTML += `<option value="[${nisVal}] ${namaVal} - ${kelasVal}">`;
                 });
             } else {
                 tbodyAnggota.innerHTML = "<tr><td colspan='4' style='text-align:center;'>Belum ada data di DATA MASTER ANGGOTA.</td></tr>";
-                selectAbsensi.innerHTML = "<option value=''>Belum ada data anggota</option>";
             }
 
             // 2. Render Table Open Recruitment
@@ -400,19 +522,44 @@
         }
     }
 
+    // Ekstraksi NIS dari format pencarian datalist
+    function syncNisFromSearch(val) {
+        const match = val.match(/\[(.*?)\]/);
+        if (match) {
+            document.getElementById("selectedNisHolder").value = match[1];
+        } else {
+            document.getElementById("selectedNisHolder").value = val;
+        }
+    }
+
+    // -------------------------------------------------------------
+    // FUNGSI ANGGOTA MASTER MANUAL
+    // -------------------------------------------------------------
+    async function submitAnggotaMasterManual(e) {
+        e.preventDefault();
+        const nis = document.getElementById("masterNis").value;
+        const nama = document.getElementById("masterNama").value;
+        const kelas = document.getElementById("masterKelas").value;
+        const jabatan = document.getElementById("masterJabatan").value;
+
+        await sendDataToSheet({ action: "addAnggota", nis, nama_lengkap: nama, kelas, jabatan });
+        e.target.reset();
+        alert("Anggota berhasil ditambahkan ke Data Master!");
+    }
+
     // -------------------------------------------------------------
     // FUNGSI ABSENSI
     // -------------------------------------------------------------
     async function submitAbsensi(e) {
         e.preventDefault();
-        const selectElem = document.getElementById("absensiNama");
-        const nama = selectElem.value;
-        const nis = selectElem.options[selectElem.selectedIndex].getAttribute("data-nis");
+        const searchInputVal = document.getElementById("absensiSearchInput").value;
+        const nis = document.getElementById("selectedNisHolder").value || searchInputVal;
         const pertemuan = document.getElementById("absensiPertemuan").value;
         const keterangan = document.getElementById("absensiStatus").value;
 
-        await sendDataToSheet({ action: "addAbsensi", nis, nama_lengkap: nama, pertemuan, keterangan });
-        alert(`Absensi latihan untuk ${nama} berhasil disimpan!`);
+        await sendDataToSheet({ action: "addAbsensi", nis, nama_lengkap: searchInputVal, pertemuan, keterangan });
+        document.getElementById("absensiSearchInput").value = "";
+        alert(`Absensi latihan berhasil disimpan!`);
     }
 
     // -------------------------------------------------------------
@@ -459,42 +606,99 @@
     }
 
     // -------------------------------------------------------------
-    // FUNGSI DOWNLOAD / EKSPOR EXCEL
+    // FUNGSI DOWNLOAD EXCEL BER-KOP DAN BER-LOGO
     // -------------------------------------------------------------
-    function downloadExcelAnggota() {
-        if (!globalDataMaster.length) return alert("Data Anggota Kosong!");
-        const ws = XLSX.utils.json_to_sheet(globalDataMaster);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Data Master Anggota");
-        XLSX.writeFile(wb, "Data_Anggota_Paskibra_MAN6Ciamis.xlsx");
-    }
+    function downloadExcelDenganKop(tipe) {
+        let title = "";
+        let dataToExport = [];
+        let filename = "";
 
-    function downloadExcelOR() {
-        if (!globalRecruitment.length) return alert("Data Recruitment Kosong!");
-        const ws = XLSX.utils.json_to_sheet(globalRecruitment);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Open Recruitment");
-        XLSX.writeFile(wb, "Data_Pendaftar_OR_Paskibra.xlsx");
-    }
-
-    function downloadRekapAbsensi(jenis) {
-        if (!globalAbsensi.length) return alert("Data Absensi Kosong!");
-        
-        let filteredAbsensi = globalAbsensi;
-        const now = new Date();
-
-        if (jenis === 'mingguan') {
-            const semingguLalu = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-            filteredAbsensi = globalAbsensi.filter(a => new Date(a.TimeStamp) >= semingguLalu);
-        } else if (jenis === 'bulanan') {
-            const sebulanLalu = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-            filteredAbsensi = globalAbsensi.filter(a => new Date(a.TimeStamp) >= sebulanLalu);
+        if (tipe === 'anggota') {
+            title = "LAPORAN DATA MASTER ANGGOTA PASKIBRA MAN 6 CIAMIS";
+            dataToExport = globalDataMaster;
+            filename = "Data_Anggota_Paskibra.xls";
+        } else if (tipe.startsWith('absensi')) {
+            const isMingguan = tipe.includes('mingguan');
+            title = isMingguan ? "REKAP ABSENSI MINGGUAN LATIHAN PASKIBRA" : "REKAP ABSENSI BULANAN LATIHAN PASKIBRA";
+            filename = isMingguan ? "Rekap_Absensi_Mingguan.xls" : "Rekap_Absensi_Bulanan.xls";
+            
+            const now = new Date();
+            const daysLimit = isMingguan ? 7 : 30;
+            const limitDate = new Date(now.getTime() - daysLimit * 24 * 60 * 60 * 1000);
+            dataToExport = globalAbsensi.filter(a => new Date(a.TimeStamp) >= limitDate);
+        } else if (tipe === 'recruitment') {
+            title = "LAPORAN PENDAFTARAN OPEN RECRUITMENT PASKIBRA";
+            dataToExport = globalRecruitment;
+            filename = "Data_Pendaftar_OR_Paskibra.xls";
         }
 
-        const ws = XLSX.utils.json_to_sheet(filteredAbsensi);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, `Rekap ${jenis}`);
-        XLSX.writeFile(wb, `Rekap_Absensi_${jenis}_Paskibra.xlsx`);
+        if (!dataToExport || !dataToExport.length) {
+            alert("Tidak ada data untuk didownload!");
+            return;
+        }
+
+        // Generate HTML Table untuk Excel Ber-KOP Resmi
+        let logoHtml = currentLogoBase64 ? `<img src="${currentLogoBase64}" width="65" height="65" />` : '';
+        
+        let htmlTemplate = `
+            <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+            <head>
+                <!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Laporan</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->
+                <style>
+                    body { font-family: 'Segoe UI', Arial, sans-serif; }
+                    .header-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                    .header-table td { border: none; text-align: center; vertical-align: middle; }
+                    .title { font-size: 16pt; font-weight: bold; color: #4a000b; }
+                    .subtitle { font-size: 11pt; color: #555; }
+                    .data-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+                    .data-table th { background-color: #ffd700; color: #4a000b; font-weight: bold; border: 1px solid #999; padding: 8px; }
+                    .data-table td { border: 1px solid #ccc; padding: 6px; text-align: left; }
+                </style>
+            </head>
+            <body>
+                <table class="header-table">
+                    <tr>
+                        <td width="15%">${logoHtml}</td>
+                        <td width="70%">
+                            <div class="title">${title}</div>
+                            <div class="subtitle">PASKIBRA MAN 6 CIAMIS</div>
+                            <div class="subtitle">Dicetak Pada: ${new Date().toLocaleDateString('id-ID')}</div>
+                        </td>
+                        <td width="15%"></td>
+                    </tr>
+                </table>
+                <br>
+                <table class="data-table">
+                    <thead>
+                        <tr>`;
+
+        // Ambil Header Kolom
+        const headers = Object.keys(dataToExport[0]);
+        headers.forEach(h => {
+            htmlTemplate += `<th>${h}</th>`;
+        });
+        htmlTemplate += `</tr></thead><tbody>`;
+
+        // Ambil Baris Data
+        dataToExport.forEach(row => {
+            htmlTemplate += `<tr>`;
+            headers.forEach(h => {
+                htmlTemplate += `<td>${row[h] !== undefined ? row[h] : ''}</td>`;
+            });
+            htmlTemplate += `</tr>`;
+        });
+
+        htmlTemplate += `</tbody></table></body></html>`;
+
+        // Unduh File Excel XLS
+        const blob = new Blob([htmlTemplate], { type: 'application/vnd.ms-excel' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
     }
 
     // -------------------------------------------------------------
