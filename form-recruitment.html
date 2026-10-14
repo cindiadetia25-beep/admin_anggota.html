@@ -42,6 +42,9 @@
         .header-box {
             text-align: center;
             margin-bottom: 25px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         .header-box img {
@@ -49,6 +52,12 @@
             height: 70px;
             object-fit: contain;
             margin-bottom: 10px;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .header-box img:hover {
+            transform: scale(1.08);
         }
 
         .header-box h1 {
@@ -62,6 +71,26 @@
         .header-box p {
             color: #ffcc66;
             font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+
+        .logo-uploader-btn {
+            background: rgba(255,215,0,0.1);
+            border: 1px dashed #ffd700;
+            color: #ffd700;
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .logo-uploader-btn:hover {
+            background: rgba(255,215,0,0.3);
         }
 
         .form-group {
@@ -122,9 +151,13 @@
 
 <div class="form-card">
     <div class="header-box">
-        <img id="formLogo" src="https://via.placeholder.com/70/ffd700/4a000b?text=PASKIBRA" alt="Logo Paskibra">
+        <img id="formLogo" src="https://via.placeholder.com/70/ffd700/4a000b?text=PASKIBRA" alt="Logo Paskibra" onclick="triggerLogoUpload()">
         <h1>FORMULIR PENDAFTARAN ANGGOTA PASKIBRA</h1>
         <p>MAN 6 CIAMIS</p>
+
+        <!-- Tombol Ganti Logo Permanen -->
+        <button class="logo-uploader-btn" onclick="triggerLogoUpload()"><i class="fas fa-image"></i> GANTI LOGO PNG PERMANEN</button>
+        <input type="file" id="logoInput" accept="image/png" style="display: none;" onchange="handleLogoUpload(event)">
     </div>
 
     <form onsubmit="submitFormPublic(event)">
@@ -165,7 +198,7 @@
 <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxzQmY4XGvBLnoeHRo6W4gMFXQAbNESiv8ZLN0fkGIgtMxLA_riQmBRFp-hyCLXDG6D/exec";
 
-    // Muat Logo Server (Mengambil gambar logo permanen dari Spreadsheet Google Apps Script)
+    // Muat Logo Server saat halaman pertama kali dibuka
     window.addEventListener("DOMContentLoaded", async () => {
         try {
             const res = await fetch(SCRIPT_URL);
@@ -176,6 +209,40 @@
         } catch (e) { console.error("Gagal memuat logo server"); }
     });
 
+    // Pemicu Upload Logo
+    function triggerLogoUpload() {
+        document.getElementById("logoInput").click();
+    }
+
+    // Fungsi Mengirim & Menyimpan Logo Permanen ke Server Apps Script
+    function handleLogoUpload(event) {
+        const file = event.target.files[0];
+        if (file && file.type === "image/png") {
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                const logoBase64 = e.target.result;
+                document.getElementById("formLogo").src = logoBase64;
+
+                try {
+                    await fetch(SCRIPT_URL, {
+                        method: "POST",
+                        body: JSON.stringify({
+                            action: "saveLogo",
+                            logoBase64: logoBase64
+                        })
+                    });
+                    alert("Logo PNG berhasil disimpan secara permanen di server!");
+                } catch (err) {
+                    alert("Gagal menyimpan logo ke server.");
+                }
+            };
+            reader.readAsDataURL(file);
+        } else {
+            alert("Harap pilih file berformat PNG transparan.");
+        }
+    }
+
+    // Fungsi Submit Pendaftaran
     async function submitFormPublic(e) {
         e.preventDefault();
         const nama = document.getElementById("publicNama").value;
