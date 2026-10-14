@@ -7,21 +7,19 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <!-- Google Font: American Captain -->
     <link href="https://fonts.cdnfonts.com/css/american-captain" rel="stylesheet">
-    <!-- Library SheetJS untuk membaca file Excel -->
+    <!-- Library SheetJS -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
     <style>
-        /* Penerapan Font AMERICAN CAPTAIN untuk Seluruh Elemen Dashboard */
         * { 
             box-sizing: border-box; 
             margin: 0; 
             padding: 0; 
             font-family: 'American Captain', 'Segoe UI', sans-serif;
             letter-spacing: 1px;
-            font-weight: normal; /* Menjaga teks kecil tidak tebal/bold */
+            font-weight: normal;
         }
 
-        /* Background Gradien Merah Maroon & Kuning Deep */
         body { 
             background: linear-gradient(135deg, #4a000b 0%, #2b0006 50%, #800000 100%);
             min-height: 100vh; 
@@ -35,7 +33,6 @@
             width: 100%;
         }
 
-        /* Header Style & Kustom Logo PNG */
         header { 
             text-align: center; 
             margin-bottom: 25px; 
@@ -61,25 +58,18 @@
             transition: transform 0.3s;
         }
 
-        .custom-logo:hover {
-            transform: scale(1.08);
-        }
+        .custom-logo:hover { transform: scale(1.08); }
 
         header h1 { 
-            color: #ffd700; /* Deep Yellow / Gold */
+            color: #ffd700; 
             font-size: 2.5rem; 
             text-shadow: 0 0 15px rgba(255, 215, 0, 0.4); 
             text-transform: uppercase;
             line-height: 1.1;
         }
         
-        header p { 
-            color: #ffcc66; 
-            font-size: 1.1rem; 
-            margin-bottom: 12px; 
-        }
+        header p { color: #ffcc66; font-size: 1.1rem; margin-bottom: 12px; }
 
-        /* Widget Jam & Tanggal Digital Real-Time */
         .clock-box {
             display: inline-flex;
             align-items: center;
@@ -106,11 +96,8 @@
             transition: 0.3s;
         }
 
-        .logo-uploader-btn:hover {
-            background: rgba(255,215,0,0.3);
-        }
+        .logo-uploader-btn:hover { background: rgba(255,215,0,0.3); }
 
-        /* Navigasi Tab Responsif */
         .nav-tabs { 
             display: flex; 
             gap: 10px; 
@@ -130,7 +117,6 @@
             transition: all 0.3s ease; 
             flex: 1 1 auto;
             text-align: center;
-            max-width: 100%;
         }
 
         .tab-btn.active, .tab-btn:hover { 
@@ -143,7 +129,6 @@
         .card { 
             background: rgba(50, 0, 10, 0.65); 
             backdrop-filter: blur(12px); 
-            -webkit-backdrop-filter: blur(12px); 
             border: 1px solid rgba(255, 215, 0, 0.25); 
             border-radius: 16px; 
             padding: 20px; 
@@ -175,7 +160,6 @@
             border: 1px solid rgba(255, 215, 0, 0.15);
         }
 
-        /* Tabel Responsif */
         .table-wrapper {
             width: 100%;
             overflow-x: auto;
@@ -186,7 +170,19 @@
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 0.95rem; word-break: break-word; }
         th { background: rgba(255, 215, 0, 0.2); color: #ffd700; font-size: 1.1rem; }
 
-        /* Form Grid Responsif */
+        /* Style khusus baris pembatas absensi */
+        tr.divider-pertemuan {
+            background-color: rgba(255, 215, 0, 0.3);
+            border-top: 3px solid #ffd700;
+            border-bottom: 3px solid #ffd700;
+        }
+        tr.divider-pertemuan td {
+            color: #ffd700;
+            font-weight: bold;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 12px; }
         .form-group { margin-bottom: 12px; }
         .form-group label { display: block; margin-bottom: 5px; color: #ffcc66; font-size: 0.95rem; }
@@ -217,6 +213,7 @@
         }
 
         .btn-primary { background: linear-gradient(45deg, #ffd700, #ffaa00); }
+        .btn-approve { background: linear-gradient(45deg, #27ae60, #2ecc71); color: #fff; padding: 6px 12px; font-size: 0.9rem; }
         .btn-excel { background: linear-gradient(45deg, #27ae60, #2ecc71); color: #fff; }
         .btn-download { background: linear-gradient(45deg, #e67e22, #f39c12); color: #fff; }
         .btn:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
@@ -224,7 +221,6 @@
         .file-input-wrapper { position: relative; overflow: hidden; display: inline-block; }
         .file-input-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; }
 
-        /* Penyesuaian Media Query untuk Tampilan Ponsel (HP) */
         @media (max-width: 600px) {
             header h1 { font-size: 1.8rem; }
             .custom-logo { width: 50px; height: 50px; }
@@ -239,19 +235,17 @@
 <div class="container">
     <header>
         <div class="header-title-box">
-            <!-- Logo PNG Kustom Transparan -->
             <img id="dashboardLogo" class="custom-logo" src="https://via.placeholder.com/65/ffd700/4a000b?text=PASKIBRA" alt="Logo Paskibra" onclick="triggerLogoUpload()">
             <h1>DASHBOARD MANAJEMEN PASKIBRA MAN 6 CIAMIS</h1>
         </div>
         <p>Sistem Informasi Anggota, Presensi Latihan Rutin, dan Open Recruitment</p>
         
-        <!-- Widget Jam & Tanggal Digital Real-Time -->
         <div class="clock-box">
             <i class="fas fa-clock"></i>
             <span id="liveClock">--:--:-- WIB</span>
         </div>
 
-        <button class="logo-uploader-btn" onclick="triggerLogoUpload()"><i class="fas fa-image"></i> GANTI LOGO PNG</button>
+        <button class="logo-uploader-btn" onclick="triggerLogoUpload()"><i class="fas fa-image"></i> GANTI LOGO PNG PERMANEN</button>
         <input type="file" id="logoInput" accept="image/png" style="display: none;" onchange="handleLogoUpload(event)">
     </header>
 
@@ -265,7 +259,6 @@
     <div id="tab-anggota" class="card tab-content active">
         <h2>DAFTAR ANGGOTA PASKIBRA (DATA MASTER)</h2>
         
-        <!-- Form Tambah Anggota Manual -->
         <form onsubmit="submitAnggotaMasterManual(event)" style="margin-bottom: 20px;">
             <div class="form-grid">
                 <div class="form-group">
@@ -315,11 +308,11 @@
         <h2>INPUT ABSENSI LATIHAN RUTIN</h2>
         <form id="formAbsensi" onsubmit="submitAbsensi(event)">
             <div class="form-group">
-                <label>Cari / Pilih Anggota (Ketik Nama atau NISN)</label>
-                <!-- Datalist pencarian anggota interaktif -->
-                <input type="text" id="absensiSearchInput" list="anggotaListOptions" placeholder="Ketik NISN atau Nama Anggota..." required onchange="syncNisFromSearch(this.value)">
-                <datalist id="anggotaListOptions"></datalist>
-                <input type="hidden" id="selectedNisHolder">
+                <label>Cari / Pilih Anggota (Cari atau Pilih Berurutan)</label>
+                <select id="absensiSelectNama" required style="width:100%; margin-bottom:5px;">
+                    <option value="">-- PILIH ANGGOTA BERURUTAN --</option>
+                </select>
+                <input type="text" id="absensiSearchInput" placeholder="Atau ketik pencarian NIS / Nama di sini..." oninput="filterDropdownAnggota(this.value)">
             </div>
             <div class="form-group">
                 <label>Hari / Pertemuan Latihan Rutin</label>
@@ -343,40 +336,40 @@
 
         <hr style="border: 0; border-top: 1px solid rgba(255,215,0,0.2); margin: 25px 0;">
 
-        <h2>REKAP ABSENSI LATIHAN</h2>
+        <h2>PREVIEW REKAP ABSENSI LATIHAN</h2>
         <div class="action-box">
-            <span><strong>Download Laporan / Rekap Absensi:</strong></span>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <button class="btn btn-download" onclick="downloadExcelDenganKop('absensi_mingguan')"><i class="fas fa-calendar-week"></i> REKAP MINGGUAN</button>
-                <button class="btn btn-download" onclick="downloadExcelDenganKop('absensi_bulanan')"><i class="fas fa-calendar-alt"></i> REKAP BULANAN</button>
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <span><strong>Filter Preview & Laporan:</strong></span>
+                <select id="filterRekapTipe" onchange="renderPreviewAbsensi()" style="padding: 8px; border-radius: 6px; background: #2b0006; color: #fff; border: 1px solid #ffd700;">
+                    <option value="mingguan">Rekap Mingguan (7 Hari Terakhir)</option>
+                    <option value="bulanan">Rekap Bulanan (30 Hari Terakhir)</option>
+                    <option value="semua">Semua Riwayat Absensi</option>
+                </select>
             </div>
+            <button class="btn btn-download" onclick="downloadExcelDenganKop('absensi')"><i class="fas fa-file-download"></i> DOWNLOAD REKAP EXCEL</button>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tanggal</th>
+                        <th>NIS / NISN</th>
+                        <th>Nama Lengkap</th>
+                        <th>Pertemuan</th>
+                        <th>Keterangan</th>
+                    </tr>
+                </thead>
+                <tbody id="tablePreviewAbsensi">
+                    <tr><td colspan="5" style="text-align:center;">Memuat preview rekap absensi...</td></tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
     <!-- TAB 3: OPEN RECRUITMENT -->
     <div id="tab-recruitment" class="card tab-content">
         <h2>PENDAFTAR CALON ANGGOTA PASKIBRA BARU (OR)</h2>
-
-        <!-- Form Input Manual OR -->
-        <form onsubmit="submitORManual(event)" style="margin-top: 15px;">
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>Nama Pendaftar</label>
-                    <input type="text" id="orNama" placeholder="Nama Calon Anggota" required>
-                </div>
-                <div class="form-group">
-                    <label>Kelas</label>
-                    <input type="text" id="orKelas" placeholder="Contoh: X.1" required>
-                </div>
-                <div class="form-group">
-                    <label>Alasan Masuk Paskibra</label>
-                    <input type="text" id="orAlasan" placeholder="Alasan berminat" required>
-                </div>
-            </div>
-            <button type="submit" class="btn btn-primary"><i class="fas fa-user-plus"></i> TAMBAH PENDAFTAR MANUAL</button>
-        </form>
-
-        <hr style="border: 0; border-top: 1px solid rgba(255,215,0,0.2); margin: 20px 0;">
 
         <div class="action-box">
             <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
@@ -396,8 +389,8 @@
                         <th>Tanggal</th>
                         <th>Nama Pendaftar</th>
                         <th>Kelas</th>
-                        <th>Alasan Bergabung</th>
                         <th>Status Seleksi</th>
+                        <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody id="tableOR">
@@ -411,20 +404,10 @@
 <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxzQmY4XGvBLnoeHRo6W4gMFXQAbNESiv8ZLN0fkGIgtMxLA_riQmBRFp-hyCLXDG6D/exec";
     
-    // Variabel Global Penampung Data
     let globalDataMaster = [];
     let globalAbsensi = [];
     let globalRecruitment = [];
     let currentLogoBase64 = "";
-
-    // Inisialisasi Logo dari LocalStorage saat Halaman Dimuat
-    window.addEventListener("DOMContentLoaded", () => {
-        const savedLogo = localStorage.getItem("paskibra_logo_png");
-        if (savedLogo) {
-            currentLogoBase64 = savedLogo;
-            document.getElementById("dashboardLogo").src = savedLogo;
-        }
-    });
 
     function triggerLogoUpload() {
         document.getElementById("logoInput").click();
@@ -434,11 +417,11 @@
         const file = event.target.files[0];
         if (file && file.type === "image/png") {
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = async function(e) {
                 currentLogoBase64 = e.target.result;
                 document.getElementById("dashboardLogo").src = currentLogoBase64;
-                localStorage.setItem("paskibra_logo_png", currentLogoBase64);
-                alert("Logo PNG berhasil diganti!");
+                await sendDataToSheet({ action: "saveLogo", logoBase64: currentLogoBase64 });
+                alert("Logo PNG berhasil disimpan secara permanen di server!");
             };
             reader.readAsDataURL(file);
         } else {
@@ -446,7 +429,6 @@
         }
     }
 
-    // Jam Real-Time
     function updateLiveClock() {
         const now = new Date();
         const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
@@ -473,68 +455,153 @@
             globalAbsensi = data.absensi || [];
             globalRecruitment = data.recruitment || [];
 
-            // 1. Render Table & Datalist Anggota
-            const tbodyAnggota = document.getElementById("tableAnggota");
-            const listOptions = document.getElementById("anggotaListOptions");
-            tbodyAnggota.innerHTML = "";
-            listOptions.innerHTML = "";
-
-            if (globalDataMaster.length > 0) {
-                globalDataMaster.forEach(a => {
-                    const nisVal = a["NIS/NISN"] || a.NIS || "-";
-                    const namaVal = a["NAMA LENGKAP"] || a.Nama_Lengkap || "-";
-                    const kelasVal = a.KELAS || a.Kelas || "-";
-                    const jabatanVal = a.JABATAN || a.Jabatan || "Anggota";
-
-                    tbodyAnggota.innerHTML += `
-                        <tr>
-                            <td><strong>${nisVal}</strong></td>
-                            <td>${namaVal}</td>
-                            <td>${kelasVal}</td>
-                            <td>${jabatanVal}</td>
-                        </tr>`;
-
-                    listOptions.innerHTML += `<option value="[${nisVal}] ${namaVal} - ${kelasVal}">`;
-                });
-            } else {
-                tbodyAnggota.innerHTML = "<tr><td colspan='4' style='text-align:center;'>Belum ada data di DATA MASTER ANGGOTA.</td></tr>";
+            if (data.logoBase64) {
+                currentLogoBase64 = data.logoBase64;
+                document.getElementById("dashboardLogo").src = currentLogoBase64;
             }
 
-            // 2. Render Table Open Recruitment
-            const tbodyOR = document.getElementById("tableOR");
-            tbodyOR.innerHTML = "";
-            if (globalRecruitment.length > 0) {
-                globalRecruitment.forEach(r => {
-                    tbodyOR.innerHTML += `
-                        <tr>
-                            <td>${r.TimeStamp ? new Date(r.TimeStamp).toLocaleDateString('id-ID') : '-'}</td>
-                            <td>${r.Nama_Pendaftar || r.nama_pendaftar || '-'}</td>
-                            <td>${r.Kelas || r.kelas || '-'}</td>
-                            <td>${r.Alasan_Bergabung || r.alasan_bergabung || '-'}</td>
-                            <td>${r.Status_Seleksi || 'Pending'}</td>
-                        </tr>`;
-                });
-            } else {
-                tbodyOR.innerHTML = "<tr><td colspan='5' style='text-align:center;'>Belum ada data pendaftar calon Paskibra.</td></tr>";
-            }
+            // 1. Render Data Master Anggota & Dropdown
+            renderTableMaster();
+            populateSelectAnggota();
+
+            // 2. Render Preview Absensi
+            renderPreviewAbsensi();
+
+            // 3. Render Table Open Recruitment
+            renderTableOR();
         } catch (err) {
             console.error("Gagal memuat data:", err);
         }
     }
 
-    // Ekstraksi NIS dari format pencarian datalist
-    function syncNisFromSearch(val) {
-        const match = val.match(/\[(.*?)\]/);
-        if (match) {
-            document.getElementById("selectedNisHolder").value = match[1];
+    function renderTableMaster() {
+        const tbody = document.getElementById("tableAnggota");
+        tbody.innerHTML = "";
+        if (globalDataMaster.length > 0) {
+            globalDataMaster.forEach(a => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${a["NIS/NISN"] || a.NIS || "-"}</strong></td>
+                        <td>${a["NAMA LENGKAP"] || a.Nama_Lengkap || "-"}</td>
+                        <td>${a.KELAS || a.Kelas || "-"}</td>
+                        <td>${a.JABATAN || a.Jabatan || "Anggota"}</td>
+                    </tr>`;
+            });
         } else {
-            document.getElementById("selectedNisHolder").value = val;
+            tbody.innerHTML = "<tr><td colspan='4' style='text-align:center;'>Belum ada data di DATA MASTER ANGGOTA.</td></tr>";
         }
     }
 
-    // -------------------------------------------------------------
-    // FUNGSI ANGGOTA MASTER MANUAL
-    // -------------------------------------------------------------
+    function populateSelectAnggota() {
+        const select = document.getElementById("absensiSelectNama");
+        select.innerHTML = '<option value="">-- PILIH ANGGOTA BERURUTAN --</option>';
+        globalDataMaster.forEach(a => {
+            const nis = a["NIS/NISN"] || a.NIS || "-";
+            const nama = a["NAMA LENGKAP"] || a.Nama_Lengkap || "-";
+            const kelas = a.KELAS || a.Kelas || "-";
+            select.innerHTML += `<option value="${nama}" data-nis="${nis}">[${nis}] ${nama} - ${kelas}</option>`;
+        });
+    }
+
+    function filterDropdownAnggota(query) {
+        const select = document.getElementById("absensiSelectNama");
+        const options = select.options;
+        const q = query.toLowerCase();
+        for (let i = 1; i < options.length; i++) {
+            const txt = options[i].text.toLowerCase();
+            options[i].style.display = txt.includes(q) ? "" : "none";
+        }
+    }
+
+    function renderPreviewAbsensi() {
+        const tbody = document.getElementById("tablePreviewAbsensi");
+        const tipe = document.getElementById("filterRekapTipe").value;
+        tbody.innerHTML = "";
+
+        if (!globalAbsensi.length) {
+            tbody.innerHTML = "<tr><td colspan='5' style='text-align:center;'>Belum ada data absensi.</td></tr>";
+            return;
+        }
+
+        let filtered = globalAbsensi;
+        const now = new Date();
+        if (tipe === 'mingguan') {
+            const limit = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            filtered = globalAbsensi.filter(a => new Date(a.TimeStamp) >= limit);
+        } else if (tipe === 'bulanan') {
+            const limit = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+            filtered = globalAbsensi.filter(a => new Date(a.TimeStamp) >= limit);
+        }
+
+        // Kelompokkan data absensi berdasar Pertemuan 1, 2, dan 3
+        const pertemuanGroup = { "Pertemuan 1 (Senin)": [], "Pertemuan 2 (Selasa)": [], "Pertemuan 3 (Rabu)": [], "Lainnya": [] };
+
+        filtered.forEach(item => {
+            const p = item["Pertemuan Ke -"] || item.Pertemuan || "";
+            if (p.includes("Pertemuan 1")) pertemuanGroup["Pertemuan 1 (Senin)"].push(item);
+            else if (p.includes("Pertemuan 2")) pertemuanGroup["Pertemuan 2 (Selasa)"].push(item);
+            else if (p.includes("Pertemuan 3")) pertemuanGroup["Pertemuan 3 (Rabu)"].push(item);
+            else pertemuanGroup["Lainnya"].push(item);
+        });
+
+        Object.keys(pertemuanGroup).forEach(groupTitle => {
+            if (pertemuanGroup[groupTitle].length > 0) {
+                // Header Pembatas Kelompok Pertemuan
+                tbody.innerHTML += `
+                    <tr class="divider-pertemuan">
+                        <td colspan="5"><i class="fas fa-bookmark"></i> PEMBATAS: ${groupTitle.toUpperCase()}</td>
+                    </tr>`;
+
+                pertemuanGroup[groupTitle].forEach(row => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${row.TimeStamp ? new Date(row.TimeStamp).toLocaleDateString('id-ID') : '-'}</td>
+                            <td><strong>${row.NIS || '-'}</strong></td>
+                            <td>${row.Nama_Lengkap || '-'}</td>
+                            <td>${row["Pertemuan Ke -"] || row.Pertemuan || '-'}</td>
+                            <td>${row.Keterangan || 'Hadir'}</td>
+                        </tr>`;
+                });
+            }
+        });
+    }
+
+    function renderTableOR() {
+        const tbody = document.getElementById("tableOR");
+        tbody.innerHTML = "";
+        if (globalRecruitment.length > 0) {
+            globalRecruitment.forEach(r => {
+                const status = r.Status_Seleksi || 'Pending';
+                const isAccepted = status === 'Diterima' || status === 'Approved';
+                
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${r.TimeStamp ? new Date(r.TimeStamp).toLocaleDateString('id-ID') : '-'}</td>
+                        <td>${r.Nama_Pendaftar || r.nama_pendaftar || '-'}</td>
+                        <td>${r.Kelas || r.kelas || '-'}</td>
+                        <td><span style="color:${isAccepted ? '#2ecc71' : '#f39c12'}; font-weight:bold;">${status}</span></td>
+                        <td>
+                            ${!isAccepted ? `<button class="btn btn-approve" onclick="approveOR('${r.Nama_Pendaftar \vert{}\vert{} r.nama_pendaftar}', '${r.Kelas || r.kelas}')"><i class="fas fa-check-circle"></i> APPROVE / TERIMA</button>` : `<i class="fas fa-user-check" style="color:#2ecc71;"></i> Terverifikasi`}
+                        </td>
+                    </tr>`;
+            });
+        } else {
+            tbody.innerHTML = "<tr><td colspan='5' style='text-align:center;'>Belum ada data pendaftar calon Paskibra.</td></tr>";
+        }
+    }
+
+    async function approveOR(nama, kelas) {
+        if (confirm(`Setujui pendaftaran ${nama} (${kelas}) dan masukkan ke Data Master Anggota?`)) {
+            await sendDataToSheet({
+                action: "updateStatusRecruitment",
+                nama_pendaftar: nama,
+                kelas: kelas,
+                status_seleksi: "Diterima"
+            });
+            alert(`Pendaftar ${nama} berhasil diterima dan dimasukkan ke Data Master!`);
+        }
+    }
+
     async function submitAnggotaMasterManual(e) {
         e.preventDefault();
         const nis = document.getElementById("masterNis").value;
@@ -547,33 +614,19 @@
         alert("Anggota berhasil ditambahkan ke Data Master!");
     }
 
-    // -------------------------------------------------------------
-    // FUNGSI ABSENSI
-    // -------------------------------------------------------------
     async function submitAbsensi(e) {
         e.preventDefault();
-        const searchInputVal = document.getElementById("absensiSearchInput").value;
-        const nis = document.getElementById("selectedNisHolder").value || searchInputVal;
+        const select = document.getElementById("absensiSelectNama");
+        if (!select.value) return alert("Pilih anggota terlebih dahulu!");
+
+        const nama = select.value;
+        const nis = select.options[select.selectedIndex].getAttribute("data-nis");
         const pertemuan = document.getElementById("absensiPertemuan").value;
         const keterangan = document.getElementById("absensiStatus").value;
 
-        await sendDataToSheet({ action: "addAbsensi", nis, nama_lengkap: searchInputVal, pertemuan, keterangan });
-        document.getElementById("absensiSearchInput").value = "";
+        await sendDataToSheet({ action: "addAbsensi", nis, nama_lengkap: nama, pertemuan, keterangan });
+        select.value = "";
         alert(`Absensi latihan berhasil disimpan!`);
-    }
-
-    // -------------------------------------------------------------
-    // FUNGSI OPEN RECRUITMENT (MANUAL & UPLOAD EXCEL)
-    // -------------------------------------------------------------
-    async function submitORManual(e) {
-        e.preventDefault();
-        const nama = document.getElementById("orNama").value;
-        const kelas = document.getElementById("orKelas").value;
-        const alasan = document.getElementById("orAlasan").value;
-
-        await sendDataToSheet({ action: "submitOR", nama_pendaftar: nama, kelas, alasan_bergabung: alasan });
-        e.target.reset();
-        alert("Pendaftaran berhasil disimpan!");
     }
 
     function importExcelOR(event) {
@@ -593,21 +646,17 @@
                         action: "submitOR",
                         nama_pendaftar: row.Nama_Pendaftar || row.Nama || row.nama || "",
                         kelas: row.Kelas || row.kelas || "",
+                        alumni_smp: row.Alumni_SMP || row.alumni_smp || "-",
                         alasan_bergabung: row.Alasan_Bergabung || row.Alasan || row.alasan || ""
                     });
                 }
-                alert("Berhasil mengunggah dan menyimpan data Excel Pendaftar OR!");
+                alert("Berhasil mengunggah data Excel OR!");
                 loadData();
-            } catch (err) {
-                alert("Gagal memproses file Excel OR.");
-            }
+            } catch (err) { alert("Gagal memproses file Excel OR."); }
         };
         reader.readAsArrayBuffer(file);
     }
 
-    // -------------------------------------------------------------
-    // FUNGSI DOWNLOAD EXCEL BER-KOP DAN BER-LOGO
-    // -------------------------------------------------------------
     function downloadExcelDenganKop(tipe) {
         let title = "";
         let dataToExport = [];
@@ -617,33 +666,24 @@
             title = "LAPORAN DATA MASTER ANGGOTA PASKIBRA MAN 6 CIAMIS";
             dataToExport = globalDataMaster;
             filename = "Data_Anggota_Paskibra.xls";
-        } else if (tipe.startsWith('absensi')) {
-            const isMingguan = tipe.includes('mingguan');
-            title = isMingguan ? "REKAP ABSENSI MINGGUAN LATIHAN PASKIBRA" : "REKAP ABSENSI BULANAN LATIHAN PASKIBRA";
-            filename = isMingguan ? "Rekap_Absensi_Mingguan.xls" : "Rekap_Absensi_Bulanan.xls";
-            
-            const now = new Date();
-            const daysLimit = isMingguan ? 7 : 30;
-            const limitDate = new Date(now.getTime() - daysLimit * 24 * 60 * 60 * 1000);
-            dataToExport = globalAbsensi.filter(a => new Date(a.TimeStamp) >= limitDate);
+        } else if (tipe === 'absensi') {
+            const filterTipe = document.getElementById("filterRekapTipe").value;
+            title = `REKAP ABSENSI LATIHAN PASKIBRA (${filterTipe.toUpperCase()})`;
+            filename = `Rekap_Absensi_${filterTipe}.xls`;
+            dataToExport = globalAbsensi;
         } else if (tipe === 'recruitment') {
             title = "LAPORAN PENDAFTARAN OPEN RECRUITMENT PASKIBRA";
             dataToExport = globalRecruitment;
             filename = "Data_Pendaftar_OR_Paskibra.xls";
         }
 
-        if (!dataToExport || !dataToExport.length) {
-            alert("Tidak ada data untuk didownload!");
-            return;
-        }
+        if (!dataToExport || !dataToExport.length) return alert("Tidak ada data untuk didownload!");
 
-        // Generate HTML Table untuk Excel Ber-KOP Resmi
         let logoHtml = currentLogoBase64 ? `<img src="${currentLogoBase64}" width="65" height="65" />` : '';
         
         let htmlTemplate = `
             <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
             <head>
-                <!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Laporan</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->
                 <style>
                     body { font-family: 'Segoe UI', Arial, sans-serif; }
                     .header-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
@@ -669,28 +709,20 @@
                 </table>
                 <br>
                 <table class="data-table">
-                    <thead>
-                        <tr>`;
+                    <thead><tr>`;
 
-        // Ambil Header Kolom
         const headers = Object.keys(dataToExport[0]);
-        headers.forEach(h => {
-            htmlTemplate += `<th>${h}</th>`;
-        });
+        headers.forEach(h => { htmlTemplate += `<th>${h}</th>`; });
         htmlTemplate += `</tr></thead><tbody>`;
 
-        // Ambil Baris Data
         dataToExport.forEach(row => {
             htmlTemplate += `<tr>`;
-            headers.forEach(h => {
-                htmlTemplate += `<td>${row[h] !== undefined ? row[h] : ''}</td>`;
-            });
+            headers.forEach(h => { htmlTemplate += `<td>${row[h] !== undefined ? row[h] : ''}</td>`; });
             htmlTemplate += `</tr>`;
         });
 
         htmlTemplate += `</tbody></table></body></html>`;
 
-        // Unduh File Excel XLS
         const blob = new Blob([htmlTemplate], { type: 'application/vnd.ms-excel' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -701,9 +733,6 @@
         document.body.removeChild(a);
     }
 
-    // -------------------------------------------------------------
-    // FUNGSI HIT SERVER GOOGLE APPS SCRIPT
-    // -------------------------------------------------------------
     async function sendDataToSheet(payload) {
         try {
             await fetch(SCRIPT_URL, {
@@ -711,9 +740,7 @@
                 body: JSON.stringify(payload)
             });
             loadData();
-        } catch (err) {
-            alert("Gagal terhubung ke server Google Sheets.");
-        }
+        } catch (err) { alert("Gagal terhubung ke server Google Sheets."); }
     }
 
     loadData();
