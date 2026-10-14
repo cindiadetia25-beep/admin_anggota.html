@@ -125,8 +125,8 @@
 
 <div class="form-card">
     <div class="header-box">
-        <!-- Logo diambil secara otomatis dari server yang dikelola melalui Dashboard Admin -->
-        <img id="formLogo" src="https://via.placeholder.com/70/ffd700/4a000b?text=PASKIBRA" alt="Logo Paskibra">
+        <!-- Logo langsung dipanggil dari folder assets/logo-paskibra.png -->
+        <img id="formLogo" src="assets/logo-paskibra.png" alt="Logo Paskibra">
         <h1>FORMULIR PENDAFTARAN ANGGOTA PASKIBRA</h1>
         <p>MAN 6 CIAMIS</p>
     </div>
@@ -169,20 +169,7 @@
 <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxzQmY4XGvBLnoeHRo6W4gMFXQAbNESiv8ZLN0fkGIgtMxLA_riQmBRFp-hyCLXDG6D/exec";
 
-    // Muat Logo dari Server Google Apps Script saat halaman pertama kali dibuka
-    window.addEventListener("DOMContentLoaded", async () => {
-        try {
-            const res = await fetch(SCRIPT_URL);
-            const data = await res.json();
-            if (data.logoBase64) {
-                document.getElementById("formLogo").src = data.logoBase64;
-            }
-        } catch (e) { 
-            console.error("Gagal memuat logo dari server"); 
-        }
-    });
-
-    // Fungsi Submit Pendaftaran
+    // Fungsi Submit Pendaftaran ke Server Google Apps Script
     async function submitFormPublic(e) {
         e.preventDefault();
         const nama = document.getElementById("publicNama").value;
