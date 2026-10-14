@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pendaftaran Calon Anggota PASKIBRA MAN 6 Ciamis</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <!-- Google Font: American Captain -->
     <link href="https://fonts.cdnfonts.com/css/american-captain" rel="stylesheet">
 
     <style>
@@ -125,7 +124,6 @@
 
 <div class="form-card">
     <div class="header-box">
-        <!-- Logo langsung dipanggil dari folder assets/logo-paskibra.png -->
         <img id="formLogo" src="assets/logo-paskibra.png" alt="Logo Paskibra">
         <h1>FORMULIR PENDAFTARAN ANGGOTA PASKIBRA</h1>
         <p>MAN 6 CIAMIS</p>
@@ -169,7 +167,6 @@
 <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxzQmY4XGvBLnoeHRo6W4gMFXQAbNESiv8ZLN0fkGIgtMxLA_riQmBRFp-hyCLXDG6D/exec";
 
-    // Fungsi Submit Pendaftaran ke Server Google Apps Script
     async function submitFormPublic(e) {
         e.preventDefault();
         const nama = document.getElementById("publicNama").value;
