@@ -638,7 +638,7 @@
                 return rNama.toLowerCase() !== nama.toLowerCase();
             });
 
-            // 2. Otomatis hapus dari tampilan lokal Open Recruitment (< 0.1s)
+            // 2. OTOMATIS HAPUS dari tampilan lokal Open Recruitment (< 0.1s)
             globalRecruitment = globalRecruitment.filter(r => {
                 let rNama = String(r.Nama_Pendaftar || r.nama_pendaftar || "").trim();
                 return rNama.toLowerCase() !== nama.toLowerCase();
@@ -711,12 +711,22 @@
                     </tr>`;
 
                 pertemuanGroup[groupTitle].forEach(row => {
-                    const ts = row.TimeStamp || row.Timestamp;
+                    const rawTs = row.TimeStamp || row.Timestamp || row.timestamp || "";
+                    let formattedDate = '-';
+                    if (rawTs) {
+                        const parsedDate = new Date(rawTs);
+                        if (!isNaN(parsedDate.getTime())) {
+                            formattedDate = parsedDate.toLocaleDateString('id-ID');
+                        } else {
+                            formattedDate = rawTs.toString().split('T')[0];
+                        }
+                    }
+
                     let rawNis = row.NIS || row.nis || '-';
                     const nis = rawNis.toString().trim() || "-";
                     tbody.innerHTML += `
                         <tr>
-                            <td>${ts ? new Date(ts).toLocaleDateString('id-ID') : '-'}</td>
+                            <td>${formattedDate}</td>
                             <td><strong>${nis}</strong></td>
                             <td>${row.Nama_Lengkap || row.nama_lengkap || row.Nama || '-'}</td>
                             <td>${row["Pertemuan Ke -"] || row.Pertemuan || '-'}</td>
@@ -737,11 +747,23 @@
                 const nama = r.Nama_Pendaftar || r.nama_pendaftar || '-';
                 const kelas = r.Kelas || r.kelas || '-';
                 const alumni = r["Alumni SMP/MTS"] || r.alumni_smp || '-';
-                const ts = r.TimeStamp || r.Timestamp;
+                
+                // Format tanggal tangguh (Mencegah Invalid Date)
+                const rawTs = r.TimeStamp || r.Timestamp || r.timestamp || r.Tanggal || r.tanggal || "";
+                let formattedDate = '-';
+                
+                if (rawTs) {
+                    const parsedDate = new Date(rawTs);
+                    if (!isNaN(parsedDate.getTime())) {
+                        formattedDate = parsedDate.toLocaleDateString('id-ID');
+                    } else {
+                        formattedDate = rawTs.toString().split('T')[0]; 
+                    }
+                }
 
                 tbody.innerHTML += `
                     <tr>
-                        <td>${ts ? new Date(ts).toLocaleDateString('id-ID') : '-'}</td>
+                        <td>${formattedDate}</td>
                         <td>${nama}</td>
                         <td>${alumni}</td>
                         <td>${kelas}</td>
