@@ -509,7 +509,7 @@
         const icon = document.getElementById("refreshIcon");
         icon.classList.add("fa-spin");
         await loadData();
-        setTimeout(() => icon.classList.remove("fa-spin"), 600);
+        setTimeout(() => icon.classList.remove("fa-spin"), 300);
     }
 
     async function loadData() {
@@ -521,14 +521,18 @@
             globalAbsensi = data.absensi || [];
             globalRecruitment = data.recruitment || [];
 
-            renderTableMaster();
-            populateSelectAnggota();
-            renderPreviewAbsensi();
-            renderTableOR();
+            renderAllTables();
         } catch (err) {
             console.error("Gagal memuat data:", err);
             document.getElementById("tableAnggota").innerHTML = "<tr><td colspan='5' style='text-align:center; color:#ff6b6b;'>Gagal memuat data. Periksa koneksi Web App Apps Script Anda.</td></tr>";
         }
+    }
+
+    function renderAllTables() {
+        renderTableMaster();
+        populateSelectAnggota();
+        renderPreviewAbsensi();
+        renderTableOR();
     }
 
     function renderTableMaster() {
@@ -582,14 +586,34 @@
         const jabatan = document.getElementById("editJabatan").value;
 
         closeModal();
-        await sendDataToSheet({ action: "updateAnggota", oldNis, nis, nama_lengkap: nama, kelas, jabatan });
-        alert("Data anggota berhasil diperbarui!");
+
+        // Optimistic Local Update (< 0.1 detik)
+        const idx = globalDataMaster.findIndex(a => {
+            let r = (a["NIS/NISN"] || a["NIS"] || a["nis"] || "").toString().trim();
+            return r === oldNis;
+        });
+
+        if (idx !== -1) {
+            globalDataMaster[idx]["NIS/NISN"] = nis;
+            globalDataMaster[idx]["NAMA LENGKAP"] = nama;
+            globalDataMaster[idx]["KELAS"] = kelas;
+            globalDataMaster[idx]["JABATAN"] = jabatan;
+            renderAllTables();
+        }
+
+        sendDataToSheet({ action: "updateAnggota", oldNis, nis, nama_lengkap: nama, kelas, jabatan });
     }
 
     async function deleteAnggota(nis, nama) {
         if (confirm(`Apakah Anda yakin ingin menghapus ${nama} [NIS: ${nis}] dari Data Master?`)) {
-            await sendDataToSheet({ action: "deleteAnggota", nis });
-            alert(`Anggota ${nama} telah dihapus!`);
+            // Optimistic Local Delete (< 0.1 detik)
+            globalDataMaster = globalDataMaster.filter(a => {
+                let r = (a["NIS/NISN"] || a["NIS"] || a["nis"] || "").toString().trim();
+                return r !== nis;
+            });
+            renderAllTables();
+
+            sendDataToSheet({ action: "deleteAnggota", nis });
         }
     }
 
@@ -700,23 +724,33 @@
 
     async function approveOR(nama, kelas) {
         let inputNis = prompt(`Masukkan NIS / NISN untuk anggota ${nama} (Opsional, boleh dikosongkan):`);
-        
-        if (inputNis === null) return; // Pembatalan
+        if (inputNis === null) return;
 
         let cleanNis = inputNis.replace(/\D/g, '');
-        if (!cleanNis) {
-            cleanNis = "-";
+        if (!cleanNis) cleanNis = "-";
+
+        // Optimistic Local Update (< 0.1 detik)
+        const idx = globalRecruitment.findIndex(r => (r.Nama_Pendaftar || r.nama_pendaftar) === nama);
+        if (idx !== -1) {
+            globalRecruitment[idx].Status_Seleksi = "Diterima";
         }
 
-        await sendDataToSheet({
+        globalDataMaster.push({
+            "NIS/NISN": cleanNis,
+            "NAMA LENGKAP": nama,
+            "KELAS": kelas,
+            "JABATAN": "Anggota"
+        });
+
+        renderAllTables();
+
+        sendDataToSheet({
             action: "updateStatusRecruitment",
             nama_pendaftar: nama,
             kelas: kelas,
             nis: cleanNis,
             status_seleksi: "Diterima"
         });
-
-        alert(`Pendaftar ${nama} berhasil diterima! NIS/NISN diset ke: ${cleanNis}`);
     }
 
     async function submitAnggotaMasterManual(e) {
@@ -727,9 +761,17 @@
         const kelas = document.getElementById("masterKelas").value;
         const jabatan = document.getElementById("masterJabatan").value;
 
-        await sendDataToSheet({ action: "addAnggota", nis, nama_lengkap: nama, kelas, jabatan });
+        // Optimistic Local Update (< 0.1 detik)
+        globalDataMaster.push({
+            "NIS/NISN": nis,
+            "NAMA LENGKAP": nama,
+            "KELAS": kelas,
+            "JABATAN": jabatan
+        });
+        renderAllTables();
+
         e.target.reset();
-        alert("Anggota berhasil ditambahkan ke Data Master!");
+        sendDataToSheet({ action: "addAnggota", nis, nama_lengkap: nama, kelas, jabatan });
     }
 
     async function submitAbsensi(e) {
@@ -743,9 +785,18 @@
         const pertemuan = document.getElementById("absensiPertemuan").value;
         const keterangan = document.getElementById("absensiStatus").value;
 
-        await sendDataToSheet({ action: "addAbsensi", nis, nama_lengkap: nama, pertemuan, keterangan });
+        // Optimistic Local Update (< 0.1 detik)
+        globalAbsensi.unshift({
+            TimeStamp: new Date().toISOString(),
+            NIS: nis,
+            Nama_Lengkap: nama,
+            Pertemuan: pertemuan,
+            Keterangan: keterangan
+        });
+        renderPreviewAbsensi();
+
         select.value = "";
-        alert(`Absensi latihan berhasil disimpan!`);
+        sendDataToSheet({ action: "addAbsensi", nis, nama_lengkap: nama, pertemuan, keterangan });
     }
 
     function importExcelOR(event) {
@@ -856,9 +907,10 @@
                 headers: { "Content-Type": "text/plain" },
                 body: JSON.stringify(payload)
             });
-            setTimeout(() => { loadData(); }, 1200);
+            // Auto Sync background setelah 1 detik
+            setTimeout(() => { loadData(); }, 1000);
         } catch (err) { 
-            alert("Gagal terhubung ke server Google Sheets."); 
+            console.error("Gagal terhubung ke server Google Sheets.", err); 
         }
     }
 
