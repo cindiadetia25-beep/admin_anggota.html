@@ -450,6 +450,7 @@
         <h3><i class="fas fa-user-edit"></i> EDIT DATA ANGGOTA</h3>
         <form onsubmit="saveEditAnggota(event)">
             <input type="hidden" id="editOldNis">
+            <input type="hidden" id="editOldNama">
             <div class="form-group">
                 <label>NIS / NISN (Boleh Angka / -)</label>
                 <input type="text" id="editNis">
@@ -565,6 +566,7 @@
 
     function openEditModal(nis, nama, kelas, jabatan) {
         document.getElementById("editOldNis").value = nis;
+        document.getElementById("editOldNama").value = nama;
         document.getElementById("editNis").value = nis;
         document.getElementById("editNama").value = nama;
         document.getElementById("editKelas").value = kelas;
@@ -579,6 +581,7 @@
     async function saveEditAnggota(e) {
         e.preventDefault();
         const oldNis = document.getElementById("editOldNis").value;
+        const oldNama = document.getElementById("editOldNama").value;
         let nis = document.getElementById("editNis").value.trim();
         if (!nis) nis = "-";
         const nama = document.getElementById("editNama").value;
@@ -589,8 +592,9 @@
 
         // Optimistic Local Update (< 0.1 detik)
         const idx = globalDataMaster.findIndex(a => {
-            let r = (a["NIS/NISN"] || a["NIS"] || a["nis"] || "").toString().trim();
-            return r === oldNis;
+            let rNis = String(a["NIS/NISN"] || a["NIS"] || a["nis"] || "").trim();
+            let rNama = String(a["NAMA LENGKAP"] || a["Nama_Lengkap"] || a["nama"] || "").trim();
+            return (oldNis !== "-" && oldNis !== "") ? (rNis === oldNis) : (rNama.toLowerCase() === oldNama.toLowerCase());
         });
 
         if (idx !== -1) {
@@ -601,19 +605,31 @@
             renderAllTables();
         }
 
-        sendDataToSheet({ action: "updateAnggota", oldNis, nis, nama_lengkap: nama, kelas, jabatan });
+        sendDataToSheet({ 
+            action: "updateAnggota", 
+            oldNis: oldNis, 
+            oldNama: oldNama, 
+            nis: nis, 
+            nama_lengkap: nama, 
+            kelas: kelas, 
+            jabatan: jabatan 
+        });
     }
 
     async function deleteAnggota(nis, nama) {
         if (confirm(`Apakah Anda yakin ingin menghapus ${nama} [NIS: ${nis}] dari Data Master?`)) {
             // Optimistic Local Delete (< 0.1 detik)
             globalDataMaster = globalDataMaster.filter(a => {
-                let r = (a["NIS/NISN"] || a["NIS"] || a["nis"] || "").toString().trim();
-                return r !== nis;
+                let rNis = String(a["NIS/NISN"] || a["NIS"] || a["nis"] || "").trim();
+                let rNama = String(a["NAMA LENGKAP"] || a["Nama_Lengkap"] || a["nama"] || "").trim();
+                if (nis !== "-" && nis !== "") {
+                    return rNis !== nis;
+                }
+                return rNama.toLowerCase() !== nama.toLowerCase();
             });
             renderAllTables();
 
-            sendDataToSheet({ action: "deleteAnggota", nis });
+            sendDataToSheet({ action: "deleteAnggota", nis: nis, nama_lengkap: nama });
         }
     }
 
@@ -729,7 +745,6 @@
         let cleanNis = inputNis.replace(/\D/g, '');
         if (!cleanNis) cleanNis = "-";
 
-        // Optimistic Local Update (< 0.1 detik)
         const idx = globalRecruitment.findIndex(r => (r.Nama_Pendaftar || r.nama_pendaftar) === nama);
         if (idx !== -1) {
             globalRecruitment[idx].Status_Seleksi = "Diterima";
@@ -761,7 +776,6 @@
         const kelas = document.getElementById("masterKelas").value;
         const jabatan = document.getElementById("masterJabatan").value;
 
-        // Optimistic Local Update (< 0.1 detik)
         globalDataMaster.push({
             "NIS/NISN": nis,
             "NAMA LENGKAP": nama,
@@ -785,7 +799,6 @@
         const pertemuan = document.getElementById("absensiPertemuan").value;
         const keterangan = document.getElementById("absensiStatus").value;
 
-        // Optimistic Local Update (< 0.1 detik)
         globalAbsensi.unshift({
             TimeStamp: new Date().toISOString(),
             NIS: nis,
@@ -907,8 +920,7 @@
                 headers: { "Content-Type": "text/plain" },
                 body: JSON.stringify(payload)
             });
-            // Auto Sync background setelah 1 detik
-            setTimeout(() => { loadData(); }, 1000);
+            setTimeout(() => { loadData(); }, 1200);
         } catch (err) { 
             console.error("Gagal terhubung ke server Google Sheets.", err); 
         }
