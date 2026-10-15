@@ -230,40 +230,61 @@
         .btn-download { background: linear-gradient(45deg, #e67e22, #f39c12); color: #fff; }
         .btn-edit { background: #f39c12; color: #fff; padding: 5px 10px; font-size: 0.85rem; }
         .btn-delete { background: #e74c3c; color: #fff; padding: 5px 10px; font-size: 0.85rem; }
+        .btn-danger-all { background: linear-gradient(45deg, #c0392b, #e74c3c); color: #fff; border: 1px solid #ff6b6b; }
         .btn:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
 
         .file-input-wrapper { position: relative; overflow: hidden; display: inline-block; }
         .file-input-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; }
 
+        /* MODAL STYLES */
         .modal {
             display: none;
             position: fixed;
-            z-index: 999;
+            z-index: 9999;
             left: 0;
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(5px);
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(6px);
             justify-content: center;
             align-items: center;
         }
 
         .modal-content {
             background: #32000a;
-            border: 1px solid #ffd700;
+            border: 2px solid #ffd700;
             padding: 25px;
-            border-radius: 12px;
+            border-radius: 16px;
             width: 90%;
             max-width: 450px;
-            box-shadow: 0 5px 25px rgba(0,0,0,0.8);
+            box-shadow: 0 10px 35px rgba(0,0,0,0.9);
+            text-align: center;
+            animation: modalPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes modalPop {
+            0% { transform: scale(0.7); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
         }
 
         .modal-content h3 {
             color: #ffd700;
-            margin-bottom: 15px;
-            text-align: center;
-            font-size: 1.6rem;
+            margin-bottom: 12px;
+            font-size: 1.7rem;
+        }
+
+        .modal-content p {
+            color: #ffcc66;
+            font-size: 1.05rem;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
         }
 
         @media (max-width: 600px) {
@@ -300,6 +321,7 @@
         <button class="tab-btn" onclick="switchTab('tab-recruitment', this)"><i class="fas fa-user-plus"></i> OPEN RECRUITMENT</button>
     </div>
 
+    <!-- TAB 1: DATA MASTER ANGGOTA -->
     <div id="tab-anggota" class="card tab-content active">
         <h2>DAFTAR ANGGOTA PASKIBRA (DATA MASTER)</h2>
         
@@ -327,13 +349,17 @@
 
         <div class="action-box">
             <span><strong>Terkoneksi dengan Sheet DATA MASTER ANGGOTA</strong></span>
-            <button class="btn btn-download" onclick="downloadExcelDenganKop('anggota')"><i class="fas fa-file-download"></i> DOWNLOAD EXCEL ANGGOTA</button>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <button class="btn btn-download" onclick="downloadExcelDenganKop('anggota')"><i class="fas fa-file-download"></i> DOWNLOAD EXCEL ANGGOTA</button>
+                <button class="btn btn-danger-all" onclick="confirmClearAll('anggota')"><i class="fas fa-trash-restore"></i> HAPUS SEMUA DATA ANGGOTA</button>
+            </div>
         </div>
 
         <div class="table-wrapper">
             <table>
                 <thead>
                     <tr>
+                        <th style="width:50px;">NO.</th>
                         <th>NIS / NISN</th>
                         <th>NAMA LENGKAP</th>
                         <th>KELAS</th>
@@ -342,12 +368,13 @@
                     </tr>
                 </thead>
                 <tbody id="tableAnggota">
-                    <tr><td colspan="5" style="text-align:center;"><i class="fas fa-spinner fa-spin"></i> Memuat data master anggota...</td></tr>
+                    <tr><td colspan="6" style="text-align:center;"><i class="fas fa-spinner fa-spin"></i> Memuat data master anggota...</td></tr>
                 </tbody>
             </table>
         </div>
     </div>
 
+    <!-- TAB 2: ABSENSI LATIHAN RUTIN -->
     <div id="tab-absensi" class="card tab-content">
         <h2>INPUT ABSENSI LATIHAN RUTIN</h2>
         <form id="formAbsensi" onsubmit="submitAbsensi(event)">
@@ -390,13 +417,17 @@
                     <option value="semua">Semua Riwayat Absensi</option>
                 </select>
             </div>
-            <button class="btn btn-download" onclick="downloadExcelDenganKop('absensi')"><i class="fas fa-file-download"></i> DOWNLOAD REKAP EXCEL</button>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <button class="btn btn-download" onclick="downloadExcelDenganKop('absensi')"><i class="fas fa-file-download"></i> DOWNLOAD REKAP EXCEL</button>
+                <button class="btn btn-danger-all" onclick="confirmClearAll('absensi')"><i class="fas fa-trash-restore"></i> HAPUS SEMUA REKAP ABSENSI</button>
+            </div>
         </div>
 
         <div class="table-wrapper">
             <table>
                 <thead>
                     <tr>
+                        <th style="width:50px;">NO.</th>
                         <th>Tanggal</th>
                         <th>NIS / NISN</th>
                         <th>Nama Lengkap</th>
@@ -405,12 +436,13 @@
                     </tr>
                 </thead>
                 <tbody id="tablePreviewAbsensi">
-                    <tr><td colspan="5" style="text-align:center;"><i class="fas fa-spinner fa-spin"></i> Memuat preview rekap absensi...</td></tr>
+                    <tr><td colspan="6" style="text-align:center;"><i class="fas fa-spinner fa-spin"></i> Memuat preview rekap absensi...</td></tr>
                 </tbody>
             </table>
         </div>
     </div>
 
+    <!-- TAB 3: OPEN RECRUITMENT -->
     <div id="tab-recruitment" class="card tab-content">
         <h2>PENDAFTAR CALON ANGGOTA PASKIBRA BARU (OR)</h2>
 
@@ -422,13 +454,17 @@
                     <input type="file" accept=".xlsx, .xls, .csv" onchange="importExcelOR(event)">
                 </div>
             </div>
-            <button class="btn btn-download" onclick="downloadExcelDenganKop('recruitment')"><i class="fas fa-file-download"></i> DOWNLOAD DATA OR</button>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <button class="btn btn-download" onclick="downloadExcelDenganKop('recruitment')"><i class="fas fa-file-download"></i> DOWNLOAD DATA OR</button>
+                <button class="btn btn-danger-all" onclick="confirmClearAll('recruitment')"><i class="fas fa-trash-restore"></i> HAPUS SEMUA DATA OR</button>
+            </div>
         </div>
 
         <div class="table-wrapper">
             <table>
                 <thead>
                     <tr>
+                        <th style="width:50px;">NO.</th>
                         <th>Tanggal</th>
                         <th>Nama Pendaftar</th>
                         <th>Alumni SMP/MTS</th>
@@ -438,13 +474,14 @@
                     </tr>
                 </thead>
                 <tbody id="tableOR">
-                    <tr><td colspan="6" style="text-align:center;"><i class="fas fa-spinner fa-spin"></i> Memuat data pendaftar...</td></tr>
+                    <tr><td colspan="7" style="text-align:center;"><i class="fas fa-spinner fa-spin"></i> Memuat data pendaftar...</td></tr>
                 </tbody>
             </table>
         </div>
     </div>
 </div>
 
+<!-- MODAL EDIT DATA -->
 <div id="editModal" class="modal">
     <div class="modal-content">
         <h3><i class="fas fa-user-edit"></i> EDIT DATA ANGGOTA</h3>
@@ -452,26 +489,38 @@
             <input type="hidden" id="editOldNis">
             <input type="hidden" id="editOldNama">
             <div class="form-group">
-                <label>NIS / NISN (Boleh Angka / -)</label>
+                <label style="text-align:left;">NIS / NISN (Boleh Angka / -)</label>
                 <input type="text" id="editNis">
             </div>
             <div class="form-group">
-                <label>NAMA LENGKAP</label>
+                <label style="text-align:left;">NAMA LENGKAP</label>
                 <input type="text" id="editNama" required>
             </div>
             <div class="form-group">
-                <label>KELAS</label>
+                <label style="text-align:left;">KELAS</label>
                 <input type="text" id="editKelas" required>
             </div>
             <div class="form-group">
-                <label>JABATAN</label>
+                <label style="text-align:left;">JABATAN</label>
                 <input type="text" id="editJabatan" required>
             </div>
-            <div style="display: flex; gap: 10px; margin-top: 15px;">
+            <div class="modal-actions" style="margin-top:20px;">
                 <button type="submit" class="btn btn-primary" style="flex: 1;">SIMPAN</button>
-                <button type="button" class="btn btn-delete" style="flex: 1;" onclick="closeModal()">BATAL</button>
+                <button type="button" class="btn btn-delete" style="flex: 1;" onclick="closeModal('editModal')">BATAL</button>
             </div>
         </form>
+    </div>
+</div>
+
+<!-- CUSTOM DIALOG NOTIFIKASI & KONFIRMASI (CENTERED) -->
+<div id="customDialogModal" class="modal">
+    <div class="modal-content">
+        <h3 id="dialogTitle"><i class="fas fa-info-circle"></i> KONFIRMASI</h3>
+        <p id="dialogMessage">Apakah Anda yakin ingin melanjutkan tindakan ini?</p>
+        <div class="modal-actions" id="dialogActions">
+            <button class="btn btn-primary" id="btnDialogConfirm">YA, LANJUTKAN</button>
+            <button class="btn btn-delete" onclick="closeModal('customDialogModal')">BATAL</button>
+        </div>
     </div>
 </div>
 
@@ -481,6 +530,32 @@
     let globalDataMaster = [];
     let globalAbsensi = [];
     let globalRecruitment = [];
+
+    // FUNGSI NOTIFIKASI & CONFIRM CUSTOM DI TENGAH LAYAR
+    function showCustomAlert(title, message, iconClass = "fa-check-circle") {
+        document.getElementById("dialogTitle").innerHTML = `<i class="fas ${iconClass}"></i> ${title}`;
+        document.getElementById("dialogMessage").innerText = message;
+        document.getElementById("dialogActions").innerHTML = `<button class="btn btn-primary" onclick="closeModal('customDialogModal')" style="width:100%;">OK</button>`;
+        document.getElementById("customDialogModal").style.display = "flex";
+    }
+
+    function showCustomConfirm(title, message, onConfirmCallback) {
+        document.getElementById("dialogTitle").innerHTML = `<i class="fas fa-exclamation-triangle" style="color:#f39c12;"></i> ${title}`;
+        document.getElementById("dialogMessage").innerText = message;
+        document.getElementById("dialogActions").innerHTML = `
+            <button class="btn btn-primary" id="btnConfirmYes" style="flex:1;">YA, PROSES</button>
+            <button class="btn btn-delete" onclick="closeModal('customDialogModal')" style="flex:1;">BATAL</button>
+        `;
+        document.getElementById("btnConfirmYes").onclick = function() {
+            closeModal('customDialogModal');
+            onConfirmCallback();
+        };
+        document.getElementById("customDialogModal").style.display = "flex";
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = "none";
+    }
 
     function switchTab(tabId, btnElement) {
         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -515,13 +590,13 @@
 
     async function loadData() {
         if (globalDataMaster.length === 0) {
-            document.getElementById("tableAnggota").innerHTML = "<tr><td colspan='5' style='text-align:center;'><i class='fas fa-spinner fa-spin'></i> Memuat data master anggota...</td></tr>";
+            document.getElementById("tableAnggota").innerHTML = "<tr><td colspan='6' style='text-align:center;'><i class='fas fa-spinner fa-spin'></i> Memuat data master anggota...</td></tr>";
         }
         if (globalAbsensi.length === 0) {
-            document.getElementById("tablePreviewAbsensi").innerHTML = "<tr><td colspan='5' style='text-align:center;'><i class='fas fa-spinner fa-spin'></i> Memuat rekap absensi...</td></tr>";
+            document.getElementById("tablePreviewAbsensi").innerHTML = "<tr><td colspan='6' style='text-align:center;'><i class='fas fa-spinner fa-spin'></i> Memuat rekap absensi...</td></tr>";
         }
         if (globalRecruitment.length === 0) {
-            document.getElementById("tableOR").innerHTML = "<tr><td colspan='6' style='text-align:center;'><i class='fas fa-spinner fa-spin'></i> Memuat data pendaftar...</td></tr>";
+            document.getElementById("tableOR").innerHTML = "<tr><td colspan='7' style='text-align:center;'><i class='fas fa-spinner fa-spin'></i> Memuat data pendaftar...</td></tr>";
         }
 
         try {
@@ -535,7 +610,7 @@
             renderAllTables();
         } catch (err) {
             console.error("Gagal memuat data:", err);
-            document.getElementById("tableAnggota").innerHTML = "<tr><td colspan='5' style='text-align:center; color:#ff6b6b;'>Gagal memuat data. Periksa koneksi Web App Apps Script Anda.</td></tr>";
+            document.getElementById("tableAnggota").innerHTML = "<tr><td colspan='6' style='text-align:center; color:#ff6b6b;'>Gagal memuat data. Periksa koneksi Web App Apps Script Anda.</td></tr>";
         }
     }
 
@@ -550,7 +625,7 @@
         const tbody = document.getElementById("tableAnggota");
         tbody.innerHTML = "";
         if (globalDataMaster.length > 0) {
-            globalDataMaster.forEach(a => {
+            globalDataMaster.forEach((a, index) => {
                 let rawNis = a["NIS/NISN"] || a["NIS"] || a["nis"] || "-";
                 const nis = rawNis.toString().trim() || "-";
                 const nama = a["NAMA LENGKAP"] || a["Nama_Lengkap"] || a["nama"] || "-";
@@ -559,6 +634,7 @@
 
                 tbody.innerHTML += `
                     <tr>
+                        <td><strong>${index + 1}</strong></td>
                         <td><strong>${nis}</strong></td>
                         <td>${nama}</td>
                         <td>${kelas}</td>
@@ -570,7 +646,7 @@
                     </tr>`;
             });
         } else {
-            tbody.innerHTML = "<tr><td colspan='5' style='text-align:center;'>Belum ada data di DATA MASTER ANGGOTA.</td></tr>";
+            tbody.innerHTML = "<tr><td colspan='6' style='text-align:center;'>Belum ada data di DATA MASTER ANGGOTA.</td></tr>";
         }
     }
 
@@ -584,10 +660,6 @@
         document.getElementById("editModal").style.display = "flex";
     }
 
-    function closeModal() {
-        document.getElementById("editModal").style.display = "none";
-    }
-
     async function saveEditAnggota(e) {
         e.preventDefault();
         const oldNis = document.getElementById("editOldNis").value;
@@ -598,7 +670,7 @@
         const kelas = document.getElementById("editKelas").value;
         const jabatan = document.getElementById("editJabatan").value;
 
-        closeModal();
+        closeModal('editModal');
 
         // Optimistic Local Update (< 0.1s)
         const idx = globalDataMaster.findIndex(a => {
@@ -615,40 +687,41 @@
             renderAllTables();
         }
 
-        sendDataToSheet({ 
-            action: "updateAnggota", 
-            oldNis: oldNis, 
-            oldNama: oldNama, 
-            nis: nis, 
-            nama_lengkap: nama, 
-            kelas: kelas, 
-            jabatan: jabatan 
-        });
+        showCustomAlert("BERHASIL", "Data anggota berhasil diperbarui!");
+        sendDataToSheet({ action: "updateAnggota", oldNis, oldNama, nis, nama_lengkap: nama, kelas, jabatan });
     }
 
-    async function deleteAnggota(nis, nama) {
-        if (confirm(`Apakah Anda yakin ingin menghapus ${nama} [NIS: ${nis}] dari Data Master dan Open Recruitment?`)) {
-            // 1. Hapus dari tampilan lokal Data Master (< 0.1s)
+    function deleteAnggota(nis, nama) {
+        showCustomConfirm("HAPUS ANGGOTA", `Apakah Anda yakin ingin menghapus ${nama} [NIS: ${nis}] dari Data Master dan Open Recruitment?`, () => {
             globalDataMaster = globalDataMaster.filter(a => {
                 let rNis = String(a["NIS/NISN"] || a["NIS"] || a["nis"] || "").trim();
                 let rNama = String(a["NAMA LENGKAP"] || a["Nama_Lengkap"] || a["nama"] || "").trim();
-                if (nis !== "-" && nis !== "") {
-                    return rNis !== nis;
-                }
+                if (nis !== "-" && nis !== "") return rNis !== nis;
                 return rNama.toLowerCase() !== nama.toLowerCase();
             });
 
-            // 2. OTOMATIS HAPUS dari tampilan lokal Open Recruitment (< 0.1s)
             globalRecruitment = globalRecruitment.filter(r => {
                 let rNama = String(r.Nama_Pendaftar || r.nama_pendaftar || "").trim();
                 return rNama.toLowerCase() !== nama.toLowerCase();
             });
 
             renderAllTables();
+            showCustomAlert("TERHAPUS", "Data anggota berhasil dihapus!");
+            sendDataToSheet({ action: "deleteAnggota", nis, nama_lengkap: nama });
+        });
+    }
 
-            // 3. Kirim perintah hapus ke Google Sheets
-            sendDataToSheet({ action: "deleteAnggota", nis: nis, nama_lengkap: nama });
-        }
+    function confirmClearAll(section) {
+        let sectionName = section === 'anggota' ? 'DATA MASTER ANGGOTA' : (section === 'absensi' ? 'REKAP ABSENSI' : 'DATA OPEN RECRUITMENT');
+        showCustomConfirm("HAPUS SEMUA DATA", `PERINGATAN! Seluruh isi ${sectionName} akan dihapus secara permanen. Lanjutkan?`, () => {
+            if (section === 'anggota') globalDataMaster = [];
+            else if (section === 'absensi') globalAbsensi = [];
+            else if (section === 'recruitment') globalRecruitment = [];
+
+            renderAllTables();
+            showCustomAlert("PEMBERSIHAN DATA", `Seluruh isi ${sectionName} telah dihapus!`);
+            sendDataToSheet({ action: "clearAll", section: section });
+        });
     }
 
     function populateSelectAnggota() {
@@ -679,7 +752,7 @@
         tbody.innerHTML = "";
 
         if (!globalAbsensi.length) {
-            tbody.innerHTML = "<tr><td colspan='5' style='text-align:center;'>Belum ada data absensi.</td></tr>";
+            tbody.innerHTML = "<tr><td colspan='6' style='text-align:center;'>Belum ada data absensi.</td></tr>";
             return;
         }
 
@@ -703,11 +776,12 @@
             else pertemuanGroup["Lainnya"].push(item);
         });
 
+        let globalIndex = 1;
         Object.keys(pertemuanGroup).forEach(groupTitle => {
             if (pertemuanGroup[groupTitle].length > 0) {
                 tbody.innerHTML += `
                     <tr class="divider-pertemuan">
-                        <td colspan="5"><i class="fas fa-bookmark"></i> PEMBATAS: ${groupTitle.toUpperCase()}</td>
+                        <td colspan="6"><i class="fas fa-bookmark"></i> PEMBATAS: ${groupTitle.toUpperCase()}</td>
                     </tr>`;
 
                 pertemuanGroup[groupTitle].forEach(row => {
@@ -726,6 +800,7 @@
                     const nis = rawNis.toString().trim() || "-";
                     tbody.innerHTML += `
                         <tr>
+                            <td><strong>${globalIndex++}</strong></td>
                             <td>${formattedDate}</td>
                             <td><strong>${nis}</strong></td>
                             <td>${row.Nama_Lengkap || row.nama_lengkap || row.Nama || '-'}</td>
@@ -741,14 +816,13 @@
         const tbody = document.getElementById("tableOR");
         tbody.innerHTML = "";
         if (globalRecruitment.length > 0) {
-            globalRecruitment.forEach(r => {
+            globalRecruitment.forEach((r, index) => {
                 const status = r.Status_Seleksi || r.status_seleksi || 'Pending';
                 const isAccepted = status === 'Diterima' || status === 'Approved';
                 const nama = r.Nama_Pendaftar || r.nama_pendaftar || '-';
                 const kelas = r.Kelas || r.kelas || '-';
                 const alumni = r["Alumni SMP/MTS"] || r.alumni_smp || '-';
                 
-                // Format tanggal tangguh (Mencegah Invalid Date)
                 const rawTs = r.TimeStamp || r.Timestamp || r.timestamp || r.Tanggal || r.tanggal || "";
                 let formattedDate = '-';
                 
@@ -763,6 +837,7 @@
 
                 tbody.innerHTML += `
                     <tr>
+                        <td><strong>${index + 1}</strong></td>
                         <td>${formattedDate}</td>
                         <td>${nama}</td>
                         <td>${alumni}</td>
@@ -774,7 +849,7 @@
                     </tr>`;
             });
         } else {
-            tbody.innerHTML = "<tr><td colspan='6' style='text-align:center;'>Belum ada data pendaftar calon Paskibra.</td></tr>";
+            tbody.innerHTML = "<tr><td colspan='7' style='text-align:center;'>Belum ada data pendaftar calon Paskibra.</td></tr>";
         }
     }
 
@@ -798,6 +873,7 @@
         });
 
         renderAllTables();
+        showCustomAlert("BERHASIL", `Pendaftar ${nama} telah di-approve dan masuk ke Data Master Anggota!`);
 
         sendDataToSheet({
             action: "updateStatusRecruitment",
@@ -824,6 +900,7 @@
         });
         renderAllTables();
 
+        showCustomAlert("BERHASIL", "Anggota baru berhasil ditambahkan!");
         e.target.reset();
         sendDataToSheet({ action: "addAnggota", nis, nama_lengkap: nama, kelas, jabatan });
     }
@@ -831,7 +908,7 @@
     async function submitAbsensi(e) {
         e.preventDefault();
         const select = document.getElementById("absensiSelectNama");
-        if (!select.value) return alert("Pilih anggota terlebih dahulu!");
+        if (!select.value) return showCustomAlert("PERINGATAN", "Pilih anggota terlebih dahulu!", "fa-exclamation-circle");
 
         const nama = select.value;
         const rawNis = select.options[select.selectedIndex].getAttribute("data-nis");
@@ -848,6 +925,7 @@
         });
         renderPreviewAbsensi();
 
+        showCustomAlert("BERHASIL", `Absensi ${nama} berhasil disimpan!`);
         select.value = "";
         sendDataToSheet({ action: "addAbsensi", nis, nama_lengkap: nama, pertemuan, keterangan });
     }
@@ -873,9 +951,9 @@
                         alasan_bergabung: row.Alasan_Bergabung || row.Alasan || row.alasan || ""
                     });
                 }
-                alert("Berhasil mengunggah data Excel OR!");
+                showCustomAlert("UPLOAD SUKSES", "Berhasil mengunggah data Excel OR!");
                 loadData();
-            } catch (err) { alert("Gagal memproses file Excel OR."); }
+            } catch (err) { showCustomAlert("ERROR", "Gagal memproses file Excel OR.", "fa-times-circle"); }
         };
         reader.readAsArrayBuffer(file);
     }
@@ -900,7 +978,7 @@
             filename = "Data_Pendaftar_OR_Paskibra.xls";
         }
 
-        if (!dataToExport || !dataToExport.length) return alert("Tidak ada data untuk didownload!");
+        if (!dataToExport || !dataToExport.length) return showCustomAlert("INFORMASI", "Tidak ada data untuk didownload!", "fa-info-circle");
 
         let htmlTemplate = `
             <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
@@ -928,14 +1006,14 @@
                 </table>
                 <br>
                 <table class="data-table">
-                    <thead><tr>`;
+                    <thead><tr><th>NO.</th>`;
 
         const headers = Object.keys(dataToExport[0]);
         headers.forEach(h => { htmlTemplate += `<th>${h}</th>`; });
         htmlTemplate += `</tr></thead><tbody>`;
 
-        dataToExport.forEach(row => {
-            htmlTemplate += `<tr>`;
+        dataToExport.forEach((row, idx) => {
+            htmlTemplate += `<tr><td>${idx + 1}</td>`;
             headers.forEach(h => { htmlTemplate += `<td>${row[h] !== undefined ? row[h] : ''}</td>`; });
             htmlTemplate += `</tr>`;
         });
