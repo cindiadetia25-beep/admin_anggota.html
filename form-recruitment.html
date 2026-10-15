@@ -169,6 +169,10 @@
 
     async function submitFormPublic(e) {
         e.preventDefault();
+        const btn = e.target.querySelector("button[type='submit']");
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> MENGIRIM...';
+
         const nama = document.getElementById("publicNama").value;
         const ttl = document.getElementById("publicTtl").value;
         const nohp = document.getElementById("publicNoHp").value;
@@ -179,6 +183,8 @@
         try {
             await fetch(SCRIPT_URL, {
                 method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "text/plain" },
                 body: JSON.stringify({
                     action: "submitOR",
                     nama_pendaftar: nama,
@@ -189,10 +195,14 @@
                     alasan_bergabung: alasan
                 })
             });
+
             alert("Selamat! Pendaftaran Anda berhasil dikirim.");
             e.target.reset();
         } catch (err) {
             alert("Gagal mengirim data pendaftaran. Periksa koneksi internet Anda.");
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-paper-plane"></i> KIRIM PENDAFTARAN';
         }
     }
 </script>
