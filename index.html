@@ -697,13 +697,29 @@
     }
 
     async function approveOR(nama, kelas) {
-        let inputNis = prompt(`Masukkan NIS / NISN untuk anggota ${nama} (Hanya Angka):`);
-        if (inputNis !== null) {
-            let cleanNis = inputNis.replace(/\D/g, '');
-            if (!cleanNis) {
-                alert("NIS/NISN wajib diisi angka!");
-                return;
-            }
+    let inputNis = prompt(`Masukkan NIS / NISN untuk anggota ${nama} (Opsional, boleh dikosongkan):`);
+    
+    // Jika admin menekan tombol "Batal" pada prompt
+    if (inputNis === null) return;
+
+    // Bersihkan masukan dari karakter selain angka
+    let cleanNis = inputNis.replace(/\D/g, '');
+    
+    // Jika dikosongkan, beri nilai default "-"
+    if (!cleanNis) {
+        cleanNis = "-";
+    }
+
+    await sendDataToSheet({
+        action: "updateStatusRecruitment",
+        nama_pendaftar: nama,
+        kelas: kelas,
+        nis: cleanNis,
+        status_seleksi: "Diterima"
+    });
+
+    alert(`Pendaftar ${nama} berhasil diterima! NIS/NISN diset ke: ${cleanNis}`);
+}
 
             await sendDataToSheet({
                 action: "updateStatusRecruitment",
