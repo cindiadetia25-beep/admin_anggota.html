@@ -28,7 +28,7 @@
         }
 
         .container { 
-            max-width: 1050px; 
+            max-width: 1100px; 
             margin: 0 auto; 
             width: 100%;
         }
@@ -70,6 +70,14 @@
         
         header p { color: #ffcc66; font-size: 1.1rem; margin-bottom: 12px; }
 
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
         .clock-box {
             display: inline-flex;
             align-items: center;
@@ -84,19 +92,26 @@
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
         }
 
-        .logo-uploader-btn {
-            margin-top: 10px;
-            background: rgba(255,215,0,0.1);
-            border: 1px dashed #ffd700;
-            color: #ffd700;
-            padding: 5px 12px;
-            border-radius: 6px;
-            font-size: 0.9rem;
+        .btn-refresh-header {
+            background: linear-gradient(45deg, #ffd700, #ffaa00);
+            color: #4a000b;
+            border: none;
+            padding: 7px 16px;
+            border-radius: 20px;
+            font-size: 1rem;
+            font-weight: bold;
             cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
             transition: 0.3s;
         }
 
-        .logo-uploader-btn:hover { background: rgba(255,215,0,0.3); }
+        .btn-refresh-header:hover {
+            transform: translateY(-2px);
+            opacity: 0.95;
+        }
 
         .nav-tabs { 
             display: flex; 
@@ -166,7 +181,7 @@
             -webkit-overflow-scrolling: touch;
         }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; min-width: 600px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; min-width: 650px; }
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 0.95rem; word-break: break-word; }
         th { background: rgba(255, 215, 0, 0.2); color: #ffd700; font-size: 1.1rem; }
 
@@ -215,10 +230,44 @@
         .btn-approve { background: linear-gradient(45deg, #27ae60, #2ecc71); color: #fff; padding: 6px 12px; font-size: 0.9rem; }
         .btn-excel { background: linear-gradient(45deg, #27ae60, #2ecc71); color: #fff; }
         .btn-download { background: linear-gradient(45deg, #e67e22, #f39c12); color: #fff; }
+        .btn-edit { background: #f39c12; color: #fff; padding: 5px 10px; font-size: 0.85rem; }
+        .btn-delete { background: #e74c3c; color: #fff; padding: 5px 10px; font-size: 0.85rem; }
         .btn:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
 
         .file-input-wrapper { position: relative; overflow: hidden; display: inline-block; }
         .file-input-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; }
+
+        /* MODAL POPUP EDIT */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: #32000a;
+            border: 1px solid #ffd700;
+            padding: 25px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 450px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.8);
+        }
+
+        .modal-content h3 {
+            color: #ffd700;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 1.6rem;
+        }
 
         @media (max-width: 600px) {
             header h1 { font-size: 1.8rem; }
@@ -239,13 +288,13 @@
         </div>
         <p>Sistem Informasi Anggota, Presensi Latihan Rutin, dan Open Recruitment</p>
         
-        <div class="clock-box">
-            <i class="fas fa-clock"></i>
-            <span id="liveClock">--:--:-- WIB</span>
+        <div class="header-controls">
+            <div class="clock-box">
+                <i class="fas fa-clock"></i>
+                <span id="liveClock">--:--:-- WIB</span>
+            </div>
+            <button class="btn-refresh-header" onclick="loadData()"><i class="fas fa-sync-alt"></i> REFRESH DATA</button>
         </div>
-
-        <button class="logo-uploader-btn" onclick="triggerLogoUpload()"><i class="fas fa-image"></i> GANTI LOGO PNG PERMANEN</button>
-        <input type="file" id="logoInput" accept="image/png" style="display: none;" onchange="handleLogoUpload(event)">
     </header>
 
     <!-- NAVIGASI TAB -->
@@ -262,8 +311,8 @@
         <form onsubmit="submitAnggotaMasterManual(event)" style="margin-bottom: 20px;">
             <div class="form-grid">
                 <div class="form-group">
-                    <label>NIS / NISN</label>
-                    <input type="text" id="masterNis" placeholder="Contoh: 23241001" required>
+                    <label>NIS / NISN (Hanya Angka)</label>
+                    <input type="text" id="masterNis" placeholder="Contoh: 23241001" required oninput="this.value = this.value.replace(/\D/g, '')">
                 </div>
                 <div class="form-group">
                     <label>NAMA LENGKAP</label>
@@ -294,10 +343,11 @@
                         <th>NAMA LENGKAP</th>
                         <th>KELAS</th>
                         <th>JABATAN</th>
+                        <th>AKSI</th>
                     </tr>
                 </thead>
                 <tbody id="tableAnggota">
-                    <tr><td colspan="4" style="text-align:center;">Memuat data master anggota...</td></tr>
+                    <tr><td colspan="5" style="text-align:center;">Memuat data master anggota...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -402,15 +452,43 @@
     </div>
 </div>
 
+<!-- MODAL EDIT ANGGOTA -->
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <h3><i class="fas fa-user-edit"></i> EDIT DATA ANGGOTA</h3>
+        <form onsubmit="saveEditAnggota(event)">
+            <input type="hidden" id="editOldNis">
+            <div class="form-group">
+                <label>NIS / NISN (Hanya Angka)</label>
+                <input type="text" id="editNis" required oninput="this.value = this.value.replace(/\D/g, '')">
+            </div>
+            <div class="form-group">
+                <label>NAMA LENGKAP</label>
+                <input type="text" id="editNama" required>
+            </div>
+            <div class="form-group">
+                <label>KELAS</label>
+                <input type="text" id="editKelas" required>
+            </div>
+            <div class="form-group">
+                <label>JABATAN</label>
+                <input type="text" id="editJabatan" required>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button type="submit" class="btn btn-primary" style="flex: 1;">SIMPAN</button>
+                <button type="button" class="btn btn-delete" style="flex: 1;" onclick="closeModal()">BATAL</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxzQmY4XGvBLnoeHRo6W4gMFXQAbNESiv8ZLN0fkGIgtMxLA_riQmBRFp-hyCLXDG6D/exec";
     
     let globalDataMaster = [];
     let globalAbsensi = [];
     let globalRecruitment = [];
-    let currentLogoBase64 = "";
 
-    // 1. PERBAIKAN SWITCH TAB (Aman & Bebas Crash)
     function switchTab(tabId, btnElement) {
         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
@@ -421,7 +499,6 @@
         }
     }
 
-    // 2. PERBAIKAN JAM DIGITAL REAL-TIME
     function updateLiveClock() {
         try {
             const now = new Date();
@@ -436,27 +513,6 @@
     setInterval(updateLiveClock, 1000);
     updateLiveClock();
 
-    function triggerLogoUpload() {
-        document.getElementById("logoInput").click();
-    }
-
-    function handleLogoUpload(event) {
-        const file = event.target.files[0];
-        if (file && file.type === "image/png") {
-            const reader = new FileReader();
-            reader.onload = async function(e) {
-                currentLogoBase64 = e.target.result;
-                document.getElementById("dashboardLogo").src = currentLogoBase64;
-                await sendDataToSheet({ action: "saveLogo", logoBase64: currentLogoBase64 });
-                alert("Logo PNG berhasil disimpan secara permanen!");
-            };
-            reader.readAsDataURL(file);
-        } else {
-            alert("Harap pilih file berformat PNG transparan.");
-        }
-    }
-
-    // 3. FUNGSI TARIK DATA DARI APPS SCRIPT SPREADSHEET
     async function loadData() {
         try {
             const res = await fetch(SCRIPT_URL);
@@ -466,18 +522,13 @@
             globalAbsensi = data.absensi || [];
             globalRecruitment = data.recruitment || [];
 
-            if (data.logoBase64) {
-                currentLogoBase64 = data.logoBase64;
-                document.getElementById("dashboardLogo").src = currentLogoBase64;
-            }
-
             renderTableMaster();
             populateSelectAnggota();
             renderPreviewAbsensi();
             renderTableOR();
         } catch (err) {
             console.error("Gagal memuat data dari Spreadsheet:", err);
-            document.getElementById("tableAnggota").innerHTML = "<tr><td colspan='4' style='text-align:center; color:#ff6b6b;'>Gagal memuat data. Periksa koneksi Web App Apps Script Anda.</td></tr>";
+            document.getElementById("tableAnggota").innerHTML = "<tr><td colspan='5' style='text-align:center; color:#ff6b6b;'>Gagal memuat data. Periksa koneksi Web App Apps Script Anda.</td></tr>";
         }
     }
 
@@ -486,7 +537,9 @@
         tbody.innerHTML = "";
         if (globalDataMaster.length > 0) {
             globalDataMaster.forEach(a => {
-                const nis = a["NIS/NISN"] || a["NIS"] || a["nis"] || "-";
+                let rawNis = a["NIS/NISN"] || a["NIS"] || a["nis"] || "-";
+                // Bersihkan NIS agar hanya berisi angka
+                const nis = rawNis.toString().replace(/\D/g, '') || rawNis;
                 const nama = a["NAMA LENGKAP"] || a["Nama_Lengkap"] || a["nama"] || "-";
                 const kelas = a["KELAS"] || a["Kelas"] || a["kelas"] || "-";
                 const jabatan = a["JABATAN"] || a["Jabatan"] || "Anggota";
@@ -497,10 +550,48 @@
                         <td>${nama}</td>
                         <td>${kelas}</td>
                         <td>${jabatan}</td>
+                        <td>
+                            <button class="btn btn-edit" onclick="openEditModal('${nis}', '${nama}', '${kelas}', '${jabatan}')"><i class="fas fa-edit"></i> Edit</button>
+                            <button class="btn btn-delete" onclick="deleteAnggota('${nis}', '${nama}')"><i class="fas fa-trash-alt"></i> Hapus</button>
+                        </td>
                     </tr>`;
             });
         } else {
-            tbody.innerHTML = "<tr><td colspan='4' style='text-align:center;'>Belum ada data di DATA MASTER ANGGOTA.</td></tr>";
+            tbody.innerHTML = "<tr><td colspan='5' style='text-align:center;'>Belum ada data di DATA MASTER ANGGOTA.</td></tr>";
+        }
+    }
+
+    function openEditModal(nis, nama, kelas, jabatan) {
+        document.getElementById("editOldNis").value = nis;
+        document.getElementById("editNis").value = nis;
+        document.getElementById("editNama").value = nama;
+        document.getElementById("editKelas").value = kelas;
+        document.getElementById("editJabatan").value = jabatan;
+        document.getElementById("editModal").style.display = "flex";
+    }
+
+    function closeModal() {
+        document.getElementById("editModal").style.display = "none";
+    }
+
+    async function saveEditAnggota(e) {
+        e.preventDefault();
+        const oldNis = document.getElementById("editOldNis").value;
+        const rawNis = document.getElementById("editNis").value;
+        const nis = rawNis.replace(/\D/g, ''); // Pastikan hanya angka
+        const nama = document.getElementById("editNama").value;
+        const kelas = document.getElementById("editKelas").value;
+        const jabatan = document.getElementById("editJabatan").value;
+
+        closeModal();
+        await sendDataToSheet({ action: "updateAnggota", oldNis, nis, nama_lengkap: nama, kelas, jabatan });
+        alert("Data anggota berhasil diperbarui!");
+    }
+
+    async function deleteAnggota(nis, nama) {
+        if (confirm(`Apakah Anda yakin ingin menghapus ${nama} [NIS: ${nis}] dari Data Master?`)) {
+            await sendDataToSheet({ action: "deleteAnggota", nis });
+            alert(`Anggota ${nama} telah dihapus!`);
         }
     }
 
@@ -508,7 +599,8 @@
         const select = document.getElementById("absensiSelectNama");
         select.innerHTML = '<option value="">-- PILIH ANGGOTA BERURUTAN --</option>';
         globalDataMaster.forEach(a => {
-            const nis = a["NIS/NISN"] || a["NIS"] || a["nis"] || "-";
+            let rawNis = a["NIS/NISN"] || a["NIS"] || a["nis"] || "-";
+            const nis = rawNis.toString().replace(/\D/g, '') || rawNis;
             const nama = a["NAMA LENGKAP"] || a["Nama_Lengkap"] || a["nama"] || "-";
             const kelas = a["KELAS"] || a["Kelas"] || a["kelas"] || "-";
             select.innerHTML += `<option value="${nama}" data-nis="${nis}">[${nis}] ${nama} - ${kelas}</option>`;
@@ -564,10 +656,12 @@
 
                 pertemuanGroup[groupTitle].forEach(row => {
                     const ts = row.TimeStamp || row.Timestamp;
+                    let rawNis = row.NIS || row.nis || '-';
+                    const nis = rawNis.toString().replace(/\D/g, '') || rawNis;
                     tbody.innerHTML += `
                         <tr>
                             <td>${ts ? new Date(ts).toLocaleDateString('id-ID') : '-'}</td>
-                            <td><strong>${row.NIS || row.nis || '-'}</strong></td>
+                            <td><strong>${nis}</strong></td>
                             <td>${row.Nama_Lengkap || row.nama_lengkap || row.Nama || '-'}</td>
                             <td>${row["Pertemuan Ke -"] || row.Pertemuan || '-'}</td>
                             <td>${row.Keterangan || row.keterangan || 'Hadir'}</td>
@@ -607,20 +701,30 @@
     }
 
     async function approveOR(nama, kelas) {
-        if (confirm(`Setujui pendaftaran ${nama} (${kelas}) dan masukkan ke Data Master Anggota?`)) {
+        let inputNis = prompt(`Masukkan NIS / NISN untuk anggota ${nama} (Hanya Angka):`);
+        if (inputNis !== null) {
+            // Bersihkan teks masukan dari huruf/karakter non-angka
+            let cleanNis = inputNis.replace(/\D/g, '');
+            if (!cleanNis) {
+                alert("NIS/NISN wajib diisi angka!");
+                return;
+            }
+
             await sendDataToSheet({
                 action: "updateStatusRecruitment",
                 nama_pendaftar: nama,
                 kelas: kelas,
+                nis: cleanNis,
                 status_seleksi: "Diterima"
             });
-            alert(`Pendaftar ${nama} berhasil diterima dan dimasukkan ke Data Master!`);
+            alert(`Pendaftar ${nama} berhasil diterima dengan NIS: ${cleanNis} dan dimasukkan ke Data Master!`);
         }
     }
 
     async function submitAnggotaMasterManual(e) {
         e.preventDefault();
-        const nis = document.getElementById("masterNis").value;
+        const rawNis = document.getElementById("masterNis").value;
+        const nis = rawNis.replace(/\D/g, ''); // Pastikan murni angka
         const nama = document.getElementById("masterNama").value;
         const kelas = document.getElementById("masterKelas").value;
         const jabatan = document.getElementById("masterJabatan").value;
@@ -636,7 +740,8 @@
         if (!select.value) return alert("Pilih anggota terlebih dahulu!");
 
         const nama = select.value;
-        const nis = select.options[select.selectedIndex].getAttribute("data-nis");
+        const rawNis = select.options[select.selectedIndex].getAttribute("data-nis");
+        const nis = rawNis.replace(/\D/g, '');
         const pertemuan = document.getElementById("absensiPertemuan").value;
         const keterangan = document.getElementById("absensiStatus").value;
 
@@ -695,8 +800,6 @@
 
         if (!dataToExport || !dataToExport.length) return alert("Tidak ada data untuk didownload!");
 
-        let logoHtml = currentLogoBase64 ? `<img src="${currentLogoBase64}" width="65" height="65" />` : '';
-        
         let htmlTemplate = `
             <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
             <head>
@@ -714,13 +817,11 @@
             <body>
                 <table class="header-table">
                     <tr>
-                        <td width="15%">${logoHtml}</td>
-                        <td width="70%">
+                        <td width="100%">
                             <div class="title">${title}</div>
                             <div class="subtitle">PASKIBRA MAN 6 CIAMIS</div>
                             <div class="subtitle">Dicetak Pada: ${new Date().toLocaleDateString('id-ID')}</div>
                         </td>
-                        <td width="15%"></td>
                     </tr>
                 </table>
                 <br>
@@ -759,7 +860,7 @@
         } catch (err) { alert("Gagal terhubung ke server Google Sheets."); }
     }
 
-    // Panggil Tarik Data Pertama Kali
+    // PANGGIL PERTAMA KALI
     loadData();
 </script>
 
