@@ -10,7 +10,26 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'American Captain', 'Segoe UI', sans-serif; letter-spacing: 1px; }
         body { background: linear-gradient(135deg, #4a000b 0%, #2b0006 50%, #800000 100%); min-height: 100vh; color: #fff; padding: 20px; display: flex; justify-content: center; align-items: center; }
         .card { background: rgba(50, 0, 10, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 16px; padding: 25px; width: 100%; max-width: 500px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
-        h2 { color: #ffd700; text-align: center; margin-bottom: 20px; font-size: 2rem; border-bottom: 2px solid rgba(255, 215, 0, 0.3); padding-bottom: 10px; }
+        
+        .header-logo-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            gap: 10px;
+        }
+
+        .custom-logo {
+            width: 75px;
+            height: 75px;
+            object-fit: contain;
+            transition: transform 0.3s;
+        }
+
+        .custom-logo:hover { transform: scale(1.08); }
+
+        h2 { color: #ffd700; text-align: center; margin-bottom: 20px; font-size: 2rem; border-bottom: 2px solid rgba(255, 215, 0, 0.3); padding-bottom: 10px; line-height: 1.1; }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 5px; color: #ffcc66; font-size: 1rem; }
         .form-group input, .form-group textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(255, 215, 0, 0.3); background: rgba(0, 0, 0, 0.4); color: #fff; font-size: 1rem; }
@@ -21,7 +40,11 @@
 <body>
 
 <div class="card">
-    <h2>FORMULIR OPEN RECRUITMENT PASKIBRA</h2>
+    <div class="header-logo-box">
+        <img class="custom-logo" src="assets/logo-paskibra.png" alt="Logo Paskibra MAN 6 Ciamis">
+        <h2>FORMULIR OPEN RECRUITMENT PASKIBRA</h2>
+    </div>
+    
     <form onsubmit="submitPendaftaran(event)">
         <div class="form-group">
             <label>NAMA LENGKAP</label>
