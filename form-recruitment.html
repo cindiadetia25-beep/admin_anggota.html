@@ -35,6 +35,35 @@
         .form-group input, .form-group textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(255, 215, 0, 0.3); background: rgba(0, 0, 0, 0.4); color: #fff; font-size: 1rem; }
         .btn-submit { width: 100%; padding: 12px; background: linear-gradient(45deg, #ffd700, #ffaa00); color: #4a000b; border: none; border-radius: 8px; font-size: 1.2rem; cursor: pointer; transition: 0.3s; margin-top: 10px; }
         .btn-submit:hover { opacity: 0.9; transform: translateY(-2px); }
+
+        /* MODAL NOTIFIKASI FORM */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(6px);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: #32000a;
+            border: 2px solid #ffd700;
+            padding: 25px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 35px rgba(0,0,0,0.9);
+            text-align: center;
+        }
+
+        .modal-content h3 { color: #ffd700; margin-bottom: 12px; font-size: 1.7rem; }
+        .modal-content p { color: #ffcc66; font-size: 1.05rem; margin-bottom: 20px; line-height: 1.4; }
     </style>
 </head>
 <body>
@@ -74,8 +103,27 @@
     </form>
 </div>
 
+<!-- MODAL NOTIFIKASI CENTERED -->
+<div id="formNotifModal" class="modal">
+    <div class="modal-content">
+        <h3 id="notifTitle"><i class="fas fa-check-circle"></i> BERHASIL</h3>
+        <p id="notifMessage">Pendaftaran berhasil dikirim!</p>
+        <button class="btn-submit" onclick="closeNotifModal()" style="font-size:1rem; padding:8px 16px;">TUTUP</button>
+    </div>
+</div>
+
 <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxzQmY4XGvBLnoeHRo6W4gMFXQAbNESiv8ZLN0fkGIgtMxLA_riQmBRFp-hyCLXDG6D/exec";
+
+    function showFormNotif(title, message, isSuccess = true) {
+        document.getElementById("notifTitle").innerHTML = `<i class="fas ${isSuccess ? 'fa-check-circle' : 'fa-times-circle'}" style="color:${isSuccess ? '#2ecc71' : '#e74c3c'}"></i> ${title}`;
+        document.getElementById("notifMessage").innerText = message;
+        document.getElementById("formNotifModal").style.display = "flex";
+    }
+
+    function closeNotifModal() {
+        document.getElementById("formNotifModal").style.display = "none";
+    }
 
     async function submitPendaftaran(e) {
         e.preventDefault();
@@ -100,10 +148,10 @@
                 headers: { "Content-Type": "text/plain" },
                 body: JSON.stringify(payload)
             });
-            alert("Pendaftaran berhasil dikirim! Silakan tunggu konfirmasi dari pengurus Paskibra.");
+            showFormNotif("PENDAFTARAN BERHASIL", "Data pendaftaran Anda telah berhasil dikirim. Silakan tunggu konfirmasi selanjutnya dari pengurus!");
             e.target.reset();
         } catch (err) {
-            alert("Gagal mengirim pendaftaran. Periksa koneksi internet Anda.");
+            showFormNotif("GAGAL MENGIRIM", "Terjadi kesalahan saat mengirim data. Periksa koneksi internet Anda.", false);
         } finally {
             btn.disabled = false;
             btn.innerHTML = "<i class='fas fa-paper-plane'></i> KIRIM PENDAFTARAN";
