@@ -412,9 +412,9 @@
             <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                 <span><strong>Filter Preview & Laporan:</strong></span>
                 <select id="filterRekapTipe" onchange="renderPreviewAbsensi()" style="padding: 8px; border-radius: 6px; background: #2b0006; color: #fff; border: 1px solid #ffd700;">
+                    <option value="semua">Semua Riwayat Absensi</option>
                     <option value="mingguan">Rekap Mingguan (7 Hari Terakhir)</option>
                     <option value="bulanan">Rekap Bulanan (30 Hari Terakhir)</option>
-                    <option value="semua">Semua Riwayat Absensi</option>
                 </select>
             </div>
             <div style="display:flex; gap:10px; flex-wrap:wrap;">
@@ -512,7 +512,7 @@
     </div>
 </div>
 
-<!-- CUSTOM DIALOG NOTIFIKASI & KONFIRMASI (CENTERED) -->
+<!-- CUSTOM DIALOG NOTIFIKASI & KONFIRMASI -->
 <div id="customDialogModal" class="modal">
     <div class="modal-content">
         <h3 id="dialogTitle"><i class="fas fa-info-circle"></i> KONFIRMASI</h3>
@@ -530,8 +530,8 @@
     let globalDataMaster = [];
     let globalAbsensi = [];
     let globalRecruitment = [];
+    let currentFilteredAbsensi = []; // Menyimpan data absensi hasil filter saat ini
 
-    // FUNGSI NOTIFIKASI & CONFIRM CUSTOM DI TENGAH LAYAR
     function showCustomAlert(title, message, iconClass = "fa-check-circle") {
         document.getElementById("dialogTitle").innerHTML = `<i class="fas ${iconClass}"></i> ${title}`;
         document.getElementById("dialogMessage").innerText = message;
@@ -672,7 +672,6 @@
 
         closeModal('editModal');
 
-        // Optimistic Local Update (< 0.1s)
         const idx = globalDataMaster.findIndex(a => {
             let rNis = String(a["NIS/NISN"] || a["NIS"] || a["nis"] || "").trim();
             let rNama = String(a["NAMA LENGKAP"] || a["Nama_Lengkap"] || a["nama"] || "").trim();
@@ -715,7 +714,7 @@
         let sectionName = section === 'anggota' ? 'DATA MASTER ANGGOTA' : (section === 'absensi' ? 'REKAP ABSENSI' : 'DATA OPEN RECRUITMENT');
         showCustomConfirm("HAPUS SEMUA DATA", `PERINGATAN! Seluruh isi ${sectionName} akan dihapus secara permanen. Lanjutkan?`, () => {
             if (section === 'anggota') globalDataMaster = [];
-            else if (section === 'absensi') globalAbsensi = [];
+            else if (section === 'absensi') { globalAbsensi = []; currentFilteredAbsensi = []; }
             else if (section === 'recruitment') globalRecruitment = [];
 
             renderAllTables();
@@ -746,6 +745,24 @@
         }
     }
 
+    // Fungsi Parsing Tanggal yang Tangguh
+    function parseDateSafe(rawTs) {
+        if (!rawTs) return null;
+        let d = new Date(rawTs);
+        if (!isNaN(d.getTime())) return d;
+        
+        let parts = rawTs.toString().split(/[\/\-\s]/);
+        if (parts.length >= 3) {
+            let day = parseInt(parts[0]);
+            let month = parseInt(parts[1]) - 1;
+            let year = parseInt(parts[2]);
+            if (!isNaN(day) && !isNaN(month) && !isNaN(year)) {
+                return new Date(year, month, day);
+            }
+        }
+        return null;
+    }
+
     function renderPreviewAbsensi() {
         const tbody = document.getElementById("tablePreviewAbsensi");
         const tipe = document.getElementById("filterRekapTipe").value;
@@ -753,22 +770,31 @@
 
         if (!globalAbsensi.length) {
             tbody.innerHTML = "<tr><td colspan='6' style='text-align:center;'>Belum ada data absensi.</td></tr>";
+            currentFilteredAbsensi = [];
             return;
         }
 
-        let filtered = globalAbsensi;
         const now = new Date();
-        if (tipe === 'mingguan') {
-            const limit = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-            filtered = globalAbsensi.filter(a => new Date(a.TimeStamp || a.Timestamp) >= limit);
-        } else if (tipe === 'bulanan') {
-            const limit = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-            filtered = globalAbsensi.filter(a => new Date(a.TimeStamp || a.Timestamp) >= limit);
+        currentFilteredAbsensi = globalAbsensi.filter(a => {
+            if (tipe === 'semua') return true;
+            const rawTs = a.TimeStamp || a.Timestamp || a.timestamp || "";
+            const d = parseDateSafe(rawTs);
+            if (!d) return true; // Tetap tampilkan jika tanggal tidak dapat ter-parse
+            
+            const diffDays = (now - d) / (1000 * 60 * 60 * 24);
+            if (tipe === 'mingguan') return diffDays <= 7 && diffDays >= 0;
+            if (tipe === 'bulanan') return diffDays <= 30 && diffDays >= 0;
+            return true;
+        });
+
+        if (!currentFilteredAbsensi.length) {
+            tbody.innerHTML = "<tr><td colspan='6' style='text-align:center;'>Belum ada data absensi pada rentang waktu ini.</td></tr>";
+            return;
         }
 
         const pertemuanGroup = { "Pertemuan 1 (Senin)": [], "Pertemuan 2 (Selasa)": [], "Pertemuan 3 (Rabu)": [], "Lainnya": [] };
 
-        filtered.forEach(item => {
+        currentFilteredAbsensi.forEach(item => {
             const p = item["Pertemuan Ke -"] || item.Pertemuan || item.pertemuan || "";
             if (p.includes("Pertemuan 1")) pertemuanGroup["Pertemuan 1 (Senin)"].push(item);
             else if (p.includes("Pertemuan 2")) pertemuanGroup["Pertemuan 2 (Selasa)"].push(item);
@@ -787,13 +813,11 @@
                 pertemuanGroup[groupTitle].forEach(row => {
                     const rawTs = row.TimeStamp || row.Timestamp || row.timestamp || "";
                     let formattedDate = '-';
-                    if (rawTs) {
-                        const parsedDate = new Date(rawTs);
-                        if (!isNaN(parsedDate.getTime())) {
-                            formattedDate = parsedDate.toLocaleDateString('id-ID');
-                        } else {
-                            formattedDate = rawTs.toString().split('T')[0];
-                        }
+                    const d = parseDateSafe(rawTs);
+                    if (d) {
+                        formattedDate = d.toLocaleDateString('id-ID');
+                    } else if (rawTs) {
+                        formattedDate = rawTs.toString().split('T')[0];
                     }
 
                     let rawNis = row.NIS || row.nis || '-';
@@ -825,14 +849,11 @@
                 
                 const rawTs = r.TimeStamp || r.Timestamp || r.timestamp || r.Tanggal || r.tanggal || "";
                 let formattedDate = '-';
-                
-                if (rawTs) {
-                    const parsedDate = new Date(rawTs);
-                    if (!isNaN(parsedDate.getTime())) {
-                        formattedDate = parsedDate.toLocaleDateString('id-ID');
-                    } else {
-                        formattedDate = rawTs.toString().split('T')[0]; 
-                    }
+                const d = parseDateSafe(rawTs);
+                if (d) {
+                    formattedDate = d.toLocaleDateString('id-ID');
+                } else if (rawTs) {
+                    formattedDate = rawTs.toString().split('T')[0]; 
                 }
 
                 tbody.innerHTML += `
@@ -971,7 +992,7 @@
             const filterTipe = document.getElementById("filterRekapTipe").value;
             title = `REKAP ABSENSI LATIHAN PASKIBRA (${filterTipe.toUpperCase()})`;
             filename = `Rekap_Absensi_${filterTipe}.xls`;
-            dataToExport = globalAbsensi;
+            dataToExport = currentFilteredAbsensi.length ? currentFilteredAbsensi : globalAbsensi; // Gunakan data hasil filter
         } else if (tipe === 'recruitment') {
             title = "LAPORAN PENDAFTARAN OPEN RECRUITMENT PASKIBRA";
             dataToExport = globalRecruitment;
