@@ -627,8 +627,8 @@
     }
 
     async function deleteAnggota(nis, nama) {
-        if (confirm(`Apakah Anda yakin ingin menghapus ${nama} [NIS: ${nis}] dari Data Master?`)) {
-            // Optimistic Local Delete (< 0.1s)
+        if (confirm(`Apakah Anda yakin ingin menghapus ${nama} [NIS: ${nis}] dari Data Master dan Open Recruitment?`)) {
+            // 1. Hapus dari tampilan lokal Data Master (< 0.1s)
             globalDataMaster = globalDataMaster.filter(a => {
                 let rNis = String(a["NIS/NISN"] || a["NIS"] || a["nis"] || "").trim();
                 let rNama = String(a["NAMA LENGKAP"] || a["Nama_Lengkap"] || a["nama"] || "").trim();
@@ -637,8 +637,16 @@
                 }
                 return rNama.toLowerCase() !== nama.toLowerCase();
             });
+
+            // 2. Otomatis hapus dari tampilan lokal Open Recruitment (< 0.1s)
+            globalRecruitment = globalRecruitment.filter(r => {
+                let rNama = String(r.Nama_Pendaftar || r.nama_pendaftar || "").trim();
+                return rNama.toLowerCase() !== nama.toLowerCase();
+            });
+
             renderAllTables();
 
+            // 3. Kirim perintah hapus ke Google Sheets
             sendDataToSheet({ action: "deleteAnggota", nis: nis, nama_lengkap: nama });
         }
     }
