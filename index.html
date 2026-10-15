@@ -306,8 +306,8 @@
         <form onsubmit="submitAnggotaMasterManual(event)" style="margin-bottom: 20px;">
             <div class="form-grid">
                 <div class="form-group">
-                    <label>NIS / NISN (Hanya Angka)</label>
-                    <input type="text" id="masterNis" placeholder="Contoh: 23241001" required oninput="this.value = this.value.replace(/\D/g, '')">
+                    <label>NIS / NISN (Opsional)</label>
+                    <input type="text" id="masterNis" placeholder="Contoh: 23241001 atau -">
                 </div>
                 <div class="form-group">
                     <label>NAMA LENGKAP</label>
@@ -451,8 +451,8 @@
         <form onsubmit="saveEditAnggota(event)">
             <input type="hidden" id="editOldNis">
             <div class="form-group">
-                <label>NIS / NISN (Hanya Angka)</label>
-                <input type="text" id="editNis" required oninput="this.value = this.value.replace(/\D/g, '')">
+                <label>NIS / NISN (Boleh Angka / -)</label>
+                <input type="text" id="editNis">
             </div>
             <div class="form-group">
                 <label>NAMA LENGKAP</label>
@@ -527,6 +527,7 @@
             renderTableOR();
         } catch (err) {
             console.error("Gagal memuat data:", err);
+            document.getElementById("tableAnggota").innerHTML = "<tr><td colspan='5' style='text-align:center; color:#ff6b6b;'>Gagal memuat data. Periksa koneksi Web App Apps Script Anda.</td></tr>";
         }
     }
 
@@ -536,7 +537,7 @@
         if (globalDataMaster.length > 0) {
             globalDataMaster.forEach(a => {
                 let rawNis = a["NIS/NISN"] || a["NIS"] || a["nis"] || "-";
-                const nis = rawNis.toString().replace(/\D/g, '') || rawNis;
+                const nis = rawNis.toString().trim() || "-";
                 const nama = a["NAMA LENGKAP"] || a["Nama_Lengkap"] || a["nama"] || "-";
                 const kelas = a["KELAS"] || a["Kelas"] || a["kelas"] || "-";
                 const jabatan = a["JABATAN"] || a["Jabatan"] || "Anggota";
@@ -574,7 +575,8 @@
     async function saveEditAnggota(e) {
         e.preventDefault();
         const oldNis = document.getElementById("editOldNis").value;
-        const nis = document.getElementById("editNis").value.replace(/\D/g, '');
+        let nis = document.getElementById("editNis").value.trim();
+        if (!nis) nis = "-";
         const nama = document.getElementById("editNama").value;
         const kelas = document.getElementById("editKelas").value;
         const jabatan = document.getElementById("editJabatan").value;
@@ -596,7 +598,7 @@
         select.innerHTML = '<option value="">-- PILIH ANGGOTA BERURUTAN --</option>';
         globalDataMaster.forEach(a => {
             let rawNis = a["NIS/NISN"] || a["NIS"] || a["nis"] || "-";
-            const nis = rawNis.toString().replace(/\D/g, '') || rawNis;
+            const nis = rawNis.toString().trim() || "-";
             const nama = a["NAMA LENGKAP"] || a["Nama_Lengkap"] || a["nama"] || "-";
             const kelas = a["KELAS"] || a["Kelas"] || a["kelas"] || "-";
             select.innerHTML += `<option value="${nama}" data-nis="${nis}">[${nis}] ${nama} - ${kelas}</option>`;
@@ -653,7 +655,7 @@
                 pertemuanGroup[groupTitle].forEach(row => {
                     const ts = row.TimeStamp || row.Timestamp;
                     let rawNis = row.NIS || row.nis || '-';
-                    const nis = rawNis.toString().replace(/\D/g, '') || rawNis;
+                    const nis = rawNis.toString().trim() || "-";
                     tbody.innerHTML += `
                         <tr>
                             <td>${ts ? new Date(ts).toLocaleDateString('id-ID') : '-'}</td>
@@ -697,44 +699,30 @@
     }
 
     async function approveOR(nama, kelas) {
-    let inputNis = prompt(`Masukkan NIS / NISN untuk anggota ${nama} (Opsional, boleh dikosongkan):`);
-    
-    // Jika admin menekan tombol "Batal" pada prompt
-    if (inputNis === null) return;
+        let inputNis = prompt(`Masukkan NIS / NISN untuk anggota ${nama} (Opsional, boleh dikosongkan):`);
+        
+        if (inputNis === null) return; // Pembatalan
 
-    // Bersihkan masukan dari karakter selain angka
-    let cleanNis = inputNis.replace(/\D/g, '');
-    
-    // Jika dikosongkan, beri nilai default "-"
-    if (!cleanNis) {
-        cleanNis = "-";
-    }
-
-    await sendDataToSheet({
-        action: "updateStatusRecruitment",
-        nama_pendaftar: nama,
-        kelas: kelas,
-        nis: cleanNis,
-        status_seleksi: "Diterima"
-    });
-
-    alert(`Pendaftar ${nama} berhasil diterima! NIS/NISN diset ke: ${cleanNis}`);
-}
-
-            await sendDataToSheet({
-                action: "updateStatusRecruitment",
-                nama_pendaftar: nama,
-                kelas: kelas,
-                nis: cleanNis,
-                status_seleksi: "Diterima"
-            });
-            alert(`Pendaftar ${nama} berhasil diterima dengan NIS: ${cleanNis}!`);
+        let cleanNis = inputNis.replace(/\D/g, '');
+        if (!cleanNis) {
+            cleanNis = "-";
         }
+
+        await sendDataToSheet({
+            action: "updateStatusRecruitment",
+            nama_pendaftar: nama,
+            kelas: kelas,
+            nis: cleanNis,
+            status_seleksi: "Diterima"
+        });
+
+        alert(`Pendaftar ${nama} berhasil diterima! NIS/NISN diset ke: ${cleanNis}`);
     }
 
     async function submitAnggotaMasterManual(e) {
         e.preventDefault();
-        const nis = document.getElementById("masterNis").value.replace(/\D/g, '');
+        let nis = document.getElementById("masterNis").value.trim();
+        if (!nis) nis = "-";
         const nama = document.getElementById("masterNama").value;
         const kelas = document.getElementById("masterKelas").value;
         const jabatan = document.getElementById("masterJabatan").value;
@@ -751,7 +739,7 @@
 
         const nama = select.value;
         const rawNis = select.options[select.selectedIndex].getAttribute("data-nis");
-        const nis = rawNis.replace(/\D/g, '');
+        const nis = rawNis ? rawNis.trim() : "-";
         const pertemuan = document.getElementById("absensiPertemuan").value;
         const keterangan = document.getElementById("absensiStatus").value;
 
@@ -868,7 +856,6 @@
                 headers: { "Content-Type": "text/plain" },
                 body: JSON.stringify(payload)
             });
-            // Beri jeda singkat sebelum memuat data baru
             setTimeout(() => { loadData(); }, 1200);
         } catch (err) { 
             alert("Gagal terhubung ke server Google Sheets."); 
