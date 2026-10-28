@@ -286,7 +286,7 @@
         }
         .login-card h2 { color: #ffd700; margin-bottom: 20px; font-size: 1.8rem; }
 
-        /* OVERLAY PRESENSI QR ANGGOTA (SCAN TARGET) */
+        /* OVERLAY PRESENSI QR ANGGOTA */
         #qrPresensiOverlay {
             position: fixed;
             top: 0; left: 0;
@@ -297,6 +297,7 @@
             justify-content: center;
             align-items: center;
             padding: 20px;
+            overflow-y: auto;
         }
         .presensi-card {
             background: rgba(50, 0, 10, 0.9);
@@ -306,6 +307,31 @@
             width: 100%;
             max-width: 450px;
             box-shadow: 0 0 30px rgba(255,215,0,0.4);
+            position: relative;
+        }
+
+        /* TOMBOL TUKAR/TUTUP KEMBALI KE ADMIN */
+        .btn-close-presensi {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #e74c3c;
+            color: #fff;
+            border: 1px solid #ff6b6b;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: none; /* Default tersembunyi, hanya tampil jika dibuka dari admin */
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            transition: 0.3s;
+        }
+        .btn-close-presensi:hover {
+            transform: scale(1.15) rotate(90deg);
+            background: #c0392b;
         }
 
         .modal {
@@ -369,9 +395,14 @@
     </div>
 </div>
 
-<!-- 2. LAYAR PRESENSI SCAN QR CODE KHUSUS ANGGOTA (AKSES SCAN QR) -->
+<!-- 2. LAYAR PRESENSI SCAN QR CODE KHUSUS ANGGOTA -->
 <div id="qrPresensiOverlay">
     <div class="presensi-card">
+        <!-- TOMBOL X KEMBALI KE ADMIN (TAMPIL HANYA JIKA DIBUKA DARI ADMIN) -->
+        <button id="btnCloseAdminPreview" class="btn-close-presensi" onclick="closePresensiToAdmin()" title="Kembali ke Dashboard Admin">
+            <i class="fas fa-times"></i>
+        </button>
+
         <div style="text-align: center; margin-bottom: 15px;">
             <img class="custom-logo" src="assets/logo-paskibra.png" alt="Logo Paskibra">
             <h2 style="color:#ffd700; margin-top:5px; font-size: 1.8rem;">FORM PRESENSI MANDIRI PASKIBRA</h2>
@@ -705,16 +736,38 @@
     let globalRecruitment = [];
     let currentFilteredAbsensi = [];
 
-    // DETEKSI AKSES SCAN QR DARI URL ANGGOTA
+    // DETEKSI AKSES SCAN QR DARI URL ANGGOTA VS ADMIN PREVIEW
     function checkQrAccessMode() {
         const urlParams = new URLSearchParams(window.location.search);
+        const closeBtn = document.getElementById("btnCloseAdminPreview");
+
         if (urlParams.has('mode') && urlParams.get('mode') === 'presensi') {
             document.getElementById("loginOverlay").style.display = "none";
             document.getElementById("qrPresensiOverlay").style.display = "flex";
+            
+            // Jika ada parameter 'from=admin', tampilkan tombol X untuk kembali
+            if (urlParams.get('from') === 'admin') {
+                closeBtn.style.display = "flex";
+            } else {
+                closeBtn.style.display = "none"; // Dari SCAN QR HP Anggota murni
+            }
+
             initQrFormDate();
         } else {
             checkLoginStatus();
         }
+    }
+
+    function openSimulasiQr() {
+        // Membuka form presensi dengan penanda 'from=admin'
+        window.location.href = window.location.href.split('?')[0] + "?mode=presensi&from=admin";
+    }
+
+    function closePresensiToAdmin() {
+        // Menutup overlay presensi dan kembali ke dashboard admin
+        document.getElementById("qrPresensiOverlay").style.display = "none";
+        window.history.pushState({}, document.title, window.location.pathname); // Hapus query string di URL
+        checkLoginStatus();
     }
 
     // 1. SYSTEM LOGIN & LOGOUT ADMIN
@@ -955,6 +1008,7 @@
         const linkText = document.getElementById("qrTextLink");
         canvasContainer.innerHTML = "";
 
+        // URL QR Code Murni untuk Anggota (Tanpa tombol X)
         const targetUrl = window.location.href.split('?')[0] + "?mode=presensi";
 
         new QRCode(canvasContainer, {
@@ -968,10 +1022,6 @@
         linkText.innerHTML = `<i class="fas fa-link"></i> Link Presensi: <u>${targetUrl}</u>`;
     }
 
-    function openSimulasiQr() {
-        window.location.href = window.location.href.split('?')[0] + "?mode=presensi";
-    }
-
     // 4. LOGIKA PRESENSI MANDIRI ANGGOTA VIA SCAN QR
     function initQrFormDate() {
         const today = new Date().toISOString().split('T')[0];
@@ -983,7 +1033,7 @@
     function autoCalculatePertemuan(dateStr) {
         if (!dateStr) return;
         const d = new Date(dateStr);
-        const day = d.getDay(); // 0: Minggu, 1: Senin, 2: Selasa, 3: Rabu ...
+        const day = d.getDay();
 
         let textPertemuan = "Pertemuan 1 (Senin)";
         if (day === 2) textPertemuan = "Pertemuan 2 (Selasa)";
@@ -1035,7 +1085,6 @@
         const pertemuan = document.getElementById("qrPertemuanAuto").value;
         const keterangan = document.getElementById("qrStatusSelect").value;
 
-        // Cek pengamanan ganda (Nama & Tanggal yang sama)
         const dateObj = new Date(dateVal);
         const targetDateStr = dateObj.toLocaleDateString('id-ID');
 
