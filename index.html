@@ -7,7 +7,6 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.cdnfonts.com/css/american-captain" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <!-- Library QR Code Generator -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <style>
@@ -33,7 +32,6 @@
             width: 100%;
         }
 
-        /* GARIS PEMBATAS SECARA UMUM */
         hr.section-divider {
             border: 0;
             height: 2px;
@@ -246,7 +244,6 @@
         .file-input-wrapper { position: relative; overflow: hidden; display: inline-block; }
         .file-input-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; }
 
-        /* QR CODE DISPLAY BOX */
         .qr-wrapper {
             display: flex;
             flex-direction: column;
@@ -266,7 +263,7 @@
             margin: 15px 0;
         }
 
-        /* LOGIN SCREEN MODAL (Pengamanan Admin) */
+        /* OVERLAY LOGIN ADMIN */
         #loginOverlay {
             position: fixed;
             top: 0; left: 0;
@@ -289,11 +286,32 @@
         }
         .login-card h2 { color: #ffd700; margin-bottom: 20px; font-size: 1.8rem; }
 
-        /* MODAL GENERAL */
+        /* OVERLAY PRESENSI QR ANGGOTA (SCAN TARGET) */
+        #qrPresensiOverlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: linear-gradient(135deg, #4a000b 0%, #2b0006 100%);
+            z-index: 99998;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .presensi-card {
+            background: rgba(50, 0, 10, 0.9);
+            border: 2px solid #ffd700;
+            border-radius: 16px;
+            padding: 25px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 0 30px rgba(255,215,0,0.4);
+        }
+
         .modal {
             display: none;
             position: fixed;
-            z-index: 9999;
+            z-index: 999999;
             left: 0; top: 0;
             width: 100%; height: 100%;
             background-color: rgba(0, 0, 0, 0.8);
@@ -331,7 +349,7 @@
 </head>
 <body>
 
-<!-- PENGAMANAN LOGIN ADMIN OVERLAY -->
+<!-- 1. PENGAMANAN LOGIN ADMIN OVERLAY -->
 <div id="loginOverlay">
     <div class="login-card">
         <img class="custom-logo" src="assets/logo-paskibra.png" alt="Logo Paskibra" style="margin-bottom: 10px;">
@@ -347,6 +365,53 @@
                 <input type="password" id="loginPassword" placeholder="Masukkan Password" required>
             </div>
             <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;"><i class="fas fa-lock-open"></i> MASUK DASHBOARD</button>
+        </form>
+    </div>
+</div>
+
+<!-- 2. LAYAR PRESENSI SCAN QR CODE KHUSUS ANGGOTA (AKSES SCAN QR) -->
+<div id="qrPresensiOverlay">
+    <div class="presensi-card">
+        <div style="text-align: center; margin-bottom: 15px;">
+            <img class="custom-logo" src="assets/logo-paskibra.png" alt="Logo Paskibra">
+            <h2 style="color:#ffd700; margin-top:5px; font-size: 1.8rem;">FORM PRESENSI MANDIRI PASKIBRA</h2>
+            <p style="color:#ffcc66; font-size: 0.95rem;">Scan QR Code Berhasil! Isi data presensi di bawah ini:</p>
+        </div>
+        <hr class="section-divider">
+        
+        <form onsubmit="submitPresensiQrMandiri(event)">
+            <div class="form-group">
+                <label>ISIKAN NAMA (AWAL / PENCARIAN)</label>
+                <input type="text" id="qrInputNamaAwal" placeholder="Ketik Nama Awal / Penuh Anda..." oninput="autoMatchMemberQr(this.value)" required>
+            </div>
+
+            <div class="form-group">
+                <label>ANGGOTA TERIDENTIFIKASI (DATA MASTER)</label>
+                <select id="qrMatchResultSelect" required>
+                    <option value="">-- KETIK NAMA AWAL DI ATAS --</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>PILIH TANGGAL PRESENSI</label>
+                <input type="date" id="qrDateInput" onchange="autoCalculatePertemuan(this.value)" required>
+            </div>
+
+            <div class="form-group">
+                <label>HARI & PERTEMUAN (OTOMATIS TERDETEKSI)</label>
+                <input type="text" id="qrPertemuanAuto" readonly style="background: rgba(255,215,0,0.15); color: #ffd700; font-weight: bold;" placeholder="Otomatis Terdeteksi...">
+            </div>
+
+            <div class="form-group">
+                <label>KETERANGAN KEHADIRAN</label>
+                <select id="qrStatusSelect" required>
+                    <option value="Hadir">Hadir</option>
+                    <option value="Izin">Izin</option>
+                    <option value="Sakit">Sakit</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;"><i class="fas fa-paper-plane"></i> KIRIM PRESENSI MANDIRI</button>
         </form>
     </div>
 </div>
@@ -439,18 +504,12 @@
         <h2>PRESENSI MANDIRI / SCAN QR CODE ANGGOTA</h2>
         
         <div class="qr-wrapper">
-            <h3 style="color:#ffd700;"><i class="fas fa-qrcode"></i> QR CODE SCANNER PRESENSI ANGGOTA</h3>
-            <p style="color:#ffcc66; font-size: 0.95rem; margin-top:4px;">Pilih Nama Anggota untuk Menampilkan QR Code Presensi Cepat atau Gunakan Scan Publik</p>
+            <h3 style="color:#ffd700;"><i class="fas fa-qrcode"></i> QR CODE PRESENSI RUTIN ANGGOTA</h3>
+            <p style="color:#ffcc66; font-size: 0.95rem; margin-top:4px;">Cetak atau Tampilkan QR Code Ini Untuk Di-Scan Oleh Anggota Saat Latihan</p>
             
-            <div class="form-group" style="width:100%; max-width:400px; margin-top:15px;">
-                <label>PILIH NAMA ANGGOTA UNTUK QR CODE</label>
-                <select id="qrSelectNama" onchange="generateQrCodeForMember(this.value)">
-                    <option value="">-- PILIH ANGGOTA DATA MASTER --</option>
-                </select>
-            </div>
-
             <div id="qrcodeCanvas"></div>
             <div id="qrTextLink" style="color:#ffd700; font-size:0.9rem; word-break:break-all;"></div>
+            <button class="btn btn-approve" style="margin-top:10px;" onclick="openSimulasiQr()"><i class="fas fa-external-link-alt"></i> BUKA FORMULIR PRESENSI MANDIRI</button>
         </div>
 
         <hr class="section-divider">
@@ -645,9 +704,20 @@
     let globalAbsensi = [];
     let globalRecruitment = [];
     let currentFilteredAbsensi = [];
-    let qrcodeObj = null;
 
-    // 1. SYSTEM LOGIN & LOGOUT PENGAMANAN ADMIN
+    // DETEKSI AKSES SCAN QR DARI URL ANGGOTA
+    function checkQrAccessMode() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('mode') && urlParams.get('mode') === 'presensi') {
+            document.getElementById("loginOverlay").style.display = "none";
+            document.getElementById("qrPresensiOverlay").style.display = "flex";
+            initQrFormDate();
+        } else {
+            checkLoginStatus();
+        }
+    }
+
+    // 1. SYSTEM LOGIN & LOGOUT ADMIN
     function checkLoginStatus() {
         const isLoggedIn = sessionStorage.getItem("paskibra_admin_logged");
         if (isLoggedIn === "true") {
@@ -662,7 +732,7 @@
         const user = document.getElementById("loginUsername").value;
         const pass = document.getElementById("loginPassword").value;
 
-        if (user === "pasmanecis" && pass === "tangguhjayawibawa") {
+        if (user === "ADMIN" && pass === "PASKIBRA123") {
             sessionStorage.setItem("paskibra_admin_logged", "true");
             document.getElementById("loginOverlay").style.display = "none";
             showCustomAlert("LOGIN SUKSES", "Selamat datang di Dashboard Admin Paskibra!");
@@ -751,6 +821,7 @@
             globalRecruitment = data.recruitment || [];
 
             renderAllTables();
+            generateQrCodeForScan();
         } catch (err) {
             console.error("Gagal memuat data:", err);
             document.getElementById("tableAnggota").innerHTML = "<tr><td colspan='6' style='text-align:center; color:#ff6b6b;'>Gagal memuat data. Periksa koneksi Web App Apps Script Anda.</td></tr>";
@@ -760,7 +831,6 @@
     function renderAllTables() {
         renderTableMaster();
         populateSelectAnggota();
-        populateQrDropdown();
         renderPreviewAbsensi();
         renderTableOR();
     }
@@ -879,40 +949,123 @@
         });
     }
 
-    // 3. GENERATOR QR CODE PRESENSI DINAMIS & DROPDOWN
-    function populateQrDropdown() {
-        const qrSelect = document.getElementById("qrSelectNama");
-        qrSelect.innerHTML = '<option value="">-- PILIH ANGGOTA DATA MASTER --</option>';
-        globalDataMaster.forEach(a => {
-            const nama = a["NAMA LENGKAP"] || a["Nama_Lengkap"] || a["nama"] || "";
-            if (nama) {
-                qrSelect.innerHTML += `<option value="${nama}">${nama}</option>`;
-            }
-        });
-    }
-
-    function generateQrCodeForMember(nama) {
+    // 3. LOGIKA GENERATOR QR CODE KHUSUS ABSENSI ANGGOTA
+    function generateQrCodeForScan() {
         const canvasContainer = document.getElementById("qrcodeCanvas");
         const linkText = document.getElementById("qrTextLink");
         canvasContainer.innerHTML = "";
-        
-        if (!nama) {
-            linkText.innerText = "";
-            return;
-        }
 
-        // Tautan presensi khusus membawa parameter nama awal secara otomatis
-        const targetUrl = window.location.href.split('?')[0] + "?presensiNama=" + encodeURIComponent(nama);
-        
-        qrcodeObj = new QRCode(canvasContainer, {
+        const targetUrl = window.location.href.split('?')[0] + "?mode=presensi";
+
+        new QRCode(canvasContainer, {
             text: targetUrl,
-            width: 160,
-            height: 160,
+            width: 170,
+            height: 170,
             colorDark: "#4a000b",
             colorLight: "#ffffff"
         });
 
         linkText.innerHTML = `<i class="fas fa-link"></i> Link Presensi: <u>${targetUrl}</u>`;
+    }
+
+    function openSimulasiQr() {
+        window.location.href = window.location.href.split('?')[0] + "?mode=presensi";
+    }
+
+    // 4. LOGIKA PRESENSI MANDIRI ANGGOTA VIA SCAN QR
+    function initQrFormDate() {
+        const today = new Date().toISOString().split('T')[0];
+        const dateInput = document.getElementById("qrDateInput");
+        dateInput.value = today;
+        autoCalculatePertemuan(today);
+    }
+
+    function autoCalculatePertemuan(dateStr) {
+        if (!dateStr) return;
+        const d = new Date(dateStr);
+        const day = d.getDay(); // 0: Minggu, 1: Senin, 2: Selasa, 3: Rabu ...
+
+        let textPertemuan = "Pertemuan 1 (Senin)";
+        if (day === 2) textPertemuan = "Pertemuan 2 (Selasa)";
+        else if (day === 3) textPertemuan = "Pertemuan 3 (Rabu)";
+        else if (day === 1) textPertemuan = "Pertemuan 1 (Senin)";
+        else textPertemuan = "Pertemuan Khusus (" + d.toLocaleDateString('id-ID', { weekday: 'long' }) + ")";
+
+        document.getElementById("qrPertemuanAuto").value = textPertemuan;
+    }
+
+    function autoMatchMemberQr(inputNama) {
+        const select = document.getElementById("qrMatchResultSelect");
+        select.innerHTML = "";
+        const q = inputNama.toLowerCase().trim();
+
+        if (!q) {
+            select.innerHTML = '<option value="">-- KETIK NAMA AWAL DI ATAS --</option>';
+            return;
+        }
+
+        const matches = globalDataMaster.filter(a => {
+            const nama = (a["NAMA LENGKAP"] || a["Nama_Lengkap"] || a["nama"] || "").toLowerCase();
+            return nama.includes(q);
+        });
+
+        if (matches.length > 0) {
+            matches.forEach(m => {
+                const nama = m["NAMA LENGKAP"] || m["Nama_Lengkap"] || m["nama"];
+                let rawNis = m["NIS/NISN"] || m["NIS"] || m["nis"] || "-";
+                const kelas = m["KELAS"] || m["Kelas"] || "-";
+                select.innerHTML += `<option value="${nama}" data-nis="${rawNis}">[${rawNis}] ${nama} - ${kelas}</option>`;
+            });
+        } else {
+            select.innerHTML = '<option value="">Tidak ada nama yang cocok di Data Master</option>';
+        }
+    }
+
+    async function submitPresensiQrMandiri(e) {
+        e.preventDefault();
+        const select = document.getElementById("qrMatchResultSelect");
+        if (!select.value) {
+            return showCustomAlert("PERINGATAN", "Pilih nama anggota yang cocok terlebih dahulu!", "fa-exclamation-circle");
+        }
+
+        const nama = select.value;
+        const rawNis = select.options[select.selectedIndex].getAttribute("data-nis");
+        const nis = rawNis ? rawNis.trim() : "-";
+        const dateVal = document.getElementById("qrDateInput").value;
+        const pertemuan = document.getElementById("qrPertemuanAuto").value;
+        const keterangan = document.getElementById("qrStatusSelect").value;
+
+        // Cek pengamanan ganda (Nama & Tanggal yang sama)
+        const dateObj = new Date(dateVal);
+        const targetDateStr = dateObj.toLocaleDateString('id-ID');
+
+        const isDuplicate = globalAbsensi.some(a => {
+            const rNama = a.Nama_Lengkap || a.nama_lengkap || a.Nama || "";
+            const rawTs = a.TimeStamp || a.Timestamp || a.timestamp || "";
+            const d = parseDateSafe(rawTs);
+            const dateStr = d ? d.toLocaleDateString('id-ID') : "";
+
+            return rNama.toLowerCase() === nama.toLowerCase() && dateStr === targetDateStr;
+        });
+
+        if (isDuplicate) {
+            return showCustomAlert("SISTEM PENGAMANAN", `Anggota bernama ${nama} sudah mengisi absensi untuk tanggal ${targetDateStr}! Pengisian ganda ditolak.`, "fa-times-circle");
+        }
+
+        const isoTimestamp = new Date(dateVal).toISOString();
+        globalAbsensi.unshift({
+            TimeStamp: isoTimestamp,
+            NIS: nis,
+            Nama_Lengkap: nama,
+            Pertemuan: pertemuan,
+            Keterangan: keterangan
+        });
+
+        showCustomAlert("BERHASIL", `Presensi ${nama} untuk ${pertemuan} berhasil disimpan!`);
+        document.getElementById("qrInputNamaAwal").value = "";
+        autoMatchMemberQr("");
+
+        sendDataToSheet({ action: "addAbsensi", nis, nama_lengkap: nama, pertemuan, keterangan });
     }
 
     function filterDropdownAnggota(query) {
@@ -1105,7 +1258,6 @@
         sendDataToSheet({ action: "addAnggota", nis, nama_lengkap: nama, kelas, jabatan });
     }
 
-    // 4. PENAMBAHAN CALON ANGGOTA (OR) MANUAL SINGKRON DENGAN DEPAN & SHEET
     async function submitORManualAdmin(e) {
         e.preventDefault();
         const nama = document.getElementById("orNamaManual").value.trim();
@@ -1141,7 +1293,6 @@
         });
     }
 
-    // 5. ABSENSI DENGAN PENGAMANAN MULTI-SUBMIT NAMA YANG SAMA DENGAN HARI YANG SAMA
     async function submitAbsensi(e) {
         e.preventDefault();
         const select = document.getElementById("absensiSelectNama");
@@ -1153,7 +1304,6 @@
         const pertemuan = document.getElementById("absensiPertemuan").value;
         const keterangan = document.getElementById("absensiStatus").value;
 
-        // Cek pengamanan ganda (Nama & Hari yang sama)
         const todayStr = new Date().toLocaleDateString('id-ID');
         const isDuplicate = globalAbsensi.some(a => {
             const rNama = a.Nama_Lengkap || a.nama_lengkap || a.Nama || "";
@@ -1296,8 +1446,7 @@
         }
     }
 
-    // MEMUAT STATUS PENGAMANAN LOGIN DUA KALI
-    checkLoginStatus();
+    checkQrAccessMode();
     loadData();
 </script>
 
