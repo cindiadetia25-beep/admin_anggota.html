@@ -565,6 +565,7 @@
                 </select>
                 <input type="text" id="absensiSearchInput" placeholder="Atau ketik pencarian NIS / Nama di sini..." oninput="filterDropdownAnggota(this.value)">
             </div>
+            
             <div class="form-group">
                 <label>Hari / Pertemuan Latihan Rutin</label>
                 <select id="absensiPertemuan" required>
@@ -573,6 +574,13 @@
                     <option value="Pertemuan 3 (Rabu)">Pertemuan 3 (Rabu)</option>
                 </select>
             </div>
+
+            <!-- PENAMBAHAN FIELD PILIH TANGGAL PRESENSI DI SINI -->
+            <div class="form-group">
+                <label>PILIH TANGGAL PRESENSI</label>
+                <input type="date" id="absensiTanggalInput" required>
+            </div>
+
             <div class="form-group">
                 <label>Keterangan Kehadiran</label>
                 <select id="absensiStatus" required>
@@ -805,6 +813,15 @@
     let globalRecruitment = [];
     let currentFilteredAbsensi = [];
 
+    // INISIALISASI TANGGAL DEFAUL HARI INI
+    function initDefaultDateAdmin() {
+        const today = new Date().toISOString().split('T')[0];
+        const adminDateInput = document.getElementById("absensiTanggalInput");
+        if (adminDateInput) {
+            adminDateInput.value = today;
+        }
+    }
+
     // ------------------------------------------
     // A. DETEKSI MODE AKSES SCAN QR VS ADMIN
     // ------------------------------------------
@@ -920,7 +937,7 @@
     updateLiveClock();
 
     // ------------------------------------------
-    // D. SINKRONISASI & SINKRON DATA DARI SHEET
+    // D. SINKRONISASI & LOAD DATA DARI SHEET
     // ------------------------------------------
     async function manualRefreshData() {
         const icon = document.getElementById("refreshIcon");
@@ -1502,6 +1519,7 @@
         });
     }
 
+    // PENGIRIMAN ABSENSI DARI INPUT ADMIN MANUAL (MENGGUNAKAN TANGGAL YANG DIPILIH)
     async function submitAbsensi(e) {
         e.preventDefault();
         const select = document.getElementById("absensiSelectNama");
@@ -1512,23 +1530,27 @@
         const nis = rawNis ? rawNis.trim() : "-";
         const pertemuan = document.getElementById("absensiPertemuan").value;
         const keterangan = document.getElementById("absensiStatus").value;
+        const dateVal = document.getElementById("absensiTanggalInput").value || new Date().toISOString().split('T')[0];
 
-        const todayStr = new Date().toLocaleDateString('id-ID');
+        const dateObj = new Date(dateVal);
+        const targetDateStr = dateObj.toLocaleDateString('id-ID');
+
         const isDuplicate = globalAbsensi.some(a => {
             const rNama = a.Nama_Lengkap || a.nama_lengkap || a.Nama || "";
             const rawTs = a.TimeStamp || a.Timestamp || a.timestamp || "";
             const d = parseDateSafe(rawTs);
             const dateStr = d ? d.toLocaleDateString('id-ID') : "";
 
-            return rNama.toLowerCase() === nama.toLowerCase() && dateStr === todayStr;
+            return rNama.toLowerCase() === nama.toLowerCase() && dateStr === targetDateStr;
         });
 
         if (isDuplicate) {
-            return showCustomAlert("SISTEM PENGAMANAN", `Anggota bernama ${nama} sudah mengisi absensi untuk hari ini! Pengisian ganda ditolak.`, "fa-times-circle");
+            return showCustomAlert("SISTEM PENGAMANAN", `Anggota bernama ${nama} sudah memiliki data absensi untuk tanggal ${targetDateStr}! Pengisian ganda ditolak.`, "fa-times-circle");
         }
 
+        const isoTimestamp = new Date(dateVal).toISOString();
         globalAbsensi.unshift({
-            TimeStamp: new Date().toISOString(),
+            TimeStamp: isoTimestamp,
             NIS: nis,
             Nama_Lengkap: nama,
             Pertemuan: pertemuan,
@@ -1538,7 +1560,7 @@
 
         showCustomAlert("BERHASIL", `Absensi ${nama} berhasil disimpan!`);
         select.value = "";
-        sendDataToSheet({ action: "addAbsensi", nis, nama_lengkap: nama, pertemuan, keterangan });
+        sendDataToSheet({ action: "addAbsensi", nis, nama_lengkap: nama, pertemuan, keterangan, timestamp: isoTimestamp });
     }
 
     function importExcelOR(event) {
@@ -1662,6 +1684,7 @@
         }
     }
 
+    initDefaultDateAdmin();
     checkQrAccessMode();
     loadData();
 </script>
