@@ -9,6 +9,9 @@
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
+    <!-- ========================================== -->
+    <!-- CSS STYLES & DESAIN DASHBOARD ADMIN        -->
+    <!-- ========================================== -->
     <style>
         * { 
             box-sizing: border-box; 
@@ -32,6 +35,7 @@
             width: 100%;
         }
 
+        /* GARIS PEMBATAS SECARA VISUAL TEMA EMAS */
         hr.section-divider {
             border: 0;
             height: 2px;
@@ -187,7 +191,7 @@
             -webkit-overflow-scrolling: touch;
         }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; min-width: 650px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; min-width: 700px; }
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 0.95rem; word-break: break-word; }
         th { background: rgba(255, 215, 0, 0.2); color: #ffd700; font-size: 1.1rem; }
 
@@ -263,7 +267,6 @@
             margin: 15px 0;
         }
 
-        /* OVERLAY LOGIN ADMIN */
         #loginOverlay {
             position: fixed;
             top: 0; left: 0;
@@ -286,7 +289,6 @@
         }
         .login-card h2 { color: #ffd700; margin-bottom: 20px; font-size: 1.8rem; }
 
-        /* OVERLAY PRESENSI QR ANGGOTA */
         #qrPresensiOverlay {
             position: fixed;
             top: 0; left: 0;
@@ -310,7 +312,6 @@
             position: relative;
         }
 
-        /* TOMBOL TUKAR/TUTUP KEMBALI KE ADMIN */
         .btn-close-presensi {
             position: absolute;
             top: 15px;
@@ -321,7 +322,7 @@
             width: 36px;
             height: 36px;
             border-radius: 50%;
-            display: none; /* Default tersembunyi, hanya tampil jika dibuka dari admin */
+            display: none;
             align-items: center;
             justify-content: center;
             font-size: 1.2rem;
@@ -375,7 +376,9 @@
 </head>
 <body>
 
-<!-- 1. PENGAMANAN LOGIN ADMIN OVERLAY -->
+<!-- ========================================== -->
+<!-- ELEMEN 1: OVERLAY LOGIN ADMIN               -->
+<!-- ========================================== -->
 <div id="loginOverlay">
     <div class="login-card">
         <img class="custom-logo" src="assets/logo-paskibra.png" alt="Logo Paskibra" style="margin-bottom: 10px;">
@@ -395,10 +398,11 @@
     </div>
 </div>
 
-<!-- 2. LAYAR PRESENSI SCAN QR CODE KHUSUS ANGGOTA -->
+<!-- ========================================== -->
+<!-- ELEMEN 2: OVERLAY PRESENSI MANDIRI SCAN QR  -->
+<!-- ========================================== -->
 <div id="qrPresensiOverlay">
     <div class="presensi-card">
-        <!-- TOMBOL X KEMBALI KE ADMIN (TAMPIL HANYA JIKA DIBUKA DARI ADMIN) -->
         <button id="btnCloseAdminPreview" class="btn-close-presensi" onclick="closePresensiToAdmin()" title="Kembali ke Dashboard Admin">
             <i class="fas fa-times"></i>
         </button>
@@ -447,6 +451,9 @@
     </div>
 </div>
 
+<!-- ========================================== -->
+<!-- ELEMEN 3: KONTEN UTAMA DASHBOARD ADMIN     -->
+<!-- ========================================== -->
 <div class="container">
     <header>
         <div class="header-title-box">
@@ -475,7 +482,9 @@
 
     <hr class="section-divider">
 
-    <!-- TAB 1: DATA MASTER ANGGOTA -->
+    <!-- ========================================== -->
+    <!-- TAB 1: DATA MASTER ANGGOTA                 -->
+    <!-- ========================================== -->
     <div id="tab-anggota" class="card tab-content active">
         <h2>DAFTAR ANGGOTA PASKIBRA (DATA MASTER)</h2>
         
@@ -530,7 +539,9 @@
         </div>
     </div>
 
-    <!-- TAB 2: ABSENSI LATIHAN RUTIN & GENERATOR QR CODE -->
+    <!-- ========================================== -->
+    <!-- TAB 2: ABSENSI LATIHAN RUTIN & PREVIEW     -->
+    <!-- ========================================== -->
     <div id="tab-absensi" class="card tab-content">
         <h2>PRESENSI MANDIRI / SCAN QR CODE ANGGOTA</h2>
         
@@ -579,11 +590,20 @@
         <h2>PREVIEW REKAP ABSENSI LATIHAN</h2>
         <div class="action-box">
             <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                <span><strong>Filter Preview & Laporan:</strong></span>
+                <span><strong>Filter Waktu:</strong></span>
                 <select id="filterRekapTipe" onchange="renderPreviewAbsensi()" style="padding: 8px; border-radius: 6px; background: #2b0006; color: #fff; border: 1px solid #ffd700;">
                     <option value="semua">Semua Riwayat Absensi</option>
                     <option value="mingguan">Rekap Mingguan (7 Hari Terakhir)</option>
                     <option value="bulanan">Rekap Bulanan (30 Hari Terakhir)</option>
+                </select>
+
+                <span><strong>Filter Keterangan:</strong></span>
+                <select id="filterRekapStatus" onchange="renderPreviewAbsensi()" style="padding: 8px; border-radius: 6px; background: #2b0006; color: #fff; border: 1px solid #ffd700;">
+                    <option value="semua">Semua Keterangan</option>
+                    <option value="Hadir">Hadir</option>
+                    <option value="Izin">Izin</option>
+                    <option value="Sakit">Sakit</option>
+                    <option value="Alpha">Alpha</option>
                 </select>
             </div>
             <div style="display:flex; gap:10px; flex-wrap:wrap;">
@@ -596,22 +616,25 @@
             <table>
                 <thead>
                     <tr>
-                        <th style="width:50px;">NO.</th>
+                        <th style="width:40px;">NO.</th>
                         <th>Tanggal</th>
                         <th>NIS / NISN</th>
                         <th>Nama Lengkap</th>
                         <th>Pertemuan</th>
                         <th>Keterangan</th>
+                        <th style="width:130px;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody id="tablePreviewAbsensi">
-                    <tr><td colspan="6" style="text-align:center;"><i class="fas fa-spinner fa-spin"></i> Memuat preview rekap absensi...</td></tr>
+                    <tr><td colspan="7" style="text-align:center;"><i class="fas fa-spinner fa-spin"></i> Memuat preview rekap absensi...</td></tr>
                 </tbody>
             </table>
         </div>
     </div>
 
-    <!-- TAB 3: OPEN RECRUITMENT -->
+    <!-- ========================================== -->
+    <!-- TAB 3: OPEN RECRUITMENT                    -->
+    <!-- ========================================== -->
     <div id="tab-recruitment" class="card tab-content">
         <h2>TAMBAH CALON ANGGOTA MANUAL (OR)</h2>
         <form onsubmit="submitORManualAdmin(event)" style="margin-bottom: 20px;">
@@ -683,7 +706,9 @@
     </div>
 </div>
 
-<!-- MODAL EDIT DATA -->
+<!-- ========================================== -->
+<!-- ELEMEN 4: MODAL EDIT DATA ANGGOTA MASTER   -->
+<!-- ========================================== -->
 <div id="editModal" class="modal">
     <div class="modal-content">
         <h3><i class="fas fa-user-edit"></i> EDIT DATA ANGGOTA</h3>
@@ -715,7 +740,48 @@
     </div>
 </div>
 
-<!-- CUSTOM DIALOG NOTIFIKASI & KONFIRMASI -->
+<!-- ========================================== -->
+<!-- ELEMEN 5: MODAL EDIT DATA ABSENSI         -->
+<!-- ========================================== -->
+<div id="editAbsensiModal" class="modal">
+    <div class="modal-content">
+        <h3><i class="fas fa-edit"></i> EDIT DATA ABSENSI</h3>
+        <hr class="section-divider">
+        <form onsubmit="saveEditAbsensi(event)">
+            <input type="hidden" id="editAbsensiNama">
+            <input type="hidden" id="editAbsensiRawTs">
+            <div class="form-group" style="text-align: left;">
+                <label>NAMA ANGGOTA</label>
+                <input type="text" id="editAbsensiNamaView" readonly style="background: rgba(255,215,0,0.15); color: #ffd700;">
+            </div>
+            <div class="form-group" style="text-align: left;">
+                <label>PERTEMUAN LATIHAN</label>
+                <select id="editAbsensiPertemuan" required>
+                    <option value="Pertemuan 1 (Senin)">Pertemuan 1 (Senin)</option>
+                    <option value="Pertemuan 2 (Selasa)">Pertemuan 2 (Selasa)</option>
+                    <option value="Pertemuan 3 (Rabu)">Pertemuan 3 (Rabu)</option>
+                </select>
+            </div>
+            <div class="form-group" style="text-align: left;">
+                <label>KETERANGAN KEHADIRAN</label>
+                <select id="editAbsensiKeterangan" required>
+                    <option value="Hadir">Hadir</option>
+                    <option value="Izin">Izin</option>
+                    <option value="Sakit">Sakit</option>
+                    <option value="Alpha">Alpha</option>
+                </select>
+            </div>
+            <div class="modal-actions" style="margin-top:20px;">
+                <button type="submit" class="btn btn-primary" style="flex: 1;">SIMPAN</button>
+                <button type="button" class="btn btn-delete" style="flex: 1;" onclick="closeModal('editAbsensiModal')">BATAL</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- ELEMEN 6: CUSTOM DIALOG NOTIFIKASI         -->
+<!-- ========================================== -->
 <div id="customDialogModal" class="modal">
     <div class="modal-content">
         <h3 id="dialogTitle"><i class="fas fa-info-circle"></i> KONFIRMASI</h3>
@@ -728,6 +794,9 @@
     </div>
 </div>
 
+<!-- ========================================== -->
+<!-- LOGIKA JAVASCRIPT & FUNGSI APLIKASI WEB    -->
+<!-- ========================================== -->
 <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxzQmY4XGvBLnoeHRo6W4gMFXQAbNESiv8ZLN0fkGIgtMxLA_riQmBRFp-hyCLXDG6D/exec";
     
@@ -736,7 +805,9 @@
     let globalRecruitment = [];
     let currentFilteredAbsensi = [];
 
-    // DETEKSI AKSES SCAN QR DARI URL ANGGOTA VS ADMIN PREVIEW
+    // ------------------------------------------
+    // A. DETEKSI MODE AKSES SCAN QR VS ADMIN
+    // ------------------------------------------
     function checkQrAccessMode() {
         const urlParams = new URLSearchParams(window.location.search);
         const closeBtn = document.getElementById("btnCloseAdminPreview");
@@ -745,11 +816,10 @@
             document.getElementById("loginOverlay").style.display = "none";
             document.getElementById("qrPresensiOverlay").style.display = "flex";
             
-            // Jika ada parameter 'from=admin', tampilkan tombol X untuk kembali
             if (urlParams.get('from') === 'admin') {
                 closeBtn.style.display = "flex";
             } else {
-                closeBtn.style.display = "none"; // Dari SCAN QR HP Anggota murni
+                closeBtn.style.display = "none";
             }
 
             initQrFormDate();
@@ -759,18 +829,18 @@
     }
 
     function openSimulasiQr() {
-        // Membuka form presensi dengan penanda 'from=admin'
         window.location.href = window.location.href.split('?')[0] + "?mode=presensi&from=admin";
     }
 
     function closePresensiToAdmin() {
-        // Menutup overlay presensi dan kembali ke dashboard admin
         document.getElementById("qrPresensiOverlay").style.display = "none";
-        window.history.pushState({}, document.title, window.location.pathname); // Hapus query string di URL
+        window.history.pushState({}, document.title, window.location.pathname);
         checkLoginStatus();
     }
 
-    // 1. SYSTEM LOGIN & LOGOUT ADMIN
+    // ------------------------------------------
+    // B. AUTENTIKASI ADMIN LOGIN & LOGOUT
+    // ------------------------------------------
     function checkLoginStatus() {
         const isLoggedIn = sessionStorage.getItem("paskibra_admin_logged");
         if (isLoggedIn === "true") {
@@ -785,7 +855,7 @@
         const user = document.getElementById("loginUsername").value;
         const pass = document.getElementById("loginPassword").value;
 
-        if (user === "pasmanecis" && pass === "PASKIBMAN6") {
+        if (user === "ADMIN" && pass === "PASKIBRA123") {
             sessionStorage.setItem("paskibra_admin_logged", "true");
             document.getElementById("loginOverlay").style.display = "none";
             showCustomAlert("LOGIN SUKSES", "Selamat datang di Dashboard Admin Paskibra!");
@@ -799,7 +869,9 @@
         checkLoginStatus();
     }
 
-    // 2. FUNGSI CUSTOM ALERT & DIALOG
+    // ------------------------------------------
+    // C. DIALOG ALERT & KONFIRMASI CUSTOM
+    // ------------------------------------------
     function showCustomAlert(title, message, iconClass = "fa-check-circle") {
         document.getElementById("dialogTitle").innerHTML = `<i class="fas ${iconClass}"></i> ${title}`;
         document.getElementById("dialogMessage").innerText = message;
@@ -847,6 +919,9 @@
     setInterval(updateLiveClock, 1000);
     updateLiveClock();
 
+    // ------------------------------------------
+    // D. SINKRONISASI & SINKRON DATA DARI SHEET
+    // ------------------------------------------
     async function manualRefreshData() {
         const icon = document.getElementById("refreshIcon");
         icon.classList.add("fa-spin");
@@ -859,7 +934,7 @@
             document.getElementById("tableAnggota").innerHTML = "<tr><td colspan='6' style='text-align:center;'><i class='fas fa-spinner fa-spin'></i> Memuat data master anggota...</td></tr>";
         }
         if (globalAbsensi.length === 0) {
-            document.getElementById("tablePreviewAbsensi").innerHTML = "<tr><td colspan='6' style='text-align:center;'><i class='fas fa-spinner fa-spin'></i> Memuat rekap absensi...</td></tr>";
+            document.getElementById("tablePreviewAbsensi").innerHTML = "<tr><td colspan='7' style='text-align:center;'><i class='fas fa-spinner fa-spin'></i> Memuat rekap absensi...</td></tr>";
         }
         if (globalRecruitment.length === 0) {
             document.getElementById("tableOR").innerHTML = "<tr><td colspan='7' style='text-align:center;'><i class='fas fa-spinner fa-spin'></i> Memuat data pendaftar...</td></tr>";
@@ -888,6 +963,9 @@
         renderTableOR();
     }
 
+    // ------------------------------------------
+    // E. KELOLA DATA MASTER ANGGOTA
+    // ------------------------------------------
     function renderTableMaster() {
         const tbody = document.getElementById("tableAnggota");
         tbody.innerHTML = "";
@@ -1002,13 +1080,14 @@
         });
     }
 
-    // 3. LOGIKA GENERATOR QR CODE KHUSUS ABSENSI ANGGOTA
+    // ------------------------------------------
+    // F. GENERATOR QR CODE PRESENSI
+    // ------------------------------------------
     function generateQrCodeForScan() {
         const canvasContainer = document.getElementById("qrcodeCanvas");
         const linkText = document.getElementById("qrTextLink");
         canvasContainer.innerHTML = "";
 
-        // URL QR Code Murni untuk Anggota (Tanpa tombol X)
         const targetUrl = window.location.href.split('?')[0] + "?mode=presensi";
 
         new QRCode(canvasContainer, {
@@ -1022,7 +1101,9 @@
         linkText.innerHTML = `<i class="fas fa-link"></i> Link Presensi: <u>${targetUrl}</u>`;
     }
 
-    // 4. LOGIKA PRESENSI MANDIRI ANGGOTA VIA SCAN QR
+    // ------------------------------------------
+    // G. LOGIKA FORM PRESENSI MANDIRI QR ANGGOTA
+    // ------------------------------------------
     function initQrFormDate() {
         const today = new Date().toISOString().split('T')[0];
         const dateInput = document.getElementById("qrDateInput");
@@ -1144,32 +1225,41 @@
         return null;
     }
 
+    // ------------------------------------------
+    // H. RENDER PREVIEW ABSENSI & EDIT/HAPUS
+    // ------------------------------------------
     function renderPreviewAbsensi() {
         const tbody = document.getElementById("tablePreviewAbsensi");
-        const tipe = document.getElementById("filterRekapTipe").value;
+        const tipeWaktu = document.getElementById("filterRekapTipe").value;
+        const tipeStatus = document.getElementById("filterRekapStatus").value;
         tbody.innerHTML = "";
 
         if (!globalAbsensi.length) {
-            tbody.innerHTML = "<tr><td colspan='6' style='text-align:center;'>Belum ada data absensi.</td></tr>";
+            tbody.innerHTML = "<tr><td colspan='7' style='text-align:center;'>Belum ada data absensi.</td></tr>";
             currentFilteredAbsensi = [];
             return;
         }
 
         const now = new Date();
         currentFilteredAbsensi = globalAbsensi.filter(a => {
-            if (tipe === 'semua') return true;
+            const ket = a.Keterangan || a.keterangan || "Hadir";
+            if (tipeStatus !== 'semua' && ket.toLowerCase() !== tipeStatus.toLowerCase()) {
+                return false;
+            }
+
+            if (tipeWaktu === 'semua') return true;
             const rawTs = a.TimeStamp || a.Timestamp || a.timestamp || "";
             const d = parseDateSafe(rawTs);
             if (!d) return true;
             
             const diffDays = (now - d) / (1000 * 60 * 60 * 24);
-            if (tipe === 'mingguan') return diffDays <= 7 && diffDays >= 0;
-            if (tipe === 'bulanan') return diffDays <= 30 && diffDays >= 0;
+            if (tipeWaktu === 'mingguan') return diffDays <= 7 && diffDays >= 0;
+            if (tipeWaktu === 'bulanan') return diffDays <= 30 && diffDays >= 0;
             return true;
         });
 
         if (!currentFilteredAbsensi.length) {
-            tbody.innerHTML = "<tr><td colspan='6' style='text-align:center;'>Belum ada data absensi pada rentang waktu ini.</td></tr>";
+            tbody.innerHTML = "<tr><td colspan='7' style='text-align:center;'>Tidak ada data absensi yang sesuai filter.</td></tr>";
             return;
         }
 
@@ -1188,7 +1278,7 @@
             if (pertemuanGroup[groupTitle].length > 0) {
                 tbody.innerHTML += `
                     <tr class="divider-pertemuan">
-                        <td colspan="6"><i class="fas fa-bookmark"></i> PEMBATAS: ${groupTitle.toUpperCase()}</td>
+                        <td colspan="7"><i class="fas fa-bookmark"></i> PEMBATAS: ${groupTitle.toUpperCase()}</td>
                     </tr>`;
 
                 pertemuanGroup[groupTitle].forEach(row => {
@@ -1203,20 +1293,90 @@
 
                     let rawNis = row.NIS || row.nis || '-';
                     const nis = rawNis.toString().trim() || "-";
+                    const nama = row.Nama_Lengkap || row.nama_lengkap || row.Nama || '-';
+                    const pertemuan = row["Pertemuan Ke -"] || row.Pertemuan || '-';
+                    const keterangan = row.Keterangan || row.keterangan || 'Hadir';
+
                     tbody.innerHTML += `
                         <tr>
                             <td><strong>${globalIndex++}</strong></td>
                             <td>${formattedDate}</td>
                             <td><strong>${nis}</strong></td>
-                            <td>${row.Nama_Lengkap || row.nama_lengkap || row.Nama || '-'}</td>
-                            <td>${row["Pertemuan Ke -"] || row.Pertemuan || '-'}</td>
-                            <td>${row.Keterangan || row.keterangan || 'Hadir'}</td>
+                            <td>${nama}</td>
+                            <td>${pertemuan}</td>
+                            <td><strong>${keterangan}</strong></td>
+                            <td>
+                                <button class="btn btn-edit" onclick="openEditAbsensiModal('${nama.replace(/'/g, "\\'")}', '${pertemuan}', '${keterangan}', '${rawTs}')"><i class="fas fa-edit"></i> Edit</button>
+                                <button class="btn btn-delete" onclick="deleteAbsensi('${nama.replace(/'/g, "\\'")}', '${rawTs}')"><i class="fas fa-trash-alt"></i> Hapus</button>
+                            </td>
                         </tr>`;
                 });
             }
         });
     }
 
+    function openEditAbsensiModal(nama, pertemuan, keterangan, rawTs) {
+        document.getElementById("editAbsensiNama").value = nama;
+        document.getElementById("editAbsensiNamaView").value = nama;
+        document.getElementById("editAbsensiPertemuan").value = pertemuan;
+        document.getElementById("editAbsensiKeterangan").value = keterangan;
+        document.getElementById("editAbsensiRawTs").value = rawTs;
+        document.getElementById("editAbsensiModal").style.display = "flex";
+    }
+
+    async function saveEditAbsensi(e) {
+        e.preventDefault();
+        const nama = document.getElementById("editAbsensiNama").value;
+        const pertemuan = document.getElementById("editAbsensiPertemuan").value;
+        const keterangan = document.getElementById("editAbsensiKeterangan").value;
+        const rawTs = document.getElementById("editAbsensiRawTs").value;
+
+        closeModal("editAbsensiModal");
+
+        const idx = globalAbsensi.findIndex(a => {
+            const rNama = a.Nama_Lengkap || a.nama_lengkap || a.Nama || "";
+            const rTs = a.TimeStamp || a.Timestamp || a.timestamp || "";
+            return rNama.toLowerCase() === nama.toLowerCase() && rTs === rawTs;
+        });
+
+        if (idx !== -1) {
+            globalAbsensi[idx]["Pertemuan Ke -"] = pertemuan;
+            globalAbsensi[idx]["Pertemuan"] = pertemuan;
+            globalAbsensi[idx]["Keterangan"] = keterangan;
+            renderPreviewAbsensi();
+        }
+
+        showCustomAlert("BERHASIL", "Data absensi berhasil diperbarui!");
+        sendDataToSheet({
+            action: "updateAbsensi",
+            nama_lengkap: nama,
+            timestamp: rawTs,
+            pertemuan: pertemuan,
+            keterangan: keterangan
+        });
+    }
+
+    function deleteAbsensi(nama, rawTs) {
+        showCustomConfirm("HAPUS ABSENSI", `Apakah Anda yakin ingin menghapus data absensi ${nama}?`, () => {
+            globalAbsensi = globalAbsensi.filter(a => {
+                const rNama = a.Nama_Lengkap || a.nama_lengkap || a.Nama || "";
+                const rTs = a.TimeStamp || a.Timestamp || a.timestamp || "";
+                return !(rNama.toLowerCase() === nama.toLowerCase() && rTs === rawTs);
+            });
+
+            renderPreviewAbsensi();
+            showCustomAlert("TERHAPUS", "Data absensi berhasil dihapus!");
+            sendDataToSheet({
+                action: "deleteAbsensi",
+                nama_lengkap: nama,
+                timestamp: rawTs
+            });
+        });
+    }
+
+    // ------------------------------------------
+    // I. KELOLA DATA OPEN RECRUITMENT (OR)
+    // ------------------------------------------
     function renderTableOR() {
         const tbody = document.getElementById("tableOR");
         tbody.innerHTML = "";
@@ -1409,6 +1569,9 @@
         reader.readAsArrayBuffer(file);
     }
 
+    // ------------------------------------------
+    // J. EXPORT DATA KE EXCEL
+    // ------------------------------------------
     function downloadExcelDenganKop(tipe) {
         let title = "";
         let dataToExport = [];
@@ -1420,8 +1583,9 @@
             filename = "Data_Anggota_Paskibra.xls";
         } else if (tipe === 'absensi') {
             const filterTipe = document.getElementById("filterRekapTipe").value;
-            title = `REKAP ABSENSI LATIHAN PASKIBRA (${filterTipe.toUpperCase()})`;
-            filename = `Rekap_Absensi_${filterTipe}.xls`;
+            const filterStatus = document.getElementById("filterRekapStatus").value;
+            title = `REKAP ABSENSI LATIHAN PASKIBRA (${filterTipe.toUpperCase()} - STATUS: ${filterStatus.toUpperCase()})`;
+            filename = `Rekap_Absensi_${filterTipe}_${filterStatus}.xls`;
             dataToExport = currentFilteredAbsensi.length ? currentFilteredAbsensi : globalAbsensi;
         } else if (tipe === 'recruitment') {
             title = "LAPORAN PENDAFTARAN OPEN RECRUITMENT PASKIBRA";
@@ -1481,6 +1645,9 @@
         document.body.removeChild(a);
     }
 
+    // ------------------------------------------
+    // K. PENGIRIMAN DATA KE SERVER SCRIPT
+    // ------------------------------------------
     async function sendDataToSheet(payload) {
         try {
             await fetch(SCRIPT_URL, {
