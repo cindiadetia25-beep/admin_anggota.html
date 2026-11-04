@@ -567,20 +567,21 @@
             <table>
                 <thead>
                     <tr>
-                        <th style="width:50px;">NO.</th>
-                        <th>NIS / NISN</th>
+                        <th style="width:40px; text-align:center;">NO.</th>
+                        <th style="width:110px;">TANGGAL</th>
+                        <th style="width:110px;">NIS / NISN</th>
                         <th>NAMA LENGKAP</th>
-                        <th>KELAS</th>
-                        <th>JABATAN</th>
-                        <th>AKSI</th>
+                        <th style="width:90px;">KELAS</th>
+                        <th>PERTEMUAN</th>
+                        <th style="width:100px;">KETERANGAN</th>
+                        <th style="width:140px; text-align:center;">AKSI</th>
                     </tr>
                 </thead>
-                <tbody id="tableAnggota">
-                    <tr><td colspan="6" style="text-align:center;"><i class="fas fa-spinner fa-spin"></i> Memuat data master anggota...</td></tr>
+                <tbody id="tablePreviewAbsensi">
+                    <tr><td colspan="8" style="text-align:center;"><i class="fas fa-spinner fa-spin"></i> Memuat preview rekap absensi...</td></tr>
                 </tbody>
             </table>
         </div>
-    </div>
 
     <!-- ========================================== -->
     <!-- TAB 2: ABSENSI LATIHAN RUTIN & PREVIEW     -->
@@ -1228,6 +1229,9 @@
         }
     }
 
+// ====================================================
+    // SUBMIT ABSENSI QR MANDIRI (FORMAT TANGGAL INDO UNTUK SPREADSHEET)
+    // ====================================================
     async function submitPresensiQrMandiri(e) {
         e.preventDefault();
         const select = document.getElementById("qrMatchResultSelect");
@@ -1242,27 +1246,25 @@
         const pertemuan = document.getElementById("qrPertemuanAuto").value;
         const keterangan = document.getElementById("qrStatusSelect").value;
 
-        const dateObj = new Date(dateVal);
-        const targetDateStr = dateObj.toLocaleDateString('id-ID');
+        const formattedDateIndo = formatDateIndo(dateVal);
+        const kelas = getKelasByNamaOrNis(nama, nis);
 
         const isDuplicate = globalAbsensi.some(a => {
             const rNama = a.Nama_Lengkap || a.nama_lengkap || a.Nama || "";
             const rawTs = a.TimeStamp || a.Timestamp || a.timestamp || "";
-            const d = parseDateSafe(rawTs);
-            const dateStr = d ? d.toLocaleDateString('id-ID') : "";
-
-            return rNama.toLowerCase() === nama.toLowerCase() && dateStr === targetDateStr;
+            const dStr = formatDateIndo(rawTs);
+            return rNama.toLowerCase() === nama.toLowerCase() && dStr === formattedDateIndo;
         });
 
         if (isDuplicate) {
-            return showCustomAlert("SISTEM PENGAMANAN", `Anggota bernama ${nama} sudah mengisi absensi untuk tanggal ${targetDateStr}! Pengisian ganda ditolak.`, "fa-times-circle");
+            return showCustomAlert("SISTEM PENGAMANAN", `Anggota bernama ${nama} sudah mengisi absensi untuk tanggal ${formattedDateIndo}! Pengisian ganda ditolak.`, "fa-times-circle");
         }
 
-        const isoTimestamp = new Date(dateVal).toISOString();
         globalAbsensi.unshift({
-            TimeStamp: isoTimestamp,
+            TimeStamp: formattedDateIndo,
             NIS: nis,
             Nama_Lengkap: nama,
+            Kelas: kelas,
             Pertemuan: pertemuan,
             Keterangan: keterangan
         });
@@ -1271,7 +1273,15 @@
         document.getElementById("qrInputNamaAwal").value = "";
         autoMatchMemberQr("");
 
-        sendDataToSheet({ action: "addAbsensi", nis, nama_lengkap: nama, pertemuan, keterangan });
+        sendDataToSheet({
+            action: "addAbsensi",
+            nis: nis,
+            nama_lengkap: nama,
+            kelas: kelas,
+            pertemuan: pertemuan,
+            keterangan: keterangan,
+            timestamp: formattedDateIndo
+        });
     }
 
     function filterDropdownAnggota(query) {
@@ -1285,7 +1295,7 @@
     }
 
     // ====================================================
-    // FUNGSI FORMAT TANGGAL RESMI INDONESIA (DD/MM/YYYY)
+    // FUNGSI UTILITAS TANGGAL LOKAL INDONESIA (DD/MM/YYYY)
     // ====================================================
     function formatDateIndo(rawTs) {
         if (!rawTs) return '-';
@@ -1302,7 +1312,15 @@
     function parseDateSafe(rawTs) {
         if (!rawTs) return null;
         
-        // Jika format string berupa YYYY-MM-DD dari input type="date"
+        // Membaca string DD/MM/YYYY
+        if (typeof rawTs === 'string' && rawTs.includes('/')) {
+            let parts = rawTs.split('/');
+            if (parts.length === 3) {
+                return new Date(parts[2], parts[1] - 1, parts[0]);
+            }
+        }
+        
+        // Membaca string YYYY-MM-DD
         if (typeof rawTs === 'string' && rawTs.includes('-')) {
             let parts = rawTs.split('T')[0].split('-');
             if (parts.length === 3) {
@@ -1316,9 +1334,19 @@
         return null;
     }
 
-    // ------------------------------------------
-    // H. RENDER PREVIEW ABSENSI & EDIT/HAPUS
-    // ------------------------------------------
+    // Helper mengambil Kelas dari Data Master Anggota
+    function getKelasByNamaOrNis(nama, nis) {
+        const found = globalDataMaster.find(a => {
+            let rNis = String(a["NIS/NISN"] || a["NIS"] || a["nis"] || "").trim();
+            let rNama = String(a["NAMA LENGKAP"] || a["Nama_Lengkap"] || a["nama"] || "").trim();
+            if (nis && nis !== "-" && rNis !== "-") return rNis === nis;
+            return rNama.toLowerCase() === (nama || "").toLowerCase();
+        });
+        return found ? (found.KELAS || found.Kelas || found.kelas || "-") : "-";
+    }
+    // ====================================================
+    // RENDER PREVIEW ABSENSI DENGAN KOLOM KELAS & TANGGAL INDO
+    // ====================================================
     function renderPreviewAbsensi() {
         const tbody = document.getElementById("tablePreviewAbsensi");
         const tipeWaktu = document.getElementById("filterRekapTipe").value;
@@ -1326,7 +1354,7 @@
         tbody.innerHTML = "";
 
         if (!globalAbsensi.length) {
-            tbody.innerHTML = "<tr><td colspan='7' style='text-align:center;'>Belum ada data absensi.</td></tr>";
+            tbody.innerHTML = "<tr><td colspan='8' style='text-align:center;'>Belum ada data absensi.</td></tr>";
             currentFilteredAbsensi = [];
             return;
         }
@@ -1350,7 +1378,7 @@
         });
 
         if (!currentFilteredAbsensi.length) {
-            tbody.innerHTML = "<tr><td colspan='7' style='text-align:center;'>Tidak ada data absensi yang sesuai filter.</td></tr>";
+            tbody.innerHTML = "<tr><td colspan='8' style='text-align:center;'>Tidak ada data absensi yang sesuai filter.</td></tr>";
             return;
         }
 
@@ -1369,28 +1397,30 @@
             if (pertemuanGroup[groupTitle].length > 0) {
                 tbody.innerHTML += `
                     <tr class="divider-pertemuan">
-                        <td colspan="7"><i class="fas fa-bookmark"></i> PEMBATAS: ${groupTitle.toUpperCase()}</td>
+                        <td colspan="8"><i class="fas fa-bookmark"></i> PEMBATAS: ${groupTitle.toUpperCase()}</td>
                     </tr>`;
 
                 pertemuanGroup[groupTitle].forEach(row => {
                     const rawTs = row.TimeStamp || row.Timestamp || row.timestamp || "";
-                  let formattedDate = formatDateIndo(rawTs);
+                    let formattedDate = formatDateIndo(rawTs);
 
                     let rawNis = row.NIS || row.nis || '-';
                     const nis = rawNis.toString().trim() || "-";
                     const nama = row.Nama_Lengkap || row.nama_lengkap || row.Nama || '-';
+                    const kelas = row.Kelas || row.kelas || getKelasByNamaOrNis(nama, nis);
                     const pertemuan = row["Pertemuan Ke -"] || row.Pertemuan || '-';
                     const keterangan = row.Keterangan || row.keterangan || 'Hadir';
 
                     tbody.innerHTML += `
                         <tr>
-                            <td><strong>${globalIndex++}</strong></td>
-                            <td>${formattedDate}</td>
+                            <td style="text-align:center;"><strong>${globalIndex++}</strong></td>
+                            <td><strong>${formattedDate}</strong></td>
                             <td><strong>${nis}</strong></td>
                             <td>${nama}</td>
+                            <td>${kelas}</td>
                             <td>${pertemuan}</td>
                             <td><strong>${keterangan}</strong></td>
-                            <td>
+                            <td style="text-align:center;">
                                 <button class="btn btn-edit" onclick="openEditAbsensiModal('${nama.replace(/'/g, "\\'")}', '${pertemuan}', '${keterangan}', '${rawTs}')"><i class="fas fa-edit"></i> Edit</button>
                                 <button class="btn btn-delete" onclick="deleteAbsensi('${nama.replace(/'/g, "\\'")}', '${rawTs}')"><i class="fas fa-trash-alt"></i> Hapus</button>
                             </td>
@@ -1399,7 +1429,6 @@
             }
         });
     }
-
     function openEditAbsensiModal(nama, pertemuan, keterangan, rawTs) {
         document.getElementById("editAbsensiNama").value = nama;
         document.getElementById("editAbsensiNamaView").value = nama;
@@ -1588,6 +1617,9 @@
     }
 
     // PENGIRIMAN ABSENSI DARI INPUT ADMIN MANUAL (MENGGUNAKAN TANGGAL YANG DIPILIH)
+// ====================================================
+    // SUBMIT ABSENSI ADMIN (FORMAT TANGGAL INDO UNTUK SPREADSHEET)
+    // ====================================================
     async function submitAbsensi(e) {
         e.preventDefault();
         const select = document.getElementById("absensiSelectNama");
@@ -1600,27 +1632,26 @@
         const keterangan = document.getElementById("absensiStatus").value;
         const dateVal = document.getElementById("absensiTanggalInput").value || new Date().toISOString().split('T')[0];
 
-        const dateObj = new Date(dateVal);
-        const targetDateStr = dateObj.toLocaleDateString('id-ID');
+        const formattedDateIndo = formatDateIndo(dateVal);
+        const kelas = getKelasByNamaOrNis(nama, nis);
 
+        // Pengecekan Duplikasi
         const isDuplicate = globalAbsensi.some(a => {
             const rNama = a.Nama_Lengkap || a.nama_lengkap || a.Nama || "";
             const rawTs = a.TimeStamp || a.Timestamp || a.timestamp || "";
-            const d = parseDateSafe(rawTs);
-            const dateStr = d ? d.toLocaleDateString('id-ID') : "";
-
-            return rNama.toLowerCase() === nama.toLowerCase() && dateStr === targetDateStr;
+            const dStr = formatDateIndo(rawTs);
+            return rNama.toLowerCase() === nama.toLowerCase() && dStr === formattedDateIndo;
         });
 
         if (isDuplicate) {
-            return showCustomAlert("SISTEM PENGAMANAN", `Anggota bernama ${nama} sudah memiliki data absensi untuk tanggal ${targetDateStr}! Pengisian ganda ditolak.`, "fa-times-circle");
+            return showCustomAlert("SISTEM PENGAMANAN", `Anggota bernama ${nama} sudah memiliki data absensi untuk tanggal ${formattedDateIndo}! Pengisian ganda ditolak.`, "fa-times-circle");
         }
 
-        const isoTimestamp = new Date(dateVal).toISOString();
         globalAbsensi.unshift({
-            TimeStamp: isoTimestamp,
+            TimeStamp: formattedDateIndo,
             NIS: nis,
             Nama_Lengkap: nama,
+            Kelas: kelas,
             Pertemuan: pertemuan,
             Keterangan: keterangan
         });
@@ -1628,7 +1659,15 @@
 
         showCustomAlert("BERHASIL", `Absensi ${nama} berhasil disimpan!`);
         select.value = "";
-        sendDataToSheet({ action: "addAbsensi", nis, nama_lengkap: nama, pertemuan, keterangan, timestamp: isoTimestamp });
+        sendDataToSheet({
+            action: "addAbsensi",
+            nis: nis,
+            nama_lengkap: nama,
+            kelas: kelas,
+            pertemuan: pertemuan,
+            keterangan: keterangan,
+            timestamp: formattedDateIndo
+        });
     }
 
     function importExcelOR(event) {
