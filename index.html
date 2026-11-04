@@ -1284,20 +1284,35 @@
         }
     }
 
+    // ====================================================
+    // FUNGSI FORMAT TANGGAL RESMI INDONESIA (DD/MM/YYYY)
+    // ====================================================
+    function formatDateIndo(rawTs) {
+        if (!rawTs) return '-';
+        let d = parseDateSafe(rawTs);
+        if (!d) return rawTs;
+
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+
+        return `${day}/${month}/${year}`;
+    }
+
     function parseDateSafe(rawTs) {
         if (!rawTs) return null;
+        
+        // Jika format string berupa YYYY-MM-DD dari input type="date"
+        if (typeof rawTs === 'string' && rawTs.includes('-')) {
+            let parts = rawTs.split('T')[0].split('-');
+            if (parts.length === 3) {
+                return new Date(parts[0], parts[1] - 1, parts[2]);
+            }
+        }
+
         let d = new Date(rawTs);
         if (!isNaN(d.getTime())) return d;
         
-        let parts = rawTs.toString().split(/[\/\-\s]/);
-        if (parts.length >= 3) {
-            let day = parseInt(parts[0]);
-            let month = parseInt(parts[1]) - 1;
-            let year = parseInt(parts[2]);
-            if (!isNaN(day) && !isNaN(month) && !isNaN(year)) {
-                return new Date(year, month, day);
-            }
-        }
         return null;
     }
 
@@ -1359,13 +1374,7 @@
 
                 pertemuanGroup[groupTitle].forEach(row => {
                     const rawTs = row.TimeStamp || row.Timestamp || row.timestamp || "";
-                    let formattedDate = '-';
-                    const d = parseDateSafe(rawTs);
-                    if (d) {
-                        formattedDate = d.toLocaleDateString('id-ID');
-                    } else if (rawTs) {
-                        formattedDate = rawTs.toString().split('T')[0];
-                    }
+                  let formattedDate = formatDateIndo(rawTs);
 
                     let rawNis = row.NIS || row.nis || '-';
                     const nis = rawNis.toString().trim() || "-";
