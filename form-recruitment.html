@@ -24,7 +24,7 @@
             width: 75px;
             height: 75px;
             object-fit: contain;
-            transition: transform 0.3s;
+            transition: trans 0.3s;
         }
 
         .custom-logo:hover { transform: scale(1.08); }
@@ -71,36 +71,52 @@
 <div class="card">
     <div class="header-logo-box">
         <img class="custom-logo" src="assets/logo-paskibra.png" alt="Logo Paskibra MAN 6 Ciamis">
-        <h2>FORMULIR OPEN RECRUITMENT PASKIBRA</h2>
+     <form id="publicOrForm" onsubmit="submitPublicOR(event)">
+    <div class="form-group">
+        <label>NAMA LENGKAP</label>
+        <input type="text" id="nama" placeholder="NAMA LENGKAP ANDA" required>
     </div>
-    
-    <form onsubmit="submitPendaftaran(event)">
-        <div class="form-group">
-            <label>NAMA LENGKAP</label>
-            <input type="text" id="nama" placeholder="Nama Lengkap Anda" required>
-        </div>
-        <div class="form-group">
-            <label>TEMPAT, TANGGAL LAHIR</label>
-            <input type="text" id="ttl" placeholder="Contoh: Ciamis, 12 Mei 2008" required>
-        </div>
-        <div class="form-group">
-            <label>NO. WHATSAPP / HP</label>
-            <input type="tel" id="noHp" placeholder="08xxxxxxxxxx" required>
-        </div>
-        <div class="form-group">
-            <label>ALUMNI SMP / MTS</label>
-            <input type="text" id="alumniSmp" placeholder="Contoh: MTs N 1 Ciamis" required>
-        </div>
-        <div class="form-group">
-            <label>KELAS SAAT INI</label>
-            <input type="text" id="kelas" placeholder="Contoh: X.1" required>
-        </div>
-        <div class="form-group">
-            <label>ALASAN BERGABUNG</label>
-            <textarea id="alasan" rows="3" placeholder="Tuliskan motivasi Anda..." required></textarea>
-        </div>
-        <button type="submit" id="btnSubmit" class="btn-submit"><i class="fas fa-paper-plane"></i> KIRIM PENDAFTARAN</button>
-    </form>
+
+    <div class="form-group">
+        <label>TEMPAT, TANGGAL LAHIR</label>
+        <input type="text" id="ttl" placeholder="CONTOH: CIAMIS, 12 MEI 2008" required>
+    </div>
+
+    <div class="form-group">
+        <label>NO. WHATSAPP / HP</label>
+        <input type="tel" id="no_hp" placeholder="08XXXXXXXXXX" required>
+    </div>
+
+    <div class="form-group">
+        <label>ALUMNI SMP / MTS</label>
+        <input type="text" id="alumni_smp" placeholder="CONTOH: MTS N 1 CIAMIS" required>
+    </div>
+
+    <div class="form-group">
+        <label>KELAS SAAT INI</label>
+        <input type="text" id="kelas" placeholder="CONTOH: X.1" required>
+    </div>
+
+    <!-- ISIAN BARU: TINGGI BADAN & BERAT BADAN -->
+    <div class="form-group">
+        <label>TINGGI BADAN (CM)</label>
+        <input type="number" id="tinggi_badan" placeholder="CONTOH: 165" required>
+    </div>
+
+    <div class="form-group">
+        <label>BERAT BADAN (KG)</label>
+        <input type="number" id="berat_badan" placeholder="CONTOH: 55" required>
+    </div>
+
+    <div class="form-group">
+        <label>ALASAN BERGABUNG</label>
+        <textarea id="alasan_bergabung" placeholder="TULISKAN MOTIVASI ANDA..." rows="3" required></textarea>
+    </div>
+
+    <button type="submit" class="btn-submit">
+        <i class="fas fa-paper-plane"></i> KIRIM PENDAFTARAN
+    </button>
+</form>
 </div>
 
 <!-- MODAL NOTIFIKASI CENTERED -->
@@ -125,38 +141,43 @@
         document.getElementById("formNotifModal").style.display = "none";
     }
 
-    async function submitPendaftaran(e) {
-        e.preventDefault();
-        const btn = document.getElementById("btnSubmit");
-        btn.disabled = true;
-        btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Mengirim...";
+  async function submitPublicOR(e) {
+    e.preventDefault();
 
-        const payload = {
-            action: "submitOR",
-            nama_pendaftar: document.getElementById("nama").value,
-            ttl: document.getElementById("ttl").value,
-            no_hp: document.getElementById("noHp").value,
-            alumni_smp: document.getElementById("alumniSmp").value,
-            kelas: document.getElementById("kelas").value,
-            alasan_bergabung: document.getElementById("alasan").value
-        };
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> MENGIRIM...';
 
-        try {
-            await fetch(SCRIPT_URL, {
-                method: "POST",
-                mode: "no-cors",
-                headers: { "Content-Type": "text/plain" },
-                body: JSON.stringify(payload)
-            });
-            showFormNotif("PENDAFTARAN BERHASIL", "Data pendaftaran Anda telah berhasil dikirim. Silakan tunggu konfirmasi selanjutnya dari pengurus!");
-            e.target.reset();
-        } catch (err) {
-            showFormNotif("GAGAL MENGIRIM", "Terjadi kesalahan saat mengirim data. Periksa koneksi internet Anda.", false);
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = "<i class='fas fa-paper-plane'></i> KIRIM PENDAFTARAN";
-        }
+    const payload = {
+        action: "submitOR",
+        nama_pendaftar: document.getElementById("nama").value.trim(),
+        ttl: document.getElementById("ttl").value.trim(),
+        no_hp: document.getElementById("no_hp").value.trim(),
+        alumni_smp: document.getElementById("alumni_smp").value.trim(),
+        kelas: document.getElementById("kelas").value.trim(),
+        tinggi_badan: document.getElementById("tinggi_badan").value.trim(),
+        berat_badan: document.getElementById("berat_badan").value.trim(),
+        alasan_bergabung: document.getElementById("alasan_bergabung").value.trim()
+    };
+
+    try {
+        await fetch(SCRIPT_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+
+        alert("PENDAFTARAN BERHASIL! Data Anda telah terkirim ke panitia Paskibra.");
+        e.target.reset();
+    } catch (error) {
+        console.error("Error submit OR:", error);
+        alert("Gagal mengirim pendaftaran. Periksa koneksi internet Anda.");
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> KIRIM PENDAFTARAN';
     }
+}
 </script>
 
 </body>
