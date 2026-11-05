@@ -9,14 +9,25 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'American Captain', 'Segoe UI', sans-serif; letter-spacing: 1px; }
         body { background: linear-gradient(135deg, #4a000b 0%, #2b0006 50%, #800000 100%); min-height: 100vh; color: #fff; padding: 20px; display: flex; justify-content: center; align-items: center; }
-        .card { background: rgba(50, 0, 10, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 16px; padding: 25px; width: 100%; max-width: 500px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
+        
+        /* Form Presisi Lebar 750px */
+        .card { 
+            background: rgba(50, 0, 10, 0.75); 
+            backdrop-filter: blur(12px); 
+            border: 1px solid rgba(255, 215, 0, 0.3); 
+            border-radius: 16px; 
+            padding: 25px 30px; 
+            width: 100%; 
+            max-width: 750px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6); 
+        }
         
         .header-logo-box {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             gap: 10px;
         }
 
@@ -24,17 +35,57 @@
             width: 75px;
             height: 75px;
             object-fit: contain;
-            transition: trans 0.3s;
+            transition: transform 0.3s;
         }
 
         .custom-logo:hover { transform: scale(1.08); }
 
-        h2 { color: #ffd700; text-align: center; margin-bottom: 20px; font-size: 2rem; border-bottom: 2px solid rgba(255, 215, 0, 0.3); padding-bottom: 10px; line-height: 1.1; }
-        .form-group { margin-bottom: 15px; }
+        h2 { 
+            color: #ffd700; 
+            text-align: center; 
+            margin-bottom: 20px; 
+            font-size: 1.8rem; 
+            border-bottom: 2px solid rgba(255, 215, 0, 0.3); 
+            padding-bottom: 10px; 
+            line-height: 1.2; 
+            text-transform: uppercase;
+        }
+
+        /* Layout Grid 2 Kolom */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px 20px;
+        }
+
+        .form-group { margin-bottom: 0; }
+        .form-group.full-width { grid-column: span 2; }
+        
         .form-group label { display: block; margin-bottom: 5px; color: #ffcc66; font-size: 1rem; }
         .form-group input, .form-group textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(255, 215, 0, 0.3); background: rgba(0, 0, 0, 0.4); color: #fff; font-size: 1rem; }
-        .btn-submit { width: 100%; padding: 12px; background: linear-gradient(45deg, #ffd700, #ffaa00); color: #4a000b; border: none; border-radius: 8px; font-size: 1.2rem; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        
+        .btn-submit { 
+            width: 100%; 
+            padding: 12px; 
+            background: linear-gradient(45deg, #ffd700, #ffaa00); 
+            color: #4a000b; 
+            border: none; 
+            border-radius: 8px; 
+            font-size: 1.2rem; 
+            cursor: pointer; 
+            transition: 0.3s; 
+            margin-top: 20px; 
+            font-weight: bold;
+        }
         .btn-submit:hover { opacity: 0.9; transform: translateY(-2px); }
+
+        /* Responsif Layar HP */
+        @media (max-width: 600px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .form-group.full-width { grid-column: span 1; }
+            .card { padding: 20px; }
+            h2 { font-size: 1.4rem; }
+        }
 
         /* MODAL NOTIFIKASI FORM */
         .modal {
@@ -71,52 +122,58 @@
 <div class="card">
     <div class="header-logo-box">
         <img class="custom-logo" src="assets/logo-paskibra.png" alt="Logo Paskibra MAN 6 Ciamis">
-     <form id="publicOrForm" onsubmit="submitPublicOR(event)">
-    <div class="form-group">
-        <label>NAMA LENGKAP</label>
-        <input type="text" id="nama" placeholder="NAMA LENGKAP ANDA" required>
     </div>
 
-    <div class="form-group">
-        <label>TEMPAT, TANGGAL LAHIR</label>
-        <input type="text" id="ttl" placeholder="CONTOH: CIAMIS, 12 MEI 2008" required>
-    </div>
+    <h2>FORMULIR PENDAFTARAN ANGGOTA PASKIBRA MAN 6 CIAMIS</h2>
 
-    <div class="form-group">
-        <label>NO. WHATSAPP / HP</label>
-        <input type="tel" id="no_hp" placeholder="08XXXXXXXXXX" required>
-    </div>
+    <form id="publicOrForm" onsubmit="submitPublicOR(event)">
+        <div class="form-grid">
+            <div class="form-group">
+                <label>NAMA LENGKAP</label>
+                <input type="text" id="nama" placeholder="NAMA LENGKAP ANDA" required>
+            </div>
 
-    <div class="form-group">
-        <label>ALUMNI SMP / MTS</label>
-        <input type="text" id="alumni_smp" placeholder="CONTOH: MTS N 1 CIAMIS" required>
-    </div>
+            <div class="form-group">
+                <label>TEMPAT, TANGGAL LAHIR</label>
+                <input type="text" id="ttl" placeholder="CONTOH: CIAMIS, 12 MEI 2008" required>
+            </div>
 
-    <div class="form-group">
-        <label>KELAS SAAT INI</label>
-        <input type="text" id="kelas" placeholder="CONTOH: X.1" required>
-    </div>
+            <!-- NO WA DIATUR OPSIONAL (TIDAK WAJIB) -->
+            <div class="form-group">
+                <label>NO. WHATSAPP / HP <span style="font-size:0.8rem; color:#aaa; font-weight:normal;">(OPSIONAL)</span></label>
+                <input type="tel" id="no_hp" placeholder="08XXXXXXXXXX">
+            </div>
 
-    <!-- ISIAN BARU: TINGGI BADAN & BERAT BADAN -->
-    <div class="form-group">
-        <label>TINGGI BADAN (CM)</label>
-        <input type="number" id="tinggi_badan" placeholder="CONTOH: 165" required>
-    </div>
+            <div class="form-group">
+                <label>ALUMNI SMP / MTS</label>
+                <input type="text" id="alumni_smp" placeholder="CONTOH: MTS N 1 CIAMIS" required>
+            </div>
 
-    <div class="form-group">
-        <label>BERAT BADAN (KG)</label>
-        <input type="number" id="berat_badan" placeholder="CONTOH: 55" required>
-    </div>
+            <div class="form-group">
+                <label>KELAS SAAT INI</label>
+                <input type="text" id="kelas" placeholder="CONTOH: X.1" required>
+            </div>
 
-    <div class="form-group">
-        <label>ALASAN BERGABUNG</label>
-        <textarea id="alasan_bergabung" placeholder="TULISKAN MOTIVASI ANDA..." rows="3" required></textarea>
-    </div>
+            <div class="form-group">
+                <label>TINGGI BADAN (CM)</label>
+                <input type="number" id="tinggi_badan" placeholder="CONTOH: 165" required>
+            </div>
 
-    <button type="submit" class="btn-submit">
-        <i class="fas fa-paper-plane"></i> KIRIM PENDAFTARAN
-    </button>
-</form>
+            <div class="form-group full-width">
+                <label>BERAT BADAN (KG)</label>
+                <input type="number" id="berat_badan" placeholder="CONTOH: 55" required>
+            </div>
+
+            <div class="form-group full-width">
+                <label>ALASAN BERGABUNG</label>
+                <textarea id="alasan_bergabung" placeholder="TULISKAN MOTIVASI ANDA..." rows="3" required></textarea>
+            </div>
+        </div>
+
+        <button type="submit" class="btn-submit">
+            <i class="fas fa-paper-plane"></i> KIRIM PENDAFTARAN
+        </button>
+    </form>
 </div>
 
 <!-- MODAL NOTIFIKASI CENTERED -->
@@ -124,7 +181,7 @@
     <div class="modal-content">
         <h3 id="notifTitle"><i class="fas fa-check-circle"></i> BERHASIL</h3>
         <p id="notifMessage">Pendaftaran berhasil dikirim!</p>
-        <button class="btn-submit" onclick="closeNotifModal()" style="font-size:1rem; padding:8px 16px;">TUTUP</button>
+        <button class="btn-submit" onclick="closeNotifModal()" style="font-size:1rem; padding:8px 16px; margin-top:0;">TUTUP</button>
     </div>
 </div>
 
@@ -141,43 +198,43 @@
         document.getElementById("formNotifModal").style.display = "none";
     }
 
-  async function submitPublicOR(e) {
-    e.preventDefault();
+    async function submitPublicOR(e) {
+        e.preventDefault();
 
-    const submitBtn = e.target.querySelector('button[type="submit"]');
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> MENGIRIM...';
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> MENGIRIM...';
 
-    const payload = {
-        action: "submitOR",
-        nama_pendaftar: document.getElementById("nama").value.trim(),
-        ttl: document.getElementById("ttl").value.trim(),
-        no_hp: document.getElementById("no_hp").value.trim(),
-        alumni_smp: document.getElementById("alumni_smp").value.trim(),
-        kelas: document.getElementById("kelas").value.trim(),
-        tinggi_badan: document.getElementById("tinggi_badan").value.trim(),
-        berat_badan: document.getElementById("berat_badan").value.trim(),
-        alasan_bergabung: document.getElementById("alasan_bergabung").value.trim()
-    };
+        const payload = {
+            action: "submitOR",
+            nama_pendaftar: document.getElementById("nama").value.trim(),
+            ttl: document.getElementById("ttl").value.trim(),
+            no_hp: document.getElementById("no_hp").value.trim(),
+            alumni_smp: document.getElementById("alumni_smp").value.trim(),
+            kelas: document.getElementById("kelas").value.trim(),
+            tinggi_badan: document.getElementById("tinggi_badan").value.trim(),
+            berat_badan: document.getElementById("berat_badan").value.trim(),
+            alasan_bergabung: document.getElementById("alasan_bergabung").value.trim()
+        };
 
-    try {
-        await fetch(SCRIPT_URL, {
-            method: "POST",
-            mode: "no-cors",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-        });
+        try {
+            await fetch(SCRIPT_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
 
-        alert("PENDAFTARAN BERHASIL! Data Anda telah terkirim ke panitia Paskibra.");
-        e.target.reset();
-    } catch (error) {
-        console.error("Error submit OR:", error);
-        alert("Gagal mengirim pendaftaran. Periksa koneksi internet Anda.");
-    } finally {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> KIRIM PENDAFTARAN';
+            showFormNotif("PENDAFTARAN BERHASIL", "Data pendaftaran Anda telah berhasil terkirim ke sistem Paskibra!", true);
+            e.target.reset();
+        } catch (error) {
+            console.error("Error submit OR:", error);
+            showFormNotif("GAGAL MENGIRIM", "Terjadi kesalahan saat mengirim pendaftaran. Silakan periksa koneksi internet Anda.", false);
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> KIRIM PENDAFTARAN';
+        }
     }
-}
 </script>
 
 </body>
