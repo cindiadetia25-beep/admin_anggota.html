@@ -556,20 +556,22 @@
             </div>
         </div>
 
-        <div class="table-wrapper">
+            <div class="table-wrapper">
             <table>
                 <thead>
                     <tr>
-                        <th style="width:50px;">NO.</th>
-                        <th>NIS / NISN</th>
-                        <th>NAMA LENGKAP</th>
-                        <th>KELAS</th>
-                        <th>JABATAN</th>
-                        <th>AKSI</th>
+                        <th style="width:40px; text-align:center; white-space:nowrap;">NO.</th>
+                        <th style="width:100px; white-space:nowrap;">TANGGAL</th>
+                        <th style="width:100px; white-space:nowrap;">NIS / NISN</th>
+                        <th style="min-width:160px; white-space:nowrap;">NAMA LENGKAP</th>
+                        <th style="width:80px; text-align:center; white-space:nowrap;">KELAS</th>
+                        <th style="min-width:150px; white-space:nowrap;">PERTEMUAN</th>
+                        <th style="width:120px; white-space:nowrap;">KETERANGAN</th>
+                        <th style="width:130px; text-align:center; white-space:nowrap;">AKSI</th>
                     </tr>
                 </thead>
-                <tbody id="tableAnggota">
-                    <tr><td colspan="6" style="text-align:center;"><i class="fas fa-spinner fa-spin"></i> Memuat data master anggota...</td></tr>
+                <tbody id="tablePreviewAbsensi">
+                    <tr><td colspan="8" style="text-align:center;"><i class="fas fa-spinner fa-spin"></i> Memuat preview rekap absensi...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -1334,20 +1336,34 @@
         const pertemuanGroup = { "Pertemuan 1 (Senin)": [], "Pertemuan 2 (Selasa)": [], "Pertemuan 3 (Rabu)": [], "Lainnya": [] };
 
         currentFilteredAbsensi.forEach(item => {
-            const p = item["Pertemuan Ke -"] || item.Pertemuan || item.pertemuan || "";
-            if (p.includes("Pertemuan 1")) pertemuanGroup["Pertemuan 1 (Senin)"].push(item);
-            else if (p.includes("Pertemuan 2")) pertemuanGroup["Pertemuan 2 (Selasa)"].push(item);
-            else if (p.includes("Pertemuan 3")) pertemuanGroup["Pertemuan 3 (Rabu)"].push(item);
-            else pertemuanGroup["Lainnya"].push(item);
+            let p = item["Pertemuan Ke -"] || item.Pertemuan || item.pertemuan || "";
+            
+            // Pengamanan jika data lama di Google Sheets nilainya terbalik
+            if (!p.includes("Pertemuan") && item.Keterangan && item.Keterangan.includes("Pertemuan")) {
+                p = item.Keterangan;
+            }
+
+            if (p.includes("Pertemuan 1")) {
+                pertemuanGroup["Pertemuan 1 (Senin)"].push(item);
+            } else if (p.includes("Pertemuan 2")) {
+                pertemuanGroup["Pertemuan 2 (Selasa)"].push(item);
+            } else if (p.includes("Pertemuan 3")) {
+                pertemuanGroup["Pertemuan 3 (Rabu)"].push(item);
+            } else {
+                pertemuanGroup["Lainnya"].push(item);
+            }
         });
 
-        let globalIndex = 1;
+        // PERULANGAN PER KELOMPOK PERTEMUAN
         Object.keys(pertemuanGroup).forEach(groupTitle => {
             if (pertemuanGroup[groupTitle].length > 0) {
                 tbody.innerHTML += `
                     <tr class="divider-pertemuan">
                         <td colspan="8"><i class="fas fa-bookmark"></i> PEMBATAS: ${groupTitle.toUpperCase()}</td>
                     </tr>`;
+
+                // RESET NOMOR KEMBALI KE 1 DI SETIAP PERTEMUAN BARU
+                let groupIndex = 1;
 
                 pertemuanGroup[groupTitle].forEach(row => {
                     const rawTs = row.TimeStamp || row.Timestamp || row.timestamp || "";
@@ -1356,20 +1372,28 @@
                     let rawNis = row.NIS || row.nis || '-';
                     const nis = rawNis.toString().trim() || "-";
                     const nama = row.Nama_Lengkap || row.nama_lengkap || row.Nama || '-';
-                    const kelas = row.Kelas || row.kelas || getKelasByNamaOrNis(nama, nis);
-                    const pertemuan = row["Pertemuan Ke -"] || row.Pertemuan || '-';
-                    const keterangan = row.Keterangan || row.keterangan || 'Hadir';
+                    
+                    let kelas = row.Kelas || row.kelas || getKelasByNamaOrNis(nama, nis);
+                    let pertemuan = row["Pertemuan Ke -"] || row.Pertemuan || '-';
+                    let keterangan = row.Keterangan || row.keterangan || 'Hadir';
+
+                    // Penyesuaian otomatis jika kolom baris lama terbalik
+                    if (pertemuan.includes("Hadir") || pertemuan.includes("Izin") || pertemuan.includes("Sakit") || pertemuan.includes("Alpha")) {
+                        let tempKet = pertemuan;
+                        pertemuan = keterangan;
+                        keterangan = tempKet;
+                    }
 
                     tbody.innerHTML += `
                         <tr>
-                            <td style="text-align:center;"><strong>${globalIndex++}</strong></td>
-                            <td><strong>${formattedDate}</strong></td>
-                            <td><strong>${nis}</strong></td>
-                            <td>${nama}</td>
-                            <td>${kelas}</td>
-                            <td>${pertemuan}</td>
-                            <td><strong>${keterangan}</strong></td>
-                            <td style="text-align:center;">
+                            <td style="text-align:center; white-space:nowrap;"><strong>${groupIndex++}</strong></td>
+                            <td style="white-space:nowrap;"><strong>${formattedDate}</strong></td>
+                            <td style="white-space:nowrap;"><strong>${nis}</strong></td>
+                            <td style="white-space:nowrap;">${nama}</td>
+                            <td style="text-align:center; white-space:nowrap;">${kelas}</td>
+                            <td style="white-space:nowrap;">${pertemuan}</td>
+                            <td style="white-space:nowrap;"><strong>${keterangan}</strong></td>
+                            <td style="text-align:center; white-space:nowrap;">
                                 <button class="btn btn-edit" onclick="openEditAbsensiModal('${nama.replace(/'/g, "\\'")}', '${pertemuan}', '${keterangan}', '${rawTs}')"><i class="fas fa-edit"></i> Edit</button>
                                 <button class="btn btn-delete" onclick="deleteAbsensi('${nama.replace(/'/g, "\\'")}', '${rawTs}')"><i class="fas fa-trash-alt"></i> Hapus</button>
                             </td>
