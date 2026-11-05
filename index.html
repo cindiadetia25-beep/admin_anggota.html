@@ -1064,16 +1064,29 @@
         }
 
         globalDokumentasi.forEach(item => {
+            // Menentukan nama file saat didownload
+            const fileName = `Dokumentasi_${item.pertemuan.replace(/\s+/g, '_')}_${item.tanggal.replace(/\//g, '-')}.png`;
+
             gallery.innerHTML += `
                 <div class="doc-card">
                     <img src="${item.imgData}" alt="Dokumentasi Latihan">
                     <div class="doc-title">${item.pertemuan}</div>
                     <div class="doc-desc">${item.ket} (${item.tanggal})</div>
-                    <button class="btn btn-delete" style="padding:4px 8px; font-size:0.8rem;" onclick="deleteDokumentasi(${item.id})"><i class="fas fa-trash-alt"></i> Hapus</button>
+                    
+                    <div style="display: flex; gap: 6px; justify-content: center; margin-top: 4px;">
+                        <!-- TOMBOL DOWNLOAD FOTO -->
+                        <a href="${item.imgData}" download="${fileName}" class="btn btn-download" style="padding:4px 8px; font-size:0.8rem; text-decoration:none;">
+                            <i class="fas fa-download"></i> Download
+                        </a>
+                        
+                        <!-- TOMBOL HAPUS FOTO -->
+                        <button class="btn btn-delete" style="padding:4px 8px; font-size:0.8rem;" onclick="deleteDokumentasi(${item.id})">
+                            <i class="fas fa-trash-alt"></i> Hapus
+                        </button>
+                    </div>
                 </div>`;
         });
     }
-
     function deleteDokumentasi(id) {
         showCustomConfirm("HAPUS FOTO", "Apakah Anda yakin ingin menghapus foto dokumentasi ini?", () => {
             globalDokumentasi = globalDokumentasi.filter(d => d.id !== id);
