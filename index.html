@@ -7,11 +7,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.cdnfonts.com/css/american-captain" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
-    <!-- ========================================== -->
-    <!-- CSS STYLES & DESAIN DASHBOARD ADMIN        -->
-    <!-- ========================================== -->
     <style>
         * { 
             box-sizing: border-box; 
@@ -35,7 +31,6 @@
             width: 100%;
         }
 
-        /* GARIS PEMBATAS VISUAL TEMA EMAS */
         hr.section-divider {
             border: 0;
             height: 2px;
@@ -43,9 +38,6 @@
             margin: 25px 0;
         }
 
-        /* ==================================================== */
-        /* STYLE KHUSUS FORM LOGIN ADMIN (KAPITAL, FONT & EYE)  */
-        /* ==================================================== */
         #loginUsername, #loginPassword {
             font-family: 'Courier New', Courier, monospace !important;
             font-weight: bold !important;
@@ -74,9 +66,7 @@
             transition: color 0.2s ease;
         }
 
-        .toggle-password-btn:hover {
-            color: #ffffff;
-        }
+        .toggle-password-btn:hover { color: #ffffff; }
 
         header { 
             text-align: center; 
@@ -153,10 +143,7 @@
             transition: 0.3s;
         }
 
-        .btn-refresh-header:hover {
-            transform: translateY(-2px);
-            opacity: 0.95;
-        }
+        .btn-refresh-header:hover { transform: translateY(-2px); opacity: 0.95; }
 
         .nav-tabs { 
             display: flex; 
@@ -283,23 +270,38 @@
         .file-input-wrapper { position: relative; overflow: hidden; display: inline-block; }
         .file-input-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; }
 
-        .qr-wrapper {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+        /* GALERI DOKUMENTASI */
+        .doc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .doc-card {
             background: rgba(0, 0, 0, 0.4);
             border: 1px solid rgba(255, 215, 0, 0.3);
             border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        #qrcodeCanvas {
-            background: #fff;
             padding: 10px;
-            border-radius: 10px;
-            margin: 15px 0;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .doc-card img {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid #ffd700;
+        }
+        .doc-card .doc-title {
+            color: #ffd700;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+        .doc-card .doc-desc {
+            color: #ffcc66;
+            font-size: 0.85rem;
         }
 
         #loginOverlay {
@@ -323,52 +325,6 @@
             text-align: center;
         }
         .login-card h2 { color: #ffd700; margin-bottom: 20px; font-size: 1.8rem; }
-
-        #qrPresensiOverlay {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: linear-gradient(135deg, #4a000b 0%, #2b0006 100%);
-            z-index: 99998;
-            display: none;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            overflow-y: auto;
-        }
-        .presensi-card {
-            background: rgba(50, 0, 10, 0.9);
-            border: 2px solid #ffd700;
-            border-radius: 16px;
-            padding: 25px;
-            width: 100%;
-            max-width: 450px;
-            box-shadow: 0 0 30px rgba(255,215,0,0.4);
-            position: relative;
-        }
-
-        .btn-close-presensi {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: #e74c3c;
-            color: #fff;
-            border: 1px solid #ff6b6b;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-            transition: 0.3s;
-        }
-        .btn-close-presensi:hover {
-            transform: scale(1.15) rotate(90deg);
-            background: #c0392b;
-        }
 
         .modal {
             display: none;
@@ -411,9 +367,7 @@
 </head>
 <body>
 
-<!-- ========================================== -->
-<!-- ELEMEN 1: OVERLAY LOGIN ADMIN               -->
-<!-- ========================================== -->
+<!-- OVERLAY LOGIN ADMIN -->
 <div id="loginOverlay">
     <div class="login-card">
         <img class="custom-logo" src="assets/logo-paskibra.png" alt="Logo Paskibra" style="margin-bottom: 10px;">
@@ -436,62 +390,6 @@
     </div>
 </div>
 
-<!-- ========================================== -->
-<!-- ELEMEN 2: OVERLAY PRESENSI MANDIRI SCAN QR  -->
-<!-- ========================================== -->
-<div id="qrPresensiOverlay">
-    <div class="presensi-card">
-        <button id="btnCloseAdminPreview" class="btn-close-presensi" onclick="closePresensiToAdmin()" title="Kembali ke Dashboard Admin">
-            <i class="fas fa-times"></i>
-        </button>
-
-        <div style="text-align: center; margin-bottom: 15px;">
-            <img class="custom-logo" src="assets/logo-paskibra.png" alt="Logo Paskibra">
-            <h2 style="color:#ffd700; margin-top:5px; font-size: 1.8rem;">FORM PRESENSI MANDIRI PASKIBRA</h2>
-            <p style="color:#ffcc66; font-size: 0.95rem;">Scan QR Code Berhasil! Isi data presensi di bawah ini:</p>
-        </div>
-        <hr class="section-divider">
-        
-        <form onsubmit="submitPresensiQrMandiri(event)">
-            <div class="form-group">
-                <label>ISIKAN NAMA (AWAL / PENCARIAN)</label>
-                <input type="text" id="qrInputNamaAwal" placeholder="Ketik Nama Awal / Penuh Anda..." oninput="autoMatchMemberQr(this.value)" required>
-            </div>
-
-            <div class="form-group">
-                <label>ANGGOTA TERIDENTIFIKASI (DATA MASTER)</label>
-                <select id="qrMatchResultSelect" required>
-                    <option value="">-- KETIK NAMA AWAL DI ATAS --</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>PILIH TANGGAL PRESENSI</label>
-                <input type="date" id="qrDateInput" onchange="autoCalculatePertemuan(this.value)" required>
-            </div>
-
-            <div class="form-group">
-                <label>HARI & PERTEMUAN (OTOMATIS TERDETEKSI)</label>
-                <input type="text" id="qrPertemuanAuto" readonly style="background: rgba(255,215,0,0.15); color: #ffd700; font-weight: bold;" placeholder="Otomatis Terdeteksi...">
-            </div>
-
-            <div class="form-group">
-                <label>KETERANGAN KEHADIRAN</label>
-                <select id="qrStatusSelect" required>
-                    <option value="Hadir">Hadir</option>
-                    <option value="Izin">Izin</option>
-                    <option value="Sakit">Sakit</option>
-                </select>
-            </div>
-
-            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;"><i class="fas fa-paper-plane"></i> KIRIM PRESENSI MANDIRI</button>
-        </form>
-    </div>
-</div>
-
-<!-- ========================================== -->
-<!-- ELEMEN 3: KONTEN UTAMA DASHBOARD ADMIN     -->
-<!-- ========================================== -->
 <div class="container">
     <header>
         <div class="header-title-box">
@@ -556,38 +454,53 @@
             </div>
         </div>
 
-            <div class="table-wrapper">
+        <div class="table-wrapper">
             <table>
                 <thead>
                     <tr>
-                        <th style="width:40px; text-align:center; white-space:nowrap;">NO.</th>
-                        <th style="width:100px; white-space:nowrap;">TANGGAL</th>
-                        <th style="width:100px; white-space:nowrap;">NIS / NISN</th>
-                        <th style="min-width:160px; white-space:nowrap;">NAMA LENGKAP</th>
-                        <th style="width:80px; text-align:center; white-space:nowrap;">KELAS</th>
-                        <th style="min-width:150px; white-space:nowrap;">PERTEMUAN</th>
-                        <th style="width:120px; white-space:nowrap;">KETERANGAN</th>
-                        <th style="width:130px; text-align:center; white-space:nowrap;">AKSI</th>
+                        <th style="width:50px; text-align:center; white-space:nowrap;">NO.</th>
+                        <th style="width:120px; white-space:nowrap;">NIS / NISN</th>
+                        <th style="min-width:180px; white-space:nowrap;">NAMA LENGKAP</th>
+                        <th style="width:100px; text-align:center; white-space:nowrap;">KELAS</th>
+                        <th style="width:140px; white-space:nowrap;">JABATAN</th>
+                        <th style="width:140px; text-align:center; white-space:nowrap;">AKSI</th>
                     </tr>
                 </thead>
-                <tbody id="tablePreviewAbsensi">
-                    <tr><td colspan="8" style="text-align:center;"><i class="fas fa-spinner fa-spin"></i> Memuat preview rekap absensi...</td></tr>
+                <tbody id="tableAnggota">
+                    <tr><td colspan="6" style="text-align:center;"><i class="fas fa-spinner fa-spin"></i> Memuat data master anggota...</td></tr>
                 </tbody>
             </table>
         </div>
     </div>
 
-    <!-- TAB 2: ABSENSI LATIHAN RUTIN & PREVIEW -->
+    <!-- TAB 2: ABSENSI LATIHAN RUTIN & UPLOAD DOKUMENTASI -->
     <div id="tab-absensi" class="card tab-content">
-        <h2>PRESENSI MANDIRI / SCAN QR CODE ANGGOTA</h2>
+        <h2>UPLOAD DOKUMENTASI FOTO LATIHAN</h2>
         
-        <div class="qr-wrapper">
-            <h3 style="color:#ffd700;"><i class="fas fa-qrcode"></i> QR CODE PRESENSI RUTIN ANGGOTA</h3>
-            <p style="color:#ffcc66; font-size: 0.95rem; margin-top:4px;">Cetak atau Tampilkan QR Code Ini Untuk Di-Scan Oleh Anggota Saat Latihan</p>
-            
-            <div id="qrcodeCanvas"></div>
-            <div id="qrTextLink" style="color:#ffd700; font-size:0.9rem; word-break:break-all;"></div>
-            <button class="btn btn-approve" style="margin-top:10px;" onclick="openSimulasiQr()"><i class="fas fa-external-link-alt"></i> BUKA FORMULIR PRESENSI MANDIRI</button>
+        <form onsubmit="submitDokumentasiFoto(event)" style="margin-bottom: 20px;">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>PILIH PERTEMUAN LATIHAN</label>
+                    <select id="docPertemuan" required>
+                        <option value="Pertemuan 1 (Senin)">Pertemuan 1 (Senin)</option>
+                        <option value="Pertemuan 2 (Selasa)">Pertemuan 2 (Selasa)</option>
+                        <option value="Pertemuan 3 (Rabu)">Pertemuan 3 (Rabu)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>KETERANGAN / JUDUL KEGIATAN</label>
+                    <input type="text" id="docKet" placeholder="Contoh: Latihan PBB & Pengibaran" required>
+                </div>
+                <div class="form-group">
+                    <label>PILIH FOTO DOKUMENTASI</label>
+                    <input type="file" id="docFileInput" accept="image/*" required>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary"><i class="fas fa-upload"></i> UPLOAD DOKUMENTASI FOTO</button>
+        </form>
+
+        <div id="docGallery" class="doc-grid">
+            <p style="color:#ffcc66; font-size:0.95rem;">Belum ada foto dokumentasi yang diunggah.</p>
         </div>
 
         <hr class="section-divider">
@@ -635,14 +548,22 @@
             <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                 <span><strong>Filter Waktu:</strong></span>
                 <select id="filterRekapTipe" onchange="renderPreviewAbsensi()" style="padding: 8px; border-radius: 6px; background: #2b0006; color: #fff; border: 1px solid #ffd700;">
-                    <option value="semua">Semua Riwayat Absensi</option>
-                    <option value="mingguan">Rekap Mingguan (7 Hari Terakhir)</option>
-                    <option value="bulanan">Rekap Bulanan (30 Hari Terakhir)</option>
+                    <option value="semua">Semua Riwayat</option>
+                    <option value="mingguan">Rekap Mingguan</option>
+                    <option value="bulanan">Rekap Bulanan</option>
+                </select>
+
+                <span><strong>Filter Pertemuan:</strong></span>
+                <select id="filterRekapPertemuan" onchange="renderPreviewAbsensi()" style="padding: 8px; border-radius: 6px; background: #2b0006; color: #fff; border: 1px solid #ffd700;">
+                    <option value="semua">Semua Pertemuan</option>
+                    <option value="Pertemuan 1">Pertemuan 1 (Senin)</option>
+                    <option value="Pertemuan 2">Pertemuan 2 (Selasa)</option>
+                    <option value="Pertemuan 3">Pertemuan 3 (Rabu)</option>
                 </select>
 
                 <span><strong>Filter Keterangan:</strong></span>
                 <select id="filterRekapStatus" onchange="renderPreviewAbsensi()" style="padding: 8px; border-radius: 6px; background: #2b0006; color: #fff; border: 1px solid #ffd700;">
-                    <option value="semua">Semua Keterangan</option>
+                    <option value="semua">Semua Status</option>
                     <option value="Hadir">Hadir</option>
                     <option value="Izin">Izin</option>
                     <option value="Sakit">Sakit</option>
@@ -659,14 +580,14 @@
             <table>
                 <thead>
                     <tr>
-                        <th style="width:40px; text-align:center;">NO.</th>
-                        <th style="width:110px;">TANGGAL</th>
-                        <th style="width:110px;">NIS / NISN</th>
-                        <th>NAMA LENGKAP</th>
-                        <th style="width:90px;">KELAS</th>
-                        <th>PERTEMUAN</th>
-                        <th style="width:100px;">KETERANGAN</th>
-                        <th style="width:140px; text-align:center;">AKSI</th>
+                        <th style="width:40px; text-align:center; white-space:nowrap;">NO.</th>
+                        <th style="width:100px; white-space:nowrap;">TANGGAL</th>
+                        <th style="width:100px; white-space:nowrap;">NIS / NISN</th>
+                        <th style="min-width:160px; white-space:nowrap;">NAMA LENGKAP</th>
+                        <th style="width:80px; text-align:center; white-space:nowrap;">KELAS</th>
+                        <th style="min-width:150px; white-space:nowrap;">PERTEMUAN</th>
+                        <th style="width:120px; white-space:nowrap;">KETERANGAN</th>
+                        <th style="width:130px; text-align:center; white-space:nowrap;">AKSI</th>
                     </tr>
                 </thead>
                 <tbody id="tablePreviewAbsensi">
@@ -837,6 +758,7 @@
     let globalAbsensi = [];
     let globalRecruitment = [];
     let currentFilteredAbsensi = [];
+    let globalDokumentasi = [];
 
     function initDefaultDateAdmin() {
         const today = new Date().toISOString().split('T')[0];
@@ -846,7 +768,6 @@
         }
     }
 
-    // FUNGSI TOGGLE SHOW / HIDE PASSWORD LOGIN ADMIN
     function togglePasswordVisibility() {
         const passwordInput = document.getElementById("loginPassword");
         const icon = document.getElementById("togglePasswordIcon");
@@ -860,36 +781,6 @@
             icon.classList.remove("fa-eye-slash");
             icon.classList.add("fa-eye");
         }
-    }
-
-    function checkQrAccessMode() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const closeBtn = document.getElementById("btnCloseAdminPreview");
-
-        if (urlParams.has('mode') && urlParams.get('mode') === 'presensi') {
-            document.getElementById("loginOverlay").style.display = "none";
-            document.getElementById("qrPresensiOverlay").style.display = "flex";
-            
-            if (urlParams.get('from') === 'admin') {
-                closeBtn.style.display = "flex";
-            } else {
-                closeBtn.style.display = "none";
-            }
-
-            initQrFormDate();
-        } else {
-            checkLoginStatus();
-        }
-    }
-
-    function openSimulasiQr() {
-        window.location.href = window.location.href.split('?')[0] + "?mode=presensi&from=admin";
-    }
-
-    function closePresensiToAdmin() {
-        document.getElementById("qrPresensiOverlay").style.display = "none";
-        window.history.pushState({}, document.title, window.location.pathname);
-        checkLoginStatus();
     }
 
     function checkLoginStatus() {
@@ -906,7 +797,7 @@
         const user = document.getElementById("loginUsername").value;
         const pass = document.getElementById("loginPassword").value;
 
-        if (user === "PASMANECIS" && pass === "PASKIBMAN6") {
+        if (user === "pasmanecis" && pass === "PASKIBMAN6") {
             sessionStorage.setItem("paskibra_admin_logged", "true");
             document.getElementById("loginOverlay").style.display = "none";
             showCustomAlert("LOGIN SUKSES", "Selamat datang di Dashboard Admin Paskibra!");
@@ -994,7 +885,7 @@
             globalRecruitment = data.recruitment || [];
 
             renderAllTables();
-            generateQrCodeForScan();
+            loadDokumentasiLocal();
         } catch (err) {
             console.error("Gagal memuat data:", err);
             document.getElementById("tableAnggota").innerHTML = "<tr><td colspan='6' style='text-align:center; color:#ff6b6b;'>Gagal memuat data. Periksa koneksi Web App Apps Script Anda.</td></tr>";
@@ -1021,12 +912,12 @@
 
                 tbody.innerHTML += `
                     <tr>
-                        <td><strong>${index + 1}</strong></td>
-                        <td><strong>${nis}</strong></td>
-                        <td>${nama}</td>
-                        <td>${kelas}</td>
-                        <td>${jabatan}</td>
-                        <td>
+                        <td style="text-align:center; white-space:nowrap;"><strong>${index + 1}</strong></td>
+                        <td style="white-space:nowrap;"><strong>${nis}</strong></td>
+                        <td style="white-space:nowrap;">${nama}</td>
+                        <td style="text-align:center; white-space:nowrap;">${kelas}</td>
+                        <td style="white-space:nowrap;">${jabatan}</td>
+                        <td style="text-align:center; white-space:nowrap;">
                             <button class="btn btn-edit" onclick="openEditModal('${nis}', '${nama.replace(/'/g, "\\'")}', '${kelas}', '${jabatan}')"><i class="fas fa-edit"></i> Edit</button>
                             <button class="btn btn-delete" onclick="deleteAnggota('${nis}', '${nama.replace(/'/g, "\\'")}')"><i class="fas fa-trash-alt"></i> Hapus</button>
                         </td>
@@ -1122,75 +1013,76 @@
         });
     }
 
-    function generateQrCodeForScan() {
-        const canvasContainer = document.getElementById("qrcodeCanvas");
-        const linkText = document.getElementById("qrTextLink");
-        canvasContainer.innerHTML = "";
+    // LOGIKA UPLOAD DOKUMENTASI FOTO
+    function submitDokumentasiFoto(e) {
+        e.preventDefault();
+        const pertemuan = document.getElementById("docPertemuan").value;
+        const ket = document.getElementById("docKet").value.trim();
+        const fileInput = document.getElementById("docFileInput");
 
-        const targetUrl = window.location.href.split('?')[0] + "?mode=presensi";
+        if (!fileInput.files || !fileInput.files[0]) {
+            return showCustomAlert("PERINGATAN", "Pilih file foto terlebih dahulu!", "fa-exclamation-circle");
+        }
 
-        new QRCode(canvasContainer, {
-            text: targetUrl,
-            width: 170,
-            height: 170,
-            colorDark: "#4a000b",
-            colorLight: "#ffffff"
-        });
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            const docObj = {
+                id: Date.now(),
+                pertemuan: pertemuan,
+                ket: ket,
+                imgData: evt.target.result,
+                tanggal: formatDateIndo(new Date())
+            };
 
-        linkText.innerHTML = `<i class="fas fa-link"></i> Link Presensi: <u>${targetUrl}</u>`;
+            globalDokumentasi.unshift(docObj);
+            localStorage.setItem("paskibra_docs", JSON.stringify(globalDokumentasi));
+            renderDokumentasi();
+
+            showCustomAlert("BERHASIL", "Foto dokumentasi latihan berhasil diunggah!");
+            e.target.reset();
+        };
+        reader.readAsDataURL(fileInput.files[0]);
     }
 
-    function initQrFormDate() {
-        const today = new Date().toISOString().split('T')[0];
-        const dateInput = document.getElementById("qrDateInput");
-        dateInput.value = today;
-        autoCalculatePertemuan(today);
+    function loadDokumentasiLocal() {
+        const saved = localStorage.getItem("paskibra_docs");
+        if (saved) {
+            try {
+                globalDokumentasi = JSON.parse(saved);
+            } catch (e) { globalDokumentasi = []; }
+        }
+        renderDokumentasi();
     }
 
-    function autoCalculatePertemuan(dateStr) {
-        if (!dateStr) return;
-        const d = new Date(dateStr);
-        const day = d.getDay();
+    function renderDokumentasi() {
+        const gallery = document.getElementById("docGallery");
+        gallery.innerHTML = "";
 
-        let textPertemuan = "Pertemuan 1 (Senin)";
-        if (day === 2) textPertemuan = "Pertemuan 2 (Selasa)";
-        else if (day === 3) textPertemuan = "Pertemuan 3 (Rabu)";
-        else if (day === 1) textPertemuan = "Pertemuan 1 (Senin)";
-        else textPertemuan = "Pertemuan Khusus (" + d.toLocaleDateString('id-ID', { weekday: 'long' }) + ")";
-
-        document.getElementById("qrPertemuanAuto").value = textPertemuan;
-    }
-
-    function autoMatchMemberQr(inputNama) {
-        const select = document.getElementById("qrMatchResultSelect");
-        select.innerHTML = "";
-        const q = inputNama.toLowerCase().trim();
-
-        if (!q) {
-            select.innerHTML = '<option value="">-- KETIK NAMA AWAL DI ATAS --</option>';
+        if (!globalDokumentasi.length) {
+            gallery.innerHTML = `<p style="color:#ffcc66; font-size:0.95rem;">Belum ada foto dokumentasi yang diunggah.</p>`;
             return;
         }
 
-        const matches = globalDataMaster.filter(a => {
-            const nama = (a["NAMA LENGKAP"] || a["Nama_Lengkap"] || a["nama"] || "").toLowerCase();
-            return nama.includes(q);
+        globalDokumentasi.forEach(item => {
+            gallery.innerHTML += `
+                <div class="doc-card">
+                    <img src="${item.imgData}" alt="Dokumentasi Latihan">
+                    <div class="doc-title">${item.pertemuan}</div>
+                    <div class="doc-desc">${item.ket} (${item.tanggal})</div>
+                    <button class="btn btn-delete" style="padding:4px 8px; font-size:0.8rem;" onclick="deleteDokumentasi(${item.id})"><i class="fas fa-trash-alt"></i> Hapus</button>
+                </div>`;
         });
-
-        if (matches.length > 0) {
-            matches.forEach(m => {
-                const nama = m["NAMA LENGKAP"] || m["Nama_Lengkap"] || m["nama"];
-                let rawNis = m["NIS/NISN"] || m["NIS"] || m["nis"] || "-";
-                const kelas = m["KELAS"] || m["Kelas"] || "-";
-                select.innerHTML += `<option value="${nama}" data-nis="${rawNis}">[${rawNis}] ${nama} - ${kelas}</option>`;
-            });
-        } else {
-            select.innerHTML = '<option value="">Tidak ada nama yang cocok di Data Master</option>';
-        }
     }
 
-    // ====================================================
-    // UTILITAS KUNCI FORMAT TANGGAL INDONESIA (DD/MM/YYYY)
-    // ====================================================
+    function deleteDokumentasi(id) {
+        showCustomConfirm("HAPUS FOTO", "Apakah Anda yakin ingin menghapus foto dokumentasi ini?", () => {
+            globalDokumentasi = globalDokumentasi.filter(d => d.id !== id);
+            localStorage.setItem("paskibra_docs", JSON.stringify(globalDokumentasi));
+            renderDokumentasi();
+            showCustomAlert("TERHAPUS", "Foto dokumentasi berhasil dihapus!");
+        });
+    }
+
     function formatDateIndo(rawTs) {
         if (!rawTs) return '-';
         let d = parseDateSafe(rawTs);
@@ -1236,58 +1128,6 @@
         return found ? (found.KELAS || found.Kelas || found.kelas || "-") : "-";
     }
 
-    async function submitPresensiQrMandiri(e) {
-        e.preventDefault();
-        const select = document.getElementById("qrMatchResultSelect");
-        if (!select.value) {
-            return showCustomAlert("PERINGATAN", "Pilih nama anggota yang cocok terlebih dahulu!", "fa-exclamation-circle");
-        }
-
-        const nama = select.value;
-        const rawNis = select.options[select.selectedIndex].getAttribute("data-nis");
-        const nis = rawNis ? rawNis.trim() : "-";
-        const dateVal = document.getElementById("qrDateInput").value;
-        const pertemuan = document.getElementById("qrPertemuanAuto").value;
-        const keterangan = document.getElementById("qrStatusSelect").value;
-
-        const formattedDateIndo = formatDateIndo(dateVal);
-        const kelas = getKelasByNamaOrNis(nama, nis);
-
-        const isDuplicate = globalAbsensi.some(a => {
-            const rNama = a.Nama_Lengkap || a.nama_lengkap || a.Nama || "";
-            const rawTs = a.TimeStamp || a.Timestamp || a.timestamp || "";
-            const dStr = formatDateIndo(rawTs);
-            return rNama.toLowerCase() === nama.toLowerCase() && dStr === formattedDateIndo;
-        });
-
-        if (isDuplicate) {
-            return showCustomAlert("SISTEM PENGAMANAN", `Anggota bernama ${nama} sudah mengisi absensi untuk tanggal ${formattedDateIndo}! Pengisian ganda ditolak.`, "fa-times-circle");
-        }
-
-        globalAbsensi.unshift({
-            TimeStamp: formattedDateIndo,
-            NIS: nis,
-            Nama_Lengkap: nama,
-            Kelas: kelas,
-            Pertemuan: pertemuan,
-            Keterangan: keterangan
-        });
-
-        showCustomAlert("BERHASIL", `Presensi ${nama} untuk ${pertemuan} berhasil disimpan!`);
-        document.getElementById("qrInputNamaAwal").value = "";
-        autoMatchMemberQr("");
-
-        sendDataToSheet({
-            action: "addAbsensi",
-            nis: nis,
-            nama_lengkap: nama,
-            kelas: kelas,
-            pertemuan: pertemuan,
-            keterangan: keterangan,
-            timestamp: formattedDateIndo
-        });
-    }
-
     function filterDropdownAnggota(query) {
         const select = document.getElementById("absensiSelectNama");
         const options = select.options;
@@ -1298,9 +1138,11 @@
         }
     }
 
+    // RENDER PREVIEW ABSENSI DENGAN FILTER PERTEMUAN & KETERANGAN
     function renderPreviewAbsensi() {
         const tbody = document.getElementById("tablePreviewAbsensi");
         const tipeWaktu = document.getElementById("filterRekapTipe").value;
+        const tipePertemuan = document.getElementById("filterRekapPertemuan").value;
         const tipeStatus = document.getElementById("filterRekapStatus").value;
         tbody.innerHTML = "";
 
@@ -1314,6 +1156,15 @@
         currentFilteredAbsensi = globalAbsensi.filter(a => {
             const ket = a.Keterangan || a.keterangan || "Hadir";
             if (tipeStatus !== 'semua' && ket.toLowerCase() !== tipeStatus.toLowerCase()) {
+                return false;
+            }
+
+            let p = a["Pertemuan Ke -"] || a.Pertemuan || a.pertemuan || "";
+            if (!p.includes("Pertemuan") && a.Keterangan && a.Keterangan.includes("Pertemuan")) {
+                p = a.Keterangan;
+            }
+
+            if (tipePertemuan !== 'semua' && !p.toLowerCase().includes(tipePertemuan.toLowerCase())) {
                 return false;
             }
 
@@ -1333,12 +1184,10 @@
             return;
         }
 
-        const pertemuanGroup = { "Pertemuan 1 (Senin)": [], "Pertemuan 2 (Selasa)": [], "Pertemuan 3 (Rabu)": [], "Lainnya": [] };
+        const pertemuanGroup = { "Pertemuan 1 (Senin)": [], "Pertemuan 2 (Selasa)": [], "Pertemuan 3 (Rabu)": [] };
 
         currentFilteredAbsensi.forEach(item => {
             let p = item["Pertemuan Ke -"] || item.Pertemuan || item.pertemuan || "";
-            
-            // Pengamanan jika data lama di Google Sheets nilainya terbalik
             if (!p.includes("Pertemuan") && item.Keterangan && item.Keterangan.includes("Pertemuan")) {
                 p = item.Keterangan;
             }
@@ -1347,14 +1196,11 @@
                 pertemuanGroup["Pertemuan 1 (Senin)"].push(item);
             } else if (p.includes("Pertemuan 2")) {
                 pertemuanGroup["Pertemuan 2 (Selasa)"].push(item);
-            } else if (p.includes("Pertemuan 3")) {
-                pertemuanGroup["Pertemuan 3 (Rabu)"].push(item);
             } else {
-                pertemuanGroup["Lainnya"].push(item);
+                pertemuanGroup["Pertemuan 3 (Rabu)"].push(item);
             }
         });
 
-        // PERULANGAN PER KELOMPOK PERTEMUAN
         Object.keys(pertemuanGroup).forEach(groupTitle => {
             if (pertemuanGroup[groupTitle].length > 0) {
                 tbody.innerHTML += `
@@ -1362,7 +1208,6 @@
                         <td colspan="8"><i class="fas fa-bookmark"></i> PEMBATAS: ${groupTitle.toUpperCase()}</td>
                     </tr>`;
 
-                // RESET NOMOR KEMBALI KE 1 DI SETIAP PERTEMUAN BARU
                 let groupIndex = 1;
 
                 pertemuanGroup[groupTitle].forEach(row => {
@@ -1377,7 +1222,6 @@
                     let pertemuan = row["Pertemuan Ke -"] || row.Pertemuan || '-';
                     let keterangan = row.Keterangan || row.keterangan || 'Hadir';
 
-                    // Penyesuaian otomatis jika kolom baris lama terbalik
                     if (pertemuan.includes("Hadir") || pertemuan.includes("Izin") || pertemuan.includes("Sakit") || pertemuan.includes("Alpha")) {
                         let tempKet = pertemuan;
                         pertemuan = keterangan;
@@ -1478,13 +1322,13 @@
 
                 tbody.innerHTML += `
                     <tr>
-                        <td><strong>${index + 1}</strong></td>
-                        <td>${formattedDate}</td>
-                        <td>${nama}</td>
-                        <td>${alumni}</td>
-                        <td>${kelas}</td>
-                        <td><span style="color:${isAccepted ? '#2ecc71' : '#f39c12'}; font-weight:bold;">${status}</span></td>
-                        <td>
+                        <td style="text-align:center; white-space:nowrap;"><strong>${index + 1}</strong></td>
+                        <td style="white-space:nowrap;">${formattedDate}</td>
+                        <td style="white-space:nowrap;">${nama}</td>
+                        <td style="white-space:nowrap;">${alumni}</td>
+                        <td style="text-align:center; white-space:nowrap;">${kelas}</td>
+                        <td style="white-space:nowrap;"><span style="color:${isAccepted ? '#2ecc71' : '#f39c12'}; font-weight:bold;">${status}</span></td>
+                        <td style="text-align:center; white-space:nowrap;">
                             ${!isAccepted ? `<button class="btn btn-approve" onclick="approveOR('${nama.replace(/'/g, "\\'")}', '${kelas}')"><i class="fas fa-check-circle"></i> APPROVE / TERIMA</button>` : `<i class="fas fa-user-check" style="color:#2ecc71;"></i> Terverifikasi`}
                         </td>
                     </tr>`;
@@ -1669,9 +1513,10 @@
             filename = "Data_Anggota_Paskibra.xls";
         } else if (tipe === 'absensi') {
             const filterTipe = document.getElementById("filterRekapTipe").value;
+            const filterPertemuan = document.getElementById("filterRekapPertemuan").value;
             const filterStatus = document.getElementById("filterRekapStatus").value;
-            title = `REKAP ABSENSI LATIHAN PASKIBRA (${filterTipe.toUpperCase()} - STATUS: ${filterStatus.toUpperCase()})`;
-            filename = `Rekap_Absensi_${filterTipe}_${filterStatus}.xls`;
+            title = `REKAP ABSENSI LATIHAN PASKIBRA (${filterTipe.toUpperCase()} - PERTEMUAN: ${filterPertemuan.toUpperCase()} - STATUS: ${filterStatus.toUpperCase()})`;
+            filename = `Rekap_Absensi_${filterTipe}_${filterPertemuan}_${filterStatus}.xls`;
             dataToExport = currentFilteredAbsensi.length ? currentFilteredAbsensi : globalAbsensi;
         } else if (tipe === 'recruitment') {
             title = "LAPORAN PENDAFTARAN OPEN RECRUITMENT PASKIBRA";
@@ -1746,7 +1591,7 @@
     }
 
     initDefaultDateAdmin();
-    checkQrAccessMode();
+    checkLoginStatus();
     loadData();
 </script>
 
