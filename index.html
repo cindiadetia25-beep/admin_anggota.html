@@ -1330,7 +1330,7 @@
         });
     }
 
-  function renderTableOR() {
+function renderTableOR() {
         const tbody = document.getElementById("tableOR");
         tbody.innerHTML = "";
         if (globalRecruitment.length > 0) {
@@ -1341,9 +1341,13 @@
                 const kelas = r.Kelas || r.kelas || '-';
                 const alumni = r["Alumni SMP/MTS"] || r.alumni_smp || r.Alumni_SMP || '-';
                 
-                // MENGAMBIL DATA TINGGI BADAN & BERAT BADAN
-                const tinggi = r.Tinggi_Badan || r.tinggi_badan || r.Tinggi || '-';
-                const berat = r.Berat_Badan || r.berat_badan || r.Berat || '-';
+                // Pembacaan fleksibel untuk TB dan BB
+                const rawTinggi = r.Tinggi_Badan || r.tinggi_badan || r["Tinggi Badan"] || r.Tinggi || r.tinggi || "";
+                const rawBerat = r.Berat_Badan || r.berat_badan || r["Berat Badan"] || r.Berat || r.berat || "";
+
+                // Format tampilan: jika ada nilainya tampilkan dengan "cm" / "kg", jika kosong tampilkan "-"
+                const tinggiDisplay = (rawTinggi && String(rawTinggi).trim() !== "" && String(rawTinggi).trim() !== "-") ? `${String(rawTinggi).trim()} cm` : "-";
+                const beratDisplay = (rawBerat && String(rawBerat).trim() !== "" && String(rawBerat).trim() !== "-") ? `${String(rawBerat).trim()} kg` : "-";
 
                 const rawTs = r.TimeStamp || r.Timestamp || r.timestamp || r.Tanggal || r.tanggal || "";
                 let formattedDate = formatDateIndo(rawTs);
@@ -1355,9 +1359,8 @@
                         <td style="white-space:nowrap;">${nama}</td>
                         <td style="white-space:nowrap;">${alumni}</td>
                         <td style="text-align:center; white-space:nowrap;">${kelas}</td>
-                        <!-- BARIS KELUARAN DATA TINGGI & BERAT BADAN -->
-                        <td style="text-align:center; white-space:nowrap;">${tinggi} cm</td>
-                        <td style="text-align:center; white-space:nowrap;">${berat} kg</td>
+                        <td style="text-align:center; white-space:nowrap;">${tinggiDisplay}</td>
+                        <td style="text-align:center; white-space:nowrap;">${beratDisplay}</td>
                         <td style="white-space:nowrap;"><span style="color:${isAccepted ? '#2ecc71' : '#f39c12'}; font-weight:bold;">${status}</span></td>
                         <td style="text-align:center; white-space:nowrap;">
                             ${!isAccepted ? `<button class="btn btn-approve" onclick="approveOR('${nama.replace(/'/g, "\\'")}', '${kelas}')"><i class="fas fa-check-circle"></i> APPROVE / TERIMA</button>` : `<i class="fas fa-user-check" style="color:#2ecc71;"></i> Terverifikasi`}
@@ -1428,23 +1431,41 @@
         const no_hp = document.getElementById("orHpManual").value.trim();
         const alumni_smp = document.getElementById("orAlumniManual").value.trim();
         const kelas = document.getElementById("orKelasManual").value.trim();
+        const tinggi = document.getElementById("orTinggiManual").value.trim();
+        const berat = document.getElementById("orBeratManual").value.trim();
         const alasan_bergabung = document.getElementById("orAlasanManual").value.trim();
 
-        globalRecruitment.unshift({
+        // KUNCI SINKRONISASI:
+        // Masukkan kunci variasi (Tinggi_Badan, tinggi_badan, "Tinggi Badan") sekaligus
+        // agar renderTableOR dapat membacanya secara instan tanpa tunda.
+        const newRecord = {
             TimeStamp: formatDateIndo(new Date()),
             Nama_Pendaftar: nama,
             TTL: ttl,
             No_HP: no_hp,
             "Alumni SMP/MTS": alumni_smp,
+            Alumni_SMP: alumni_smp,
             Kelas: kelas,
+            Tinggi_Badan: tinggi,
+            tinggi_badan: tinggi,
+            "Tinggi Badan": tinggi,
+            Berat_Badan: berat,
+            berat_badan: berat,
+            "Berat Badan": berat,
             Alasan_Bergabung: alasan_bergabung,
             Status_Seleksi: "Pending"
-        });
+        };
 
+        // Tambahkan ke memori lokal paling atas
+        globalRecruitment.unshift(newRecord);
+
+        // Render ulang tabel secara langsung
         renderTableOR();
+
         showCustomAlert("BERHASIL", "Calon anggota OR berhasil ditambahkan!");
         e.target.reset();
 
+        // Kirim data ke Google Sheets melalui Apps Script
         sendDataToSheet({
             action: "submitOR",
             nama_pendaftar: nama,
@@ -1452,10 +1473,11 @@
             no_hp: no_hp,
             alumni_smp: alumni_smp,
             kelas: kelas,
+            tinggi_badan: tinggi,
+            berat_badan: berat,
             alasan_bergabung: alasan_bergabung
         });
     }
-
     async function submitAbsensi(e) {
         e.preventDefault();
         const select = document.getElementById("absensiSelectNama");
