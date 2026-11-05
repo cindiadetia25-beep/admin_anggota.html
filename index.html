@@ -652,17 +652,20 @@
             <table>
                 <thead>
                     <tr>
-                        <th style="width:50px;">NO.</th>
-                        <th>Tanggal</th>
-                        <th>Nama Pendaftar</th>
-                        <th>Alumni SMP/MTS</th>
-                        <th>Kelas</th>
-                        <th>Status Seleksi</th>
-                        <th>Aksi</th>
+                        <th style="width:40px; text-align:center; white-space:nowrap;">NO.</th>
+                        <th style="width:100px; white-space:nowrap;">TANGGAL</th>
+                        <th style="min-width:160px; white-space:nowrap;">NAMA PENDAFTAR</th>
+                        <th style="width:120px; white-space:nowrap;">ALUMNI SMP/MTS</th>
+                        <th style="width:80px; text-align:center; white-space:nowrap;">KELAS</th>
+                        <!-- KOLOM BARU DITAMBAHKAN DI SINI -->
+                        <th style="width:100px; text-align:center; white-space:nowrap;">TINGGI BADAN</th>
+                        <th style="width:100px; text-align:center; white-space:nowrap;">BERAT BADAN</th>
+                        <th style="width:110px; white-space:nowrap;">STATUS SELEKSI</th>
+                        <th style="width:140px; text-align:center; white-space:nowrap;">AKSI</th>
                     </tr>
                 </thead>
                 <tbody id="tableOR">
-                    <tr><td colspan="7" style="text-align:center;"><i class="fas fa-spinner fa-spin"></i> Memuat data pendaftar...</td></tr>
+                    <tr><td colspan="9" style="text-align:center;"><i class="fas fa-spinner fa-spin"></i> Memuat data pendaftar...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -1319,7 +1322,7 @@
         });
     }
 
-    function renderTableOR() {
+  function renderTableOR() {
         const tbody = document.getElementById("tableOR");
         tbody.innerHTML = "";
         if (globalRecruitment.length > 0) {
@@ -1328,8 +1331,12 @@
                 const isAccepted = status === 'Diterima' || status === 'Approved';
                 const nama = r.Nama_Pendaftar || r.nama_pendaftar || '-';
                 const kelas = r.Kelas || r.kelas || '-';
-                const alumni = r["Alumni SMP/MTS"] || r.alumni_smp || '-';
+                const alumni = r["Alumni SMP/MTS"] || r.alumni_smp || r.Alumni_SMP || '-';
                 
+                // MENGAMBIL DATA TINGGI BADAN & BERAT BADAN
+                const tinggi = r.Tinggi_Badan || r.tinggi_badan || r.Tinggi || '-';
+                const berat = r.Berat_Badan || r.berat_badan || r.Berat || '-';
+
                 const rawTs = r.TimeStamp || r.Timestamp || r.timestamp || r.Tanggal || r.tanggal || "";
                 let formattedDate = formatDateIndo(rawTs);
 
@@ -1340,6 +1347,9 @@
                         <td style="white-space:nowrap;">${nama}</td>
                         <td style="white-space:nowrap;">${alumni}</td>
                         <td style="text-align:center; white-space:nowrap;">${kelas}</td>
+                        <!-- BARIS KELUARAN DATA TINGGI & BERAT BADAN -->
+                        <td style="text-align:center; white-space:nowrap;">${tinggi} cm</td>
+                        <td style="text-align:center; white-space:nowrap;">${berat} kg</td>
                         <td style="white-space:nowrap;"><span style="color:${isAccepted ? '#2ecc71' : '#f39c12'}; font-weight:bold;">${status}</span></td>
                         <td style="text-align:center; white-space:nowrap;">
                             ${!isAccepted ? `<button class="btn btn-approve" onclick="approveOR('${nama.replace(/'/g, "\\'")}', '${kelas}')"><i class="fas fa-check-circle"></i> APPROVE / TERIMA</button>` : `<i class="fas fa-user-check" style="color:#2ecc71;"></i> Terverifikasi`}
@@ -1347,7 +1357,7 @@
                     </tr>`;
             });
         } else {
-            tbody.innerHTML = "<tr><td colspan='7' style='text-align:center;'>Belum ada data pendaftar calon Paskibra.</td></tr>";
+            tbody.innerHTML = "<tr><td colspan='9' style='text-align:center;'>Belum ada data pendaftar calon Paskibra.</td></tr>";
         }
     }
 
