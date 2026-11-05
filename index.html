@@ -34,7 +34,18 @@
             margin: 0 auto; 
             width: 100%;
         }
-/* PERBAIKAN FORM LOGIN: FONT MONOSPACE & SHOW PASSWORD */
+
+        /* GARIS PEMBATAS VISUAL TEMA EMAS */
+        hr.section-divider {
+            border: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #ffd700, transparent);
+            margin: 25px 0;
+        }
+
+        /* ==================================================== */
+        /* STYLE KHUSUS FORM LOGIN ADMIN (KAPITAL, FONT & EYE)  */
+        /* ==================================================== */
         #loginUsername, #loginPassword {
             font-family: 'Courier New', Courier, monospace !important;
             font-weight: bold !important;
@@ -65,13 +76,6 @@
 
         .toggle-password-btn:hover {
             color: #ffffff;
-        }
-        /* GARIS PEMBATAS SECARA VISUAL TEMA EMAS */
-        hr.section-divider {
-            border: 0;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #ffd700, transparent);
-            margin: 25px 0;
         }
 
         header { 
@@ -222,7 +226,7 @@
             -webkit-overflow-scrolling: touch;
         }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; min-width: 700px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; min-width: 750px; }
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 0.95rem; word-break: break-word; }
         th { background: rgba(255, 215, 0, 0.2); color: #ffd700; font-size: 1.1rem; }
 
@@ -251,15 +255,7 @@
             font-size: 0.95rem;
         }
         .form-group option { background: #2b0006; color: #fff; }
-        /* ==================================================== */
-        /* PERBAIKAN KHUSUS FORM LOGIN ADMIN (KAPITAL & FONT)   */
-        /* ==================================================== */
-        #loginUsername, #loginPassword {
-            font-family: 'Courier New', Courier, monospace !important;
-            font-weight: bold !important;
-            text-transform: none !important;
-            letter-spacing: 0px !important;
-        }
+        
         .btn { 
             padding: 10px 18px; 
             border: none; 
@@ -430,7 +426,6 @@
             </div>
             <div class="form-group" style="text-align: left;">
                 <label>PASSWORD</label>
-                <!-- DIBUNGKUS DENGAN CONTAINER UNTUK TOMBOL TOGGLE PASSWORD -->
                 <div class="password-container">
                     <input type="password" id="loginPassword" placeholder="Masukkan Password" autocapitalize="none" autocomplete="off" required>
                     <i class="fas fa-eye toggle-password-btn" id="togglePasswordIcon" onclick="togglePasswordVisibility()" title="Tampilkan/Sembunyikan Password"></i>
@@ -525,9 +520,7 @@
 
     <hr class="section-divider">
 
-    <!-- ========================================== -->
-    <!-- TAB 1: DATA MASTER ANGGOTA                 -->
-    <!-- ========================================== -->
+    <!-- TAB 1: DATA MASTER ANGGOTA -->
     <div id="tab-anggota" class="card tab-content active">
         <h2>DAFTAR ANGGOTA PASKIBRA (DATA MASTER)</h2>
         
@@ -567,25 +560,22 @@
             <table>
                 <thead>
                     <tr>
-                        <th style="width:40px; text-align:center;">NO.</th>
-                        <th style="width:110px;">TANGGAL</th>
-                        <th style="width:110px;">NIS / NISN</th>
+                        <th style="width:50px;">NO.</th>
+                        <th>NIS / NISN</th>
                         <th>NAMA LENGKAP</th>
-                        <th style="width:90px;">KELAS</th>
-                        <th>PERTEMUAN</th>
-                        <th style="width:100px;">KETERANGAN</th>
-                        <th style="width:140px; text-align:center;">AKSI</th>
+                        <th>KELAS</th>
+                        <th>JABATAN</th>
+                        <th>AKSI</th>
                     </tr>
                 </thead>
-                <tbody id="tablePreviewAbsensi">
-                    <tr><td colspan="8" style="text-align:center;"><i class="fas fa-spinner fa-spin"></i> Memuat preview rekap absensi...</td></tr>
+                <tbody id="tableAnggota">
+                    <tr><td colspan="6" style="text-align:center;"><i class="fas fa-spinner fa-spin"></i> Memuat data master anggota...</td></tr>
                 </tbody>
             </table>
         </div>
+    </div>
 
-    <!-- ========================================== -->
-    <!-- TAB 2: ABSENSI LATIHAN RUTIN & PREVIEW     -->
-    <!-- ========================================== -->
+    <!-- TAB 2: ABSENSI LATIHAN RUTIN & PREVIEW -->
     <div id="tab-absensi" class="card tab-content">
         <h2>PRESENSI MANDIRI / SCAN QR CODE ANGGOTA</h2>
         
@@ -619,7 +609,6 @@
                 </select>
             </div>
 
-            <!-- PENAMBAHAN FIELD PILIH TANGGAL PRESENSI DI SINI -->
             <div class="form-group">
                 <label>PILIH TANGGAL PRESENSI</label>
                 <input type="date" id="absensiTanggalInput" required>
@@ -668,25 +657,24 @@
             <table>
                 <thead>
                     <tr>
-                        <th style="width:40px;">NO.</th>
-                        <th>Tanggal</th>
-                        <th>NIS / NISN</th>
-                        <th>Nama Lengkap</th>
-                        <th>Pertemuan</th>
-                        <th>Keterangan</th>
-                        <th style="width:130px;">Aksi</th>
+                        <th style="width:40px; text-align:center;">NO.</th>
+                        <th style="width:110px;">TANGGAL</th>
+                        <th style="width:110px;">NIS / NISN</th>
+                        <th>NAMA LENGKAP</th>
+                        <th style="width:90px;">KELAS</th>
+                        <th>PERTEMUAN</th>
+                        <th style="width:100px;">KETERANGAN</th>
+                        <th style="width:140px; text-align:center;">AKSI</th>
                     </tr>
                 </thead>
                 <tbody id="tablePreviewAbsensi">
-                    <tr><td colspan="7" style="text-align:center;"><i class="fas fa-spinner fa-spin"></i> Memuat preview rekap absensi...</td></tr>
+                    <tr><td colspan="8" style="text-align:center;"><i class="fas fa-spinner fa-spin"></i> Memuat preview rekap absensi...</td></tr>
                 </tbody>
             </table>
         </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- TAB 3: OPEN RECRUITMENT                    -->
-    <!-- ========================================== -->
+    <!-- TAB 3: OPEN RECRUITMENT -->
     <div id="tab-recruitment" class="card tab-content">
         <h2>TAMBAH CALON ANGGOTA MANUAL (OR)</h2>
         <form onsubmit="submitORManualAdmin(event)" style="margin-bottom: 20px;">
@@ -758,9 +746,7 @@
     </div>
 </div>
 
-<!-- ========================================== -->
-<!-- ELEMEN 4: MODAL EDIT DATA ANGGOTA MASTER   -->
-<!-- ========================================== -->
+<!-- MODAL EDIT DATA ANGGOTA MASTER -->
 <div id="editModal" class="modal">
     <div class="modal-content">
         <h3><i class="fas fa-user-edit"></i> EDIT DATA ANGGOTA</h3>
@@ -792,9 +778,7 @@
     </div>
 </div>
 
-<!-- ========================================== -->
-<!-- ELEMEN 5: MODAL EDIT DATA ABSENSI         -->
-<!-- ========================================== -->
+<!-- MODAL EDIT DATA ABSENSI -->
 <div id="editAbsensiModal" class="modal">
     <div class="modal-content">
         <h3><i class="fas fa-edit"></i> EDIT DATA ABSENSI</h3>
@@ -831,9 +815,7 @@
     </div>
 </div>
 
-<!-- ========================================== -->
-<!-- ELEMEN 6: CUSTOM DIALOG NOTIFIKASI         -->
-<!-- ========================================== -->
+<!-- CUSTOM DIALOG NOTIFIKASI & KONFIRMASI -->
 <div id="customDialogModal" class="modal">
     <div class="modal-content">
         <h3 id="dialogTitle"><i class="fas fa-info-circle"></i> KONFIRMASI</h3>
@@ -846,9 +828,6 @@
     </div>
 </div>
 
-<!-- ========================================== -->
-<!-- LOGIKA JAVASCRIPT & FUNGSI APLIKASI WEB    -->
-<!-- ========================================== -->
 <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxzQmY4XGvBLnoeHRo6W4gMFXQAbNESiv8ZLN0fkGIgtMxLA_riQmBRFp-hyCLXDG6D/exec";
     
@@ -857,7 +836,6 @@
     let globalRecruitment = [];
     let currentFilteredAbsensi = [];
 
-    // INISIALISASI TANGGAL DEFAUL HARI INI
     function initDefaultDateAdmin() {
         const today = new Date().toISOString().split('T')[0];
         const adminDateInput = document.getElementById("absensiTanggalInput");
@@ -866,9 +844,22 @@
         }
     }
 
-    // ------------------------------------------
-    // A. DETEKSI MODE AKSES SCAN QR VS ADMIN
-    // ------------------------------------------
+    // FUNGSI TOGGLE SHOW / HIDE PASSWORD LOGIN ADMIN
+    function togglePasswordVisibility() {
+        const passwordInput = document.getElementById("loginPassword");
+        const icon = document.getElementById("togglePasswordIcon");
+
+        if (passwordInput.type === "password") {
+            passwordInput.type = "text";
+            icon.classList.remove("fa-eye");
+            icon.classList.add("fa-eye-slash");
+        } else {
+            passwordInput.type = "password";
+            icon.classList.remove("fa-eye-slash");
+            icon.classList.add("fa-eye");
+        }
+    }
+
     function checkQrAccessMode() {
         const urlParams = new URLSearchParams(window.location.search);
         const closeBtn = document.getElementById("btnCloseAdminPreview");
@@ -888,23 +879,7 @@
             checkLoginStatus();
         }
     }
-    // ====================================================
-    // FUNGSI TOGGLE SHOW / HIDE PASSWORD LOGIN ADMIN
-    // ====================================================
-    function togglePasswordVisibility() {
-        const passwordInput = document.getElementById("loginPassword");
-        const icon = document.getElementById("togglePasswordIcon");
 
-        if (passwordInput.type === "password") {
-            passwordInput.type = "text";
-            icon.classList.remove("fa-eye");
-            icon.classList.add("fa-eye-slash");
-        } else {
-            passwordInput.type = "password";
-            icon.classList.remove("fa-eye-slash");
-            icon.classList.add("fa-eye");
-        }
-    }
     function openSimulasiQr() {
         window.location.href = window.location.href.split('?')[0] + "?mode=presensi&from=admin";
     }
@@ -915,9 +890,6 @@
         checkLoginStatus();
     }
 
-    // ------------------------------------------
-    // B. AUTENTIKASI ADMIN LOGIN & LOGOUT
-    // ------------------------------------------
     function checkLoginStatus() {
         const isLoggedIn = sessionStorage.getItem("paskibra_admin_logged");
         if (isLoggedIn === "true") {
@@ -932,7 +904,7 @@
         const user = document.getElementById("loginUsername").value;
         const pass = document.getElementById("loginPassword").value;
 
-        if (user === "PASMANECIS" && pass === "PASKIBMAN6") {
+        if (user === "pasmanecis" && pass === "PASKIBMAN6") {
             sessionStorage.setItem("paskibra_admin_logged", "true");
             document.getElementById("loginOverlay").style.display = "none";
             showCustomAlert("LOGIN SUKSES", "Selamat datang di Dashboard Admin Paskibra!");
@@ -946,9 +918,6 @@
         checkLoginStatus();
     }
 
-    // ------------------------------------------
-    // C. DIALOG ALERT & KONFIRMASI CUSTOM
-    // ------------------------------------------
     function showCustomAlert(title, message, iconClass = "fa-check-circle") {
         document.getElementById("dialogTitle").innerHTML = `<i class="fas ${iconClass}"></i> ${title}`;
         document.getElementById("dialogMessage").innerText = message;
@@ -996,9 +965,6 @@
     setInterval(updateLiveClock, 1000);
     updateLiveClock();
 
-    // ------------------------------------------
-    // D. SINKRONISASI & LOAD DATA DARI SHEET
-    // ------------------------------------------
     async function manualRefreshData() {
         const icon = document.getElementById("refreshIcon");
         icon.classList.add("fa-spin");
@@ -1011,7 +977,7 @@
             document.getElementById("tableAnggota").innerHTML = "<tr><td colspan='6' style='text-align:center;'><i class='fas fa-spinner fa-spin'></i> Memuat data master anggota...</td></tr>";
         }
         if (globalAbsensi.length === 0) {
-            document.getElementById("tablePreviewAbsensi").innerHTML = "<tr><td colspan='7' style='text-align:center;'><i class='fas fa-spinner fa-spin'></i> Memuat rekap absensi...</td></tr>";
+            document.getElementById("tablePreviewAbsensi").innerHTML = "<tr><td colspan='8' style='text-align:center;'><i class='fas fa-spinner fa-spin'></i> Memuat rekap absensi...</td></tr>";
         }
         if (globalRecruitment.length === 0) {
             document.getElementById("tableOR").innerHTML = "<tr><td colspan='7' style='text-align:center;'><i class='fas fa-spinner fa-spin'></i> Memuat data pendaftar...</td></tr>";
@@ -1040,9 +1006,6 @@
         renderTableOR();
     }
 
-    // ------------------------------------------
-    // E. KELOLA DATA MASTER ANGGOTA
-    // ------------------------------------------
     function renderTableMaster() {
         const tbody = document.getElementById("tableAnggota");
         tbody.innerHTML = "";
@@ -1157,9 +1120,6 @@
         });
     }
 
-    // ------------------------------------------
-    // F. GENERATOR QR CODE PRESENSI
-    // ------------------------------------------
     function generateQrCodeForScan() {
         const canvasContainer = document.getElementById("qrcodeCanvas");
         const linkText = document.getElementById("qrTextLink");
@@ -1178,9 +1138,6 @@
         linkText.innerHTML = `<i class="fas fa-link"></i> Link Presensi: <u>${targetUrl}</u>`;
     }
 
-    // ------------------------------------------
-    // G. LOGIKA FORM PRESENSI MANDIRI QR ANGGOTA
-    // ------------------------------------------
     function initQrFormDate() {
         const today = new Date().toISOString().split('T')[0];
         const dateInput = document.getElementById("qrDateInput");
@@ -1229,9 +1186,54 @@
         }
     }
 
-// ====================================================
-    // SUBMIT ABSENSI QR MANDIRI (FORMAT TANGGAL INDO UNTUK SPREADSHEET)
     // ====================================================
+    // UTILITAS KUNCI FORMAT TANGGAL INDONESIA (DD/MM/YYYY)
+    // ====================================================
+    function formatDateIndo(rawTs) {
+        if (!rawTs) return '-';
+        let d = parseDateSafe(rawTs);
+        if (!d) return rawTs;
+
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+
+        return `${day}/${month}/${year}`;
+    }
+
+    function parseDateSafe(rawTs) {
+        if (!rawTs) return null;
+        
+        if (typeof rawTs === 'string' && rawTs.includes('/')) {
+            let parts = rawTs.split('/');
+            if (parts.length === 3) {
+                return new Date(parts[2], parts[1] - 1, parts[0]);
+            }
+        }
+
+        if (typeof rawTs === 'string' && rawTs.includes('-')) {
+            let parts = rawTs.split('T')[0].split('-');
+            if (parts.length === 3) {
+                return new Date(parts[0], parts[1] - 1, parts[2]);
+            }
+        }
+
+        let d = new Date(rawTs);
+        if (!isNaN(d.getTime())) return d;
+        
+        return null;
+    }
+
+    function getKelasByNamaOrNis(nama, nis) {
+        const found = globalDataMaster.find(a => {
+            let rNis = String(a["NIS/NISN"] || a["NIS"] || a["nis"] || "").trim();
+            let rNama = String(a["NAMA LENGKAP"] || a["Nama_Lengkap"] || a["nama"] || "").trim();
+            if (nis && nis !== "-" && rNis !== "-") return rNis === nis;
+            return rNama.toLowerCase() === (nama || "").toLowerCase();
+        });
+        return found ? (found.KELAS || found.Kelas || found.kelas || "-") : "-";
+    }
+
     async function submitPresensiQrMandiri(e) {
         e.preventDefault();
         const select = document.getElementById("qrMatchResultSelect");
@@ -1294,59 +1296,6 @@
         }
     }
 
-    // ====================================================
-    // FUNGSI UTILITAS TANGGAL LOKAL INDONESIA (DD/MM/YYYY)
-    // ====================================================
-    function formatDateIndo(rawTs) {
-        if (!rawTs) return '-';
-        let d = parseDateSafe(rawTs);
-        if (!d) return rawTs;
-
-        const day = String(d.getDate()).padStart(2, '0');
-        const month = String(d.getMonth() + 1).padStart(2, '0');
-        const year = d.getFullYear();
-
-        return `${day}/${month}/${year}`;
-    }
-
-    function parseDateSafe(rawTs) {
-        if (!rawTs) return null;
-        
-        // Membaca string DD/MM/YYYY
-        if (typeof rawTs === 'string' && rawTs.includes('/')) {
-            let parts = rawTs.split('/');
-            if (parts.length === 3) {
-                return new Date(parts[2], parts[1] - 1, parts[0]);
-            }
-        }
-        
-        // Membaca string YYYY-MM-DD
-        if (typeof rawTs === 'string' && rawTs.includes('-')) {
-            let parts = rawTs.split('T')[0].split('-');
-            if (parts.length === 3) {
-                return new Date(parts[0], parts[1] - 1, parts[2]);
-            }
-        }
-
-        let d = new Date(rawTs);
-        if (!isNaN(d.getTime())) return d;
-        
-        return null;
-    }
-
-    // Helper mengambil Kelas dari Data Master Anggota
-    function getKelasByNamaOrNis(nama, nis) {
-        const found = globalDataMaster.find(a => {
-            let rNis = String(a["NIS/NISN"] || a["NIS"] || a["nis"] || "").trim();
-            let rNama = String(a["NAMA LENGKAP"] || a["Nama_Lengkap"] || a["nama"] || "").trim();
-            if (nis && nis !== "-" && rNis !== "-") return rNis === nis;
-            return rNama.toLowerCase() === (nama || "").toLowerCase();
-        });
-        return found ? (found.KELAS || found.Kelas || found.kelas || "-") : "-";
-    }
-    // ====================================================
-    // RENDER PREVIEW ABSENSI DENGAN KOLOM KELAS & TANGGAL INDO
-    // ====================================================
     function renderPreviewAbsensi() {
         const tbody = document.getElementById("tablePreviewAbsensi");
         const tipeWaktu = document.getElementById("filterRekapTipe").value;
@@ -1429,6 +1378,7 @@
             }
         });
     }
+
     function openEditAbsensiModal(nama, pertemuan, keterangan, rawTs) {
         document.getElementById("editAbsensiNama").value = nama;
         document.getElementById("editAbsensiNamaView").value = nama;
@@ -1488,9 +1438,6 @@
         });
     }
 
-    // ------------------------------------------
-    // I. KELOLA DATA OPEN RECRUITMENT (OR)
-    // ------------------------------------------
     function renderTableOR() {
         const tbody = document.getElementById("tableOR");
         tbody.innerHTML = "";
@@ -1503,13 +1450,7 @@
                 const alumni = r["Alumni SMP/MTS"] || r.alumni_smp || '-';
                 
                 const rawTs = r.TimeStamp || r.Timestamp || r.timestamp || r.Tanggal || r.tanggal || "";
-                let formattedDate = '-';
-                const d = parseDateSafe(rawTs);
-                if (d) {
-                    formattedDate = d.toLocaleDateString('id-ID');
-                } else if (rawTs) {
-                    formattedDate = rawTs.toString().split('T')[0]; 
-                }
+                let formattedDate = formatDateIndo(rawTs);
 
                 tbody.innerHTML += `
                     <tr>
@@ -1591,7 +1532,7 @@
         const alasan_bergabung = document.getElementById("orAlasanManual").value.trim();
 
         globalRecruitment.unshift({
-            TimeStamp: new Date().toISOString(),
+            TimeStamp: formatDateIndo(new Date()),
             Nama_Pendaftar: nama,
             TTL: ttl,
             No_HP: no_hp,
@@ -1616,10 +1557,6 @@
         });
     }
 
-    // PENGIRIMAN ABSENSI DARI INPUT ADMIN MANUAL (MENGGUNAKAN TANGGAL YANG DIPILIH)
-// ====================================================
-    // SUBMIT ABSENSI ADMIN (FORMAT TANGGAL INDO UNTUK SPREADSHEET)
-    // ====================================================
     async function submitAbsensi(e) {
         e.preventDefault();
         const select = document.getElementById("absensiSelectNama");
@@ -1635,7 +1572,6 @@
         const formattedDateIndo = formatDateIndo(dateVal);
         const kelas = getKelasByNamaOrNis(nama, nis);
 
-        // Pengecekan Duplikasi
         const isDuplicate = globalAbsensi.some(a => {
             const rNama = a.Nama_Lengkap || a.nama_lengkap || a.Nama || "";
             const rawTs = a.TimeStamp || a.Timestamp || a.timestamp || "";
@@ -1698,9 +1634,6 @@
         reader.readAsArrayBuffer(file);
     }
 
-    // ------------------------------------------
-    // J. EXPORT DATA KE EXCEL
-    // ------------------------------------------
     function downloadExcelDenganKop(tipe) {
         let title = "";
         let dataToExport = [];
@@ -1744,7 +1677,7 @@
                         <td width="100%">
                             <div class="title">${title}</div>
                             <div class="subtitle">PASKIBRA MAN 6 CIAMIS</div>
-                            <div class="subtitle">Dicetak Pada: ${new Date().toLocaleDateString('id-ID')}</div>
+                            <div class="subtitle">Dicetak Pada: ${formatDateIndo(new Date())}</div>
                         </td>
                     </tr>
                 </table>
@@ -1774,9 +1707,6 @@
         document.body.removeChild(a);
     }
 
-    // ------------------------------------------
-    // K. PENGIRIMAN DATA KE SERVER SCRIPT
-    // ------------------------------------------
     async function sendDataToSheet(payload) {
         try {
             await fetch(SCRIPT_URL, {
