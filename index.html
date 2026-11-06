@@ -1336,10 +1336,7 @@ function printCard() {
                             <button class="btn btn-download" style="padding: 5px 10px; font-size: 0.85rem;" onclick="openCardModal('${nis}', '${nama.replace(/'/g, "\\'")}', '${kelas}', '${jabatan}')">
                             <i class="fas fa-id-card"></i> Kartu
                             </button>
-                            <button class="btn btn-primary" style="padding: 5px 10px; font-size: 0.85rem; background-color: #28a745; border-color: #28a745;" onclick="downloadSingleQrJpg('${nis}', '${nama.replace(/'/g, "\\'")}', '${kelas}', '${jabatan}')">
-        <i class="fas fa-qrcode"></i> QR
-    </button>
-                        </td>
+                       </td>
                     </tr>`;
             });
         } else {
@@ -2354,30 +2351,56 @@ async function downloadAllCardsJpgMassal() {
     closeModal('customDialogModal');
     showCustomAlert("SELESAI", "Seluruh gambar kartu JPG anggota berhasil diunduh secara massal!");
 }
-// OPSI 1: Download Kartu Format JPG (Pas Layar HP / Gambar)
-function downloadCardAsJpg() {
-    closeModal('choiceModal');
+// ============================================================================
+// PERBAIKAN DOWNLOAD JPG DARI MODAL KARTU (PASTI MENCETAK QR CODE TERANG)
+// ============================================================================
+async function downloadCardAsJpg() {
     const cardArea = document.getElementById("idCardPrintArea");
-    const nama = document.getElementById("cardNama").innerText || "Anggota";
+    const namaText = document.getElementById("cardNama") ? document.getElementById("cardNama").innerText : "Anggota";
+
+    if (!cardArea) {
+        return showCustomAlert("GAGAL", "Area kartu tidak ditemukan!", "fa-times-circle");
+    }
 
     showCustomAlert("MEMPROSES GAMBAR", "Sedang mengunduh kartu dalam format JPG...", "fa-spinner fa-spin");
 
-    html2canvas(cardArea, {
-        scale: 3, // Kualitas Tinggi
-        useCORS: true,
-        backgroundColor: "#32000a"
-    }).then(canvas => {
-        closeModal('customDialogModal');
+    // Tutup dialog konfirmasi (jika ada) agar tidak mengganggu rendering
+    closeModal('choiceModal');
+
+    // Beri jeda 300ms agar DOM & gambar QR siap secara sempurna
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    try {
+        const canvas = await html2canvas(cardArea, {
+            scale: 3, // Kualitas Gambar Jernih HD di HP
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: "#32000a",
+            logging: false,
+            onclone: (clonedDoc) => {
+                // Sembunyikan tombol cetak/tutup pada cloning elemen sebelum di-convert ke gambar
+                const clonedCard = clonedDoc.getElementById("idCardPrintArea");
+                if (clonedCard) {
+                    clonedCard.style.margin = "0";
+                    clonedCard.style.boxShadow = "none";
+                }
+            }
+        });
+
         const image = canvas.toDataURL("image/jpeg", 1.0);
-        const a = document.createElement("a");
-        a.href = image;
-        a.download = `Kartu_Paskibra_${nama.replace(/\s+/g, '_')}.jpg`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-    }).catch(err => {
+        const link = document.createElement("a");
+        link.href = image;
+        link.download = `Kartu_Paskibra_${namaText.replace(/\s+/g, '_')}.jpg`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        closeModal('customDialogModal');
+    } catch (err) {
+        console.error("Error download JPG:", err);
+        closeModal('customDialogModal');
         showCustomAlert("GAGAL", "Gagal mengunduh gambar kartu.", "fa-times-circle");
-    });
+    }
 }
 
 // OPSI 2: Cetak Kartu Ukuran Fisik (6,5 cm x 10,5 cm)
