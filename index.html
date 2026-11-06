@@ -2236,22 +2236,22 @@ function printCardSingle() {
 function openGoogleDriveFolder() {
     window.open(GOOGLE_DRIVE_FOLDER_URL, '_blank');
 }
-    // Fungsi Langsung Unduh Gambar QR / Kartu Per Anggota (Pas Layar HP)
+    // Fungsi Langsung Unduh Gambar JPG Kartu (Persis Tampilan Cetak & QR Lebih Besar)
 async function downloadSingleQrJpg(nis, nama, kelas, jabatan) {
-    showCustomAlert("MEMPROSES KARTU", `Sedang mengunduh QR Kartu untuk ${nama}...`, "fa-spinner fa-spin");
+    showCustomAlert("MEMPROSES KARTU", `Sedang mengunduh Kartu JPG untuk ${nama}...`, "fa-spinner fa-spin");
 
-    // Buat Wadah Kartu Sementara (Ukuran Proporsional Layar Smartphone / Card)
+    // Wadah Kartu Sementara (Ukuran Fisik 6,5 cm x 10,5 cm disesuaikan ke Pixel Kualitas Tinggi)
     let tempBox = document.createElement("div");
     tempBox.style.position = "absolute";
     tempBox.style.left = "-9999px";
     tempBox.innerHTML = `
         <div id="singleCardJpgArea" style="
-            width: 360px; 
-            height: 580px; 
+            width: 380px; 
+            height: 610px; 
             background: #32000a; 
             border: 3px solid #ffd700; 
-            border-radius: 16px; 
-            padding: 20px; 
+            border-radius: 14px; 
+            padding: 20px 15px; 
             color: #fff; 
             text-align: center; 
             box-sizing: border-box; 
@@ -2261,41 +2261,44 @@ async function downloadSingleQrJpg(nis, nama, kelas, jabatan) {
             justify-content: space-between;
             font-family: 'American Captain', 'Segoe UI', sans-serif;">
             
+            <!-- HEADER LOGO & JUDUL -->
             <div>
-                <img src="assets/logo-paskibra.png" style="width: 55px; height: 55px; margin-bottom: 6px; object-fit: contain;">
-                <h4 style="color: #ffd700; margin: 0; font-size: 1.2rem; letter-spacing: 1px; line-height: 1.1;">PASKIBRA MAN 6 CIAMIS</h4>
-                <p style="font-size: 0.8rem; color: #ffcc66; margin-top: 4px; letter-spacing: 1px;">KARTU TANDA ANGGOTA</p>
-                <div style="width: 80%; height: 1px; background: rgba(255, 215, 0, 0.4); margin: 8px auto;"></div>
+                <img src="assets/logo-paskibra.png" style="width: 52px; height: 52px; margin-bottom: 4px; object-fit: contain;">
+                <h4 style="color: #ffd700; margin: 0; font-size: 1.15rem; letter-spacing: 1px; line-height: 1.1;">PASKIBRA MAN 6 CIAMIS</h4>
+                <p style="font-size: 0.75rem; color: #ffcc66; margin-top: 3px; letter-spacing: 1px;">KARTU TANDA ANGGOTA</p>
+                <div style="width: 85%; height: 1px; background: rgba(255, 215, 0, 0.4); margin: 8px auto;"></div>
             </div>
 
+            <!-- DETAIL NAMA & KELAS -->
             <div>
-                <h3 style="color: #ffffff; font-size: 1.45rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; line-height: 1.1;">${nama}</h3>
-                <p style="color: #ffcc66; font-size: 0.95rem; margin-top: 4px; letter-spacing: 1px;">${kelas} | ${jabatan}</p>
+                <h3 style="color: #ffffff; font-size: 1.35rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; line-height: 1.1;">${nama}</h3>
+                <p style="color: #ffcc66; font-size: 0.9rem; margin-top: 4px; letter-spacing: 1px;">${kelas} | ${jabatan}</p>
             </div>
 
+            <!-- AREA QR CODE (DIPERBESAR SANGAT JELAS) -->
             <div>
                 <div id="singleTempQrBox" style="background: #ffffff; padding: 8px; border-radius: 8px; display: inline-block; line-height: 0;"></div>
-                <p style="color: #ffd700; font-size: 1.2rem; font-weight: bold; margin-top: 8px; letter-spacing: 1.5px;">${nis}</p>
+                <p style="color: #ffd700; font-size: 1.15rem; font-weight: bold; margin-top: 8px; letter-spacing: 1.5px;">${nis}</p>
             </div>
         </div>
     `;
     document.body.appendChild(tempBox);
 
-    // Generate QR Code ke dalam wadah sementara
+    // Generate QR Code dengan Ukuran Diperbesar (140px x 140px)
     new QRCode(document.getElementById("singleTempQrBox"), {
         text: nis,
-        width: 130,
-        height: 130,
+        width: 140,
+        height: 140,
         correctLevel: QRCode.CorrectLevel.H
     });
 
-    // Tunggu proses render QR selesai
+    // Tunggu render QR selesai
     await new Promise(resolve => setTimeout(resolve, 250));
 
-    // Convert ke format Gambar JPG Resolusi Tinggi menggunakan html2canvas
+    // Convert ke JPG HD menggunakan html2canvas
     try {
         const canvas = await html2canvas(document.getElementById("singleCardJpgArea"), {
-            scale: 3, // Kualitas Gambar Tajam di Layar HP
+            scale: 3, // Hasil gambar tajam & jernih saat dibuka di galeri HP
             useCORS: true,
             backgroundColor: "#32000a"
         });
@@ -2303,7 +2306,7 @@ async function downloadSingleQrJpg(nis, nama, kelas, jabatan) {
         const image = canvas.toDataURL("image/jpeg", 1.0);
         const link = document.createElement("a");
         link.href = image;
-        link.download = `QR_Paskibra_${nis}_${nama.replace(/\s+/g, '_')}.jpg`;
+        link.download = `Kartu_Paskibra_${nis}_${nama.replace(/\s+/g, '_')}.jpg`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -2311,7 +2314,7 @@ async function downloadSingleQrJpg(nis, nama, kelas, jabatan) {
         closeModal('customDialogModal');
     } catch (err) {
         closeModal('customDialogModal');
-        showCustomAlert("GAGAL", "Gagal membuat gambar QR Kartu.", "fa-times-circle");
+        showCustomAlert("GAGAL", "Gagal mengunduh gambar kartu JPG.", "fa-times-circle");
     } finally {
         document.body.removeChild(tempBox);
     }
