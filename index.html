@@ -7,7 +7,8 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.cdnfonts.com/css/american-captain" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-
+<!-- Library Scan QR Code -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
     <!-- ======================================================================
          1. STYLE CSS UTAMA
     ======================================================================= -->
@@ -526,7 +527,19 @@
         </div>
 
         <hr class="section-divider">
+<!-- WADAH SCANNER QR CODE -->
+<div class="card" style="background: rgba(0,0,0,0.3); border: 1px solid #ffd700; text-align: center; margin-bottom: 20px;">
+    <h3><i class="fas fa-qrcode"></i> SCAN QR CODE KARTU ANGGOTA</h3>
+    <p style="color: #ffcc66; font-size: 0.9rem; margin-bottom: 10px;">Arahkan kamera ke QR Code NRA Anggota untuk absensi otomatis</p>
+    
+    <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 15px;">
+        <button type="button" class="btn btn-primary" onclick="startQRScanner()"><i class="fas fa-camera"></i> BUKA KAMERA</button>
+        <button type="button" class="btn btn-delete" id="btnStopScan" onclick="stopQRScanner()" style="display: none;"><i class="fas fa-stop-circle"></i> STOP KAMERA</button>
+    </div>
 
+    <!-- Area Video Kamera -->
+    <div id="reader" style="width: 100%; max-width: 400px; margin: 0 auto; border-radius: 10px; overflow: hidden;"></div>
+</div>
         <h2>INPUT ABSENSI LATIHAN RUTIN (ADMIN MANUAL)</h2>
         <form id="formAbsensi" onsubmit="submitAbsensi(event)">
             <div class="form-group">
@@ -808,7 +821,58 @@
     let globalRecruitment = [];
     let currentFilteredAbsensi = [];
     let globalDokumentasi = [];
+    let html5QrcodeScanner = null;
 
+// Fungsi Membuka Kamera Scanner
+function startQRScanner() {
+    document.getElementById("btnStopScan").style.display = "inline-flex";
+    html5QrcodeScanner = new Html5Qrcode("reader");
+    
+    const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+    
+    html5QrcodeScanner.start(
+        { facingMode: "environment" }, // Menggunakan kamera belakang HP
+        config,
+        onScanSuccess
+    ).catch(err => {
+        showCustomAlert("KAMERA ERROR", "Gagal mengakses kamera. Pastikan izin kamera diizinkan!", "fa-exclamation-circle");
+    });
+}
+
+// Fungsi Menghentikan Kamera
+function stopQRScanner() {
+    if (html5QrcodeScanner) {
+        html5QrcodeScanner.stop().then(() => {
+            document.getElementById("btnStopScan").style.display = "none";
+            document.getElementById("reader").innerHTML = "";
+        }).catch(err => console.error(err));
+    }
+}
+
+// Fungsi Ketika QR Code Berhasil Terbaca
+function onScanSuccess(decodedText) {
+    // decodedText berisi nilai NRA dari QR Code
+    const scannedNra = decodedText.trim();
+    
+    // Cari data anggota berdasarkan NRA
+    const anggota = globalDataMaster.find(a => {
+        let rNra = String(a["NRA"] || a["nra"] || a["NIS/NISN"] || "").trim();
+        return rNra.toLowerCase() === scannedNra.toLowerCase();
+    });
+
+    if (anggota) {
+        const selectNama = document.getElementById("absensiSelectNama");
+        selectNama.value = anggota["NAMA LENGKAP"] || anggota["Nama_Lengkap"];
+        
+        // Membunyikan suara beep pendek jika perlu
+        showCustomAlert("QR TERDETEKSI", `Anggota Ditemukan: ${selectNama.value} [NRA: ${scannedNra}]`);
+        
+        // Hentikan sementara kamera setelah berhasil scan
+        stopQRScanner();
+    } else {
+        showCustomAlert("TIDAK DITEMUKAN", `NRA [${scannedNra}] tidak terdaftar di Data Master!`, "fa-times-circle");
+    }
+}
     function initDefaultDateAdmin() {
         const today = new Date().toISOString().split('T')[0];
         const adminDateInput = document.getElementById("absensiTanggalInput");
