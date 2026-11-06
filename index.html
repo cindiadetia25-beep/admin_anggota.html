@@ -2356,49 +2356,79 @@ async function downloadAllCardsJpgMassal() {
 // PERBAIKAN DOWNLOAD JPG DARI MODAL KARTU (PASTI MENCETAK QR CODE TERANG)
 // ============================================================================
 // PERBAIKAN UTAMA: DOWNLOAD KARTU SINGLE JPG (QR CODE PASTI TERBACA)
+// PERBAIKAN TOTAL: DOWNLOAD KARTU SINGLE DENGAN RE-GENERATE QR PASTI MUNCUL
 async function downloadCardAsJpg() {
-    const cardArea = document.getElementById("idCardPrintArea");
     const namaText = document.getElementById("cardNama") ? document.getElementById("cardNama").innerText : "Anggota";
     const nraText = document.getElementById("cardNra") ? document.getElementById("cardNra").innerText : "NRA";
+    const kelasText = document.getElementById("cardKelasJabatan") ? document.getElementById("cardKelasJabatan").innerText : "-";
 
-    if (!cardArea) {
-        return showCustomAlert("GAGAL", "Area kartu tidak ditemukan!", "fa-times-circle");
-    }
+    showCustomAlert("MEMPROSES GAMBAR", "Sedang membuat kartu gambar HD...", "fa-spinner fa-spin");
 
-    // Pastikan Canvas QR disalin/dikonversi ke IMG Element jika belum ter-convert
-    const qrContainer = document.getElementById("qrcodeBox");
-    if (qrContainer) {
-        const qrCanvas = qrContainer.querySelector("canvas");
-        const qrImg = qrContainer.querySelector("img");
-        if (qrCanvas && (!qrImg || !qrImg.src || qrImg.style.display === "none")) {
-            const dataUrl = qrCanvas.toDataURL("image/png");
-            if (qrImg) {
-                qrImg.src = dataUrl;
-                qrImg.style.display = "block";
-            } else {
-                const newImg = document.createElement("img");
-                newImg.src = dataUrl;
-                newImg.style.width = "130px";
-                newImg.style.height = "130px";
-                qrContainer.appendChild(newImg);
-            }
-        }
-    }
-
-    showCustomAlert("MEMPROSES GAMBAR", "Sedang mengunduh kartu dalam format JPG...", "fa-spinner fa-spin");
-
+    // Tutup dialog modal konfirmasi agar tidak menghalangi rendering
     closeModal('choiceModal');
 
-    // Beri jeda 400ms agar rendering elemen gambar di DOM matang
-    await new Promise(resolve => setTimeout(resolve, 400));
+    // Buat wadah tersembunyi khusus render JPG HD
+    let tempContainer = document.createElement("div");
+    tempContainer.style.position = "fixed";
+    tempContainer.style.top = "-9999px";
+    tempContainer.style.left = "-9999px";
+    tempContainer.style.zIndex = "-9999";
+
+    tempContainer.innerHTML = `
+        <div id="renderJpgArea" style="
+            width: 380px; 
+            height: 610px; 
+            background: #32000a; 
+            border: 3px solid #ffd700; 
+            border-radius: 14px; 
+            padding: 20px 15px; 
+            color: #fff; 
+            text-align: center; 
+            box-sizing: border-box; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: space-between;
+            font-family: 'American Captain', 'Segoe UI', sans-serif;">
+            
+            <div>
+                <img src="assets/logo-paskibra.png" style="width: 52px; height: 52px; margin-bottom: 4px; object-fit: contain;">
+                <h4 style="color: #ffd700; margin: 0; font-size: 1.15rem; letter-spacing: 1px; line-height: 1.1;">PASKIBRA MAN 6 CIAMIS</h4>
+                <p style="font-size: 0.75rem; color: #ffcc66; margin-top: 3px; letter-spacing: 1px;">KARTU TANDA ANGGOTA</p>
+                <div style="width: 85%; height: 1px; background: rgba(255, 215, 0, 0.4); margin: 8px auto;"></div>
+            </div>
+
+            <div>
+                <h3 style="color: #ffffff; font-size: 1.35rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; line-height: 1.1;">${namaText}</h3>
+                <p style="color: #ffcc66; font-size: 0.9rem; margin-top: 4px; letter-spacing: 1px;">${kelasText}</p>
+            </div>
+
+            <div>
+                <div id="tempQrRenderBox" style="background: #ffffff; padding: 8px; border-radius: 8px; display: inline-block; line-height: 0;"></div>
+                <p style="color: #ffd700; font-size: 1.15rem; font-weight: bold; margin-top: 8px; letter-spacing: 1.5px;">${nraText}</p>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(tempContainer);
+
+    // Generate QR Code baru dengan tingkat ketajaman tinggi
+    new QRCode(document.getElementById("tempQrRenderBox"), {
+        text: String(nraText),
+        width: 140,
+        height: 140,
+        correctLevel: QRCode.CorrectLevel.H
+    });
+
+    // Wajib beri jeda 500ms agar elemen QR selesai dirender utuh di memori
+    await new Promise(resolve => setTimeout(resolve, 500));
 
     try {
-        const canvas = await html2canvas(cardArea, {
-            scale: 3, // Kualitas HD untuk Layar HP
+        const renderTarget = document.getElementById("renderJpgArea");
+        const canvas = await html2canvas(renderTarget, {
+            scale: 3,
             useCORS: true,
             allowTaint: true,
-            backgroundColor: "#32000a",
-            logging: false
+            backgroundColor: "#32000a"
         });
 
         const image = canvas.toDataURL("image/jpeg", 1.0);
@@ -2414,6 +2444,10 @@ async function downloadCardAsJpg() {
         console.error("Error download JPG:", err);
         closeModal('customDialogModal');
         showCustomAlert("GAGAL", "Gagal mengunduh gambar kartu.", "fa-times-circle");
+    } finally {
+        if (document.body.contains(tempContainer)) {
+            document.body.removeChild(tempContainer);
+        }
     }
 }
 
