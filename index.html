@@ -1090,19 +1090,20 @@ function onScanSuccess(decodedText) {
         }
     }
     // Fungsi Membuka Kartu & Generate QR Code
+// Membuka Modal Kartu Single & Generate QR Code (Dipastikan Render ke Tag Canvas & IMG)
 function openCardModal(nis, nama, kelas, jabatan) {
     document.getElementById("cardNama").innerText = nama;
     document.getElementById("cardKelasJabatan").innerText = `${kelas} | ${jabatan}`;
     document.getElementById("cardNra").innerText = nis;
 
-    // Bersihkan QR Code lama
-    document.getElementById("qrcodeBox").innerHTML = "";
+    const qrBox = document.getElementById("qrcodeBox");
+    qrBox.innerHTML = "";
 
-    // Generate QR Code Baru berdasarkan NRA
-    new QRCode(document.getElementById("qrcodeBox"), {
-        text: nis,
-        width: 120,
-        height: 120
+    new QRCode(qrBox, {
+        text: String(nis || "-"),
+        width: 130,
+        height: 130,
+        correctLevel: QRCode.CorrectLevel.H
     });
 
     document.getElementById("cardModal").style.display = "flex";
@@ -2354,43 +2355,56 @@ async function downloadAllCardsJpgMassal() {
 // ============================================================================
 // PERBAIKAN DOWNLOAD JPG DARI MODAL KARTU (PASTI MENCETAK QR CODE TERANG)
 // ============================================================================
+// PERBAIKAN UTAMA: DOWNLOAD KARTU SINGLE JPG (QR CODE PASTI TERBACA)
 async function downloadCardAsJpg() {
     const cardArea = document.getElementById("idCardPrintArea");
     const namaText = document.getElementById("cardNama") ? document.getElementById("cardNama").innerText : "Anggota";
+    const nraText = document.getElementById("cardNra") ? document.getElementById("cardNra").innerText : "NRA";
 
     if (!cardArea) {
         return showCustomAlert("GAGAL", "Area kartu tidak ditemukan!", "fa-times-circle");
     }
 
+    // Pastikan Canvas QR disalin/dikonversi ke IMG Element jika belum ter-convert
+    const qrContainer = document.getElementById("qrcodeBox");
+    if (qrContainer) {
+        const qrCanvas = qrContainer.querySelector("canvas");
+        const qrImg = qrContainer.querySelector("img");
+        if (qrCanvas && (!qrImg || !qrImg.src || qrImg.style.display === "none")) {
+            const dataUrl = qrCanvas.toDataURL("image/png");
+            if (qrImg) {
+                qrImg.src = dataUrl;
+                qrImg.style.display = "block";
+            } else {
+                const newImg = document.createElement("img");
+                newImg.src = dataUrl;
+                newImg.style.width = "130px";
+                newImg.style.height = "130px";
+                qrContainer.appendChild(newImg);
+            }
+        }
+    }
+
     showCustomAlert("MEMPROSES GAMBAR", "Sedang mengunduh kartu dalam format JPG...", "fa-spinner fa-spin");
 
-    // Tutup dialog konfirmasi (jika ada) agar tidak mengganggu rendering
     closeModal('choiceModal');
 
-    // Beri jeda 300ms agar DOM & gambar QR siap secara sempurna
-    await new Promise(resolve => setTimeout(resolve, 300));
+    // Beri jeda 400ms agar rendering elemen gambar di DOM matang
+    await new Promise(resolve => setTimeout(resolve, 400));
 
     try {
         const canvas = await html2canvas(cardArea, {
-            scale: 3, // Kualitas Gambar Jernih HD di HP
+            scale: 3, // Kualitas HD untuk Layar HP
             useCORS: true,
             allowTaint: true,
             backgroundColor: "#32000a",
-            logging: false,
-            onclone: (clonedDoc) => {
-                // Sembunyikan tombol cetak/tutup pada cloning elemen sebelum di-convert ke gambar
-                const clonedCard = clonedDoc.getElementById("idCardPrintArea");
-                if (clonedCard) {
-                    clonedCard.style.margin = "0";
-                    clonedCard.style.boxShadow = "none";
-                }
-            }
+            logging: false
         });
 
         const image = canvas.toDataURL("image/jpeg", 1.0);
         const link = document.createElement("a");
         link.href = image;
-        link.download = `Kartu_Paskibra_${namaText.replace(/\s+/g, '_')}.jpg`;
+        link.download = `Kartu_Paskibra_${nraText}_${namaText.replace(/\s+/g, '_')}.jpg`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
