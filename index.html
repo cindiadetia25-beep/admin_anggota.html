@@ -891,10 +891,7 @@ function onScanSuccess(decodedText) {
         showCustomAlert("TIDAK DITEMUKAN", `NRA [${scannedNra}] tidak terdaftar di Data Master!`, "fa-times-circle");
     }
 }
-    // 1. TAMBAHKAN VARIABEL SCANNER DI ATAS
-    let html5QrcodeScanner = null;
-
-    // 2. TAMBAHKAN FUNGSI BEEP SUARA HASIL SCAN
+        // 2. TAMBAHKAN FUNGSI BEEP SUARA HASIL SCAN
     function playBeepSound() {
         try {
             const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
