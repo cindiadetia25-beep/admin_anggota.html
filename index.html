@@ -446,33 +446,23 @@
 
         <hr class="section-divider">
 
-        <div class="action-box">
-            <span><strong>Terkoneksi dengan Sheet DATA MASTER ANGGOTA</strong></span>
+       <div class="action-box">
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <span><strong>Filter Kelas:</strong></span>
+                <select id="filterAnggotaKelas" onchange="renderTableMaster()" style="padding: 8px; border-radius: 6px; background: #2b0006; color: #fff; border: 1px solid #ffd700;">
+                    <option value="semua">Semua Kelas</option>
+                </select>
+
+                <span><strong>Filter Jabatan:</strong></span>
+                <select id="filterAnggotaJabatan" onchange="renderTableMaster()" style="padding: 8px; border-radius: 6px; background: #2b0006; color: #fff; border: 1px solid #ffd700;">
+                    <option value="semua">Semua Jabatan</option>
+                </select>
+            </div>
             <div style="display:flex; gap:10px; flex-wrap:wrap;">
                 <button class="btn btn-download" onclick="downloadExcelDenganKop('anggota')"><i class="fas fa-file-download"></i> DOWNLOAD EXCEL ANGGOTA</button>
                 <button class="btn btn-danger-all" onclick="confirmClearAll('anggota')"><i class="fas fa-trash-restore"></i> HAPUS SEMUA DATA ANGGOTA</button>
             </div>
         </div>
-
-        <div class="table-wrapper">
-            <table>
-                <thead>
-                    <tr>
-                        <th style="width:50px; text-align:center; white-space:nowrap;">NO.</th>
-                        <th style="width:120px; white-space:nowrap;">NIS / NISN</th>
-                        <th style="min-width:180px; white-space:nowrap;">NAMA LENGKAP</th>
-                        <th style="width:100px; text-align:center; white-space:nowrap;">KELAS</th>
-                        <th style="width:140px; white-space:nowrap;">JABATAN</th>
-                        <th style="width:140px; text-align:center; white-space:nowrap;">AKSI</th>
-                    </tr>
-                </thead>
-                <tbody id="tableAnggota">
-                    <tr><td colspan="6" style="text-align:center;"><i class="fas fa-spinner fa-spin"></i> Memuat data master anggota...</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
     <!-- TAB 2: ABSENSI LATIHAN RUTIN & UPLOAD DOKUMENTASI -->
     <div id="tab-absensi" class="card tab-content">
         <h2>UPLOAD DOKUMENTASI FOTO LATIHAN</h2>
@@ -642,9 +632,18 @@
 
         <h2>DAFTAR PENDAFTAR CALON ANGGOTA PASKIBRA BARU (OR)</h2>
 
-        <div class="action-box">
+       <div class="action-box">
             <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                <span><strong>Opsi Data Recruitment:</strong></span>
+                <span><strong>Filter Alumni SMP/MTs:</strong></span>
+                <select id="filterOrAlumni" onchange="renderTableOR()" style="padding: 8px; border-radius: 6px; background: #2b0006; color: #fff; border: 1px solid #ffd700;">
+                    <option value="semua">Semua Alumni</option>
+                </select>
+
+                <span><strong>Filter Kelas:</strong></span>
+                <select id="filterOrKelas" onchange="renderTableOR()" style="padding: 8px; border-radius: 6px; background: #2b0006; color: #fff; border: 1px solid #ffd700;">
+                    <option value="semua">Semua Kelas</option>
+                </select>
+
                 <div class="file-input-wrapper">
                     <button class="btn btn-excel"><i class="fas fa-file-excel"></i> UPLOAD EXCEL OR</button>
                     <input type="file" accept=".xlsx, .xls, .csv" onchange="importExcelOR(event)">
@@ -903,18 +902,67 @@
         }
     }
 
-    function renderAllTables() {
+  function renderAllTables() {
+        populateFilterAnggotaOptions();
         renderTableMaster();
         populateSelectAnggota();
         renderPreviewAbsensi();
+        populateFilterOROptions();
         renderTableOR();
+    }
+
+function populateFilterAnggotaOptions() {
+        const selectKelas = document.getElementById("filterAnggotaKelas");
+        const selectJabatan = document.getElementById("filterAnggotaJabatan");
+
+        const valKelas = selectKelas ? selectKelas.value : "semua";
+        const valJabatan = selectJabatan ? selectJabatan.value : "semua";
+
+        const setKelas = new Set();
+        const setJabatan = new Set();
+
+        globalDataMaster.forEach(a => {
+            let k = a["KELAS"] || a["Kelas"] || a["kelas"];
+            let j = a["JABATAN"] || a["Jabatan"];
+            if (k && String(k).trim() !== "") setKelas.add(String(k).trim());
+            if (j && String(j).trim() !== "") setJabatan.add(String(j).trim());
+        });
+
+        if (selectKelas) {
+            selectKelas.innerHTML = '<option value="semua">Semua Kelas</option>';
+            Array.from(setKelas).sort().forEach(k => {
+                selectKelas.innerHTML += `<option value="${k}">${k}</option>`;
+            });
+            selectKelas.value = valKelas;
+        }
+
+        if (selectJabatan) {
+            selectJabatan.innerHTML = '<option value="semua">Semua Jabatan</option>';
+            Array.from(setJabatan).sort().forEach(j => {
+                selectJabatan.innerHTML += `<option value="${j}">${j}</option>`;
+            });
+            selectJabatan.value = valJabatan;
+        }
     }
 
     function renderTableMaster() {
         const tbody = document.getElementById("tableAnggota");
+        const filterKelas = document.getElementById("filterAnggotaKelas") ? document.getElementById("filterAnggotaKelas").value : "semua";
+        const filterJabatan = document.getElementById("filterAnggotaJabatan") ? document.getElementById("filterAnggotaJabatan").value : "semua";
+        
         tbody.innerHTML = "";
-        if (globalDataMaster.length > 0) {
-            globalDataMaster.forEach((a, index) => {
+
+        const filtered = globalDataMaster.filter(a => {
+            const kelas = a["KELAS"] || a["Kelas"] || a["kelas"] || "-";
+            const jabatan = a["JABATAN"] || a["Jabatan"] || "Anggota";
+
+            if (filterKelas !== "semua" && kelas.toLowerCase() !== filterKelas.toLowerCase()) return false;
+            if (filterJabatan !== "semua" && jabatan.toLowerCase() !== filterJabatan.toLowerCase()) return false;
+            return true;
+        });
+
+        if (filtered.length > 0) {
+            filtered.forEach((a, index) => {
                 let rawNis = a["NIS/NISN"] || a["NIS"] || a["nis"] || "-";
                 const nis = rawNis.toString().trim() || "-";
                 const nama = a["NAMA LENGKAP"] || a["Nama_Lengkap"] || a["nama"] || "-";
@@ -935,7 +983,7 @@
                     </tr>`;
             });
         } else {
-            tbody.innerHTML = "<tr><td colspan='6' style='text-align:center;'>Belum ada data di DATA MASTER ANGGOTA.</td></tr>";
+            tbody.innerHTML = "<tr><td colspan='6' style='text-align:center;'>Tidak ada data anggota yang sesuai filter.</td></tr>";
         }
     }
 
@@ -1330,22 +1378,67 @@
         });
     }
 
-function renderTableOR() {
+function populateFilterOROptions() {
+        const selectAlumni = document.getElementById("filterOrAlumni");
+        const selectKelas = document.getElementById("filterOrKelas");
+
+        const valAlumni = selectAlumni ? selectAlumni.value : "semua";
+        const valKelas = selectKelas ? selectKelas.value : "semua";
+
+        const setAlumni = new Set();
+        const setKelas = new Set();
+
+        globalRecruitment.forEach(r => {
+            let a = r["Alumni SMP/MTS"] || r.alumni_smp || r.Alumni_SMP;
+            let k = r.Kelas || r.kelas;
+            if (a && String(a).trim() !== "") setAlumni.add(String(a).trim());
+            if (k && String(k).trim() !== "") setKelas.add(String(k).trim());
+        });
+
+        if (selectAlumni) {
+            selectAlumni.innerHTML = '<option value="semua">Semua Alumni</option>';
+            Array.from(setAlumni).sort().forEach(a => {
+                selectAlumni.innerHTML += `<option value="${a}">${a}</option>`;
+            });
+            selectAlumni.value = valAlumni;
+        }
+
+        if (selectKelas) {
+            selectKelas.innerHTML = '<option value="semua">Semua Kelas</option>';
+            Array.from(setKelas).sort().forEach(k => {
+                selectKelas.innerHTML += `<option value="${k}">${k}</option>`;
+            });
+            selectKelas.value = valKelas;
+        }
+    }
+
+    function renderTableOR() {
         const tbody = document.getElementById("tableOR");
+        const filterAlumni = document.getElementById("filterOrAlumni") ? document.getElementById("filterOrAlumni").value : "semua";
+        const filterKelas = document.getElementById("filterOrKelas") ? document.getElementById("filterOrKelas").value : "semua";
+
         tbody.innerHTML = "";
-        if (globalRecruitment.length > 0) {
-            globalRecruitment.forEach((r, index) => {
+
+        const filtered = globalRecruitment.filter(r => {
+            const alumni = r["Alumni SMP/MTS"] || r.alumni_smp || r.Alumni_SMP || "-";
+            const kelas = r.Kelas || r.kelas || "-";
+
+            if (filterAlumni !== "semua" && alumni.toLowerCase() !== filterAlumni.toLowerCase()) return false;
+            if (filterKelas !== "semua" && kelas.toLowerCase() !== filterKelas.toLowerCase()) return false;
+            return true;
+        });
+
+        if (filtered.length > 0) {
+            filtered.forEach((r, index) => {
                 const status = r.Status_Seleksi || r.status_seleksi || 'Pending';
                 const isAccepted = status === 'Diterima' || status === 'Approved';
                 const nama = r.Nama_Pendaftar || r.nama_pendaftar || '-';
                 const kelas = r.Kelas || r.kelas || '-';
                 const alumni = r["Alumni SMP/MTS"] || r.alumni_smp || r.Alumni_SMP || '-';
                 
-                // Pembacaan fleksibel untuk TB dan BB
                 const rawTinggi = r.Tinggi_Badan || r.tinggi_badan || r["Tinggi Badan"] || r.Tinggi || r.tinggi || "";
                 const rawBerat = r.Berat_Badan || r.berat_badan || r["Berat Badan"] || r.Berat || r.berat || "";
 
-                // Format tampilan: jika ada nilainya tampilkan dengan "cm" / "kg", jika kosong tampilkan "-"
                 const tinggiDisplay = (rawTinggi && String(rawTinggi).trim() !== "" && String(rawTinggi).trim() !== "-") ? `${String(rawTinggi).trim()} cm` : "-";
                 const beratDisplay = (rawBerat && String(rawBerat).trim() !== "" && String(rawBerat).trim() !== "-") ? `${String(rawBerat).trim()} kg` : "-";
 
@@ -1368,10 +1461,9 @@ function renderTableOR() {
                     </tr>`;
             });
         } else {
-            tbody.innerHTML = "<tr><td colspan='9' style='text-align:center;'>Belum ada data pendaftar calon Paskibra.</td></tr>";
+            tbody.innerHTML = "<tr><td colspan='9' style='text-align:center;'>Tidak ada data pendaftar OR yang sesuai filter.</td></tr>";
         }
     }
-
     async function approveOR(nama, kelas) {
         let inputNis = prompt(`Masukkan NIS / NISN untuk anggota ${nama} (Opsional, boleh dikosongkan):`);
         if (inputNis === null) return;
