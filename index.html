@@ -8,6 +8,9 @@
     <link href="https://fonts.cdnfonts.com/css/american-captain" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
+    <!-- ======================================================================
+         1. STYLE CSS UTAMA
+    ======================================================================= -->
     <style>
         * { 
             box-sizing: border-box; 
@@ -367,7 +370,9 @@
 </head>
 <body>
 
-<!-- OVERLAY LOGIN ADMIN -->
+<!-- ======================================================================
+     2. OVERLAY LOGIN ADMIN
+======================================================================= -->
 <div id="loginOverlay">
     <div class="login-card">
         <img class="custom-logo" src="assets/logo-paskibra.png" alt="Logo Paskibra" style="margin-bottom: 10px;">
@@ -390,6 +395,9 @@
     </div>
 </div>
 
+<!-- ======================================================================
+     3. CONTAINER DASHBOARD UTAMA
+======================================================================= -->
 <div class="container">
     <header>
         <div class="header-title-box">
@@ -418,15 +426,17 @@
 
     <hr class="section-divider">
 
-    <!-- TAB 1: DATA MASTER ANGGOTA -->
+    <!-- ==================================================================
+         4. TAB 1: DATA MASTER ANGGOTA (DENGAN NRA & FILTER)
+    =================================================================== -->
     <div id="tab-anggota" class="card tab-content active">
         <h2>DAFTAR ANGGOTA PASKIBRA (DATA MASTER)</h2>
         
         <form onsubmit="submitAnggotaMasterManual(event)" style="margin-bottom: 20px;">
             <div class="form-grid">
                 <div class="form-group">
-                    <label>NIS / NISN (Opsional)</label>
-                    <input type="text" id="masterNis" placeholder="Contoh: 23241001 atau -">
+                    <label>NRA (Nomor Registrasi Anggota)</label>
+                    <input type="text" id="masterNis" placeholder="Contoh: NRA-2026-001 atau -">
                 </div>
                 <div class="form-group">
                     <label>NAMA LENGKAP</label>
@@ -469,7 +479,7 @@
                 <thead>
                     <tr>
                         <th style="width:50px; text-align:center; white-space:nowrap;">NO.</th>
-                        <th style="width:120px; white-space:nowrap;">NIS / NISN</th>
+                        <th style="width:120px; white-space:nowrap;">NRA</th>
                         <th style="min-width:180px; white-space:nowrap;">NAMA LENGKAP</th>
                         <th style="width:100px; text-align:center; white-space:nowrap;">KELAS</th>
                         <th style="width:140px; white-space:nowrap;">JABATAN</th>
@@ -483,7 +493,9 @@
         </div>
     </div>
 
-    <!-- TAB 2: ABSENSI LATIHAN RUTIN & UPLOAD DOKUMENTASI -->
+    <!-- ==================================================================
+         5. TAB 2: ABSENSI LATIHAN RUTIN & DOKUMENTASI
+    =================================================================== -->
     <div id="tab-absensi" class="card tab-content">
         <h2>UPLOAD DOKUMENTASI FOTO LATIHAN</h2>
         
@@ -522,7 +534,7 @@
                 <select id="absensiSelectNama" required style="width:100%; margin-bottom:5px;">
                     <option value="">-- PILIH ANGGOTA BERURUTAN --</option>
                 </select>
-                <input type="text" id="absensiSearchInput" placeholder="Atau ketik pencarian NIS / Nama di sini..." oninput="filterDropdownAnggota(this.value)">
+                <input type="text" id="absensiSearchInput" placeholder="Atau ketik pencarian NRA / Nama di sini..." oninput="filterDropdownAnggota(this.value)">
             </div>
             
             <div class="form-group">
@@ -592,7 +604,7 @@
                     <tr>
                         <th style="width:40px; text-align:center; white-space:nowrap;">NO.</th>
                         <th style="width:100px; white-space:nowrap;">TANGGAL</th>
-                        <th style="width:100px; white-space:nowrap;">NIS / NISN</th>
+                        <th style="width:100px; white-space:nowrap;">NRA</th>
                         <th style="min-width:160px; white-space:nowrap;">NAMA LENGKAP</th>
                         <th style="width:80px; text-align:center; white-space:nowrap;">KELAS</th>
                         <th style="min-width:150px; white-space:nowrap;">PERTEMUAN</th>
@@ -607,7 +619,9 @@
         </div>
     </div>
 
-    <!-- TAB 3: OPEN RECRUITMENT -->
+    <!-- ==================================================================
+         6. TAB 3: OPEN RECRUITMENT (OR DENGAN FILTER ALUMNI & KELAS)
+    =================================================================== -->
     <div id="tab-recruitment" class="card tab-content">
         <h2>TAMBAH CALON ANGGOTA MANUAL (OR)</h2>
         <form onsubmit="submitORManualAdmin(event)" style="margin-bottom: 20px;">
@@ -698,6 +712,9 @@
     </div>
 </div>
 
+<!-- ======================================================================
+     7. MODAL DIALOG POPUP (EDIT & KONFIRMASI)
+======================================================================= -->
 <!-- MODAL EDIT DATA ANGGOTA MASTER -->
 <div id="editModal" class="modal">
     <div class="modal-content">
@@ -707,7 +724,7 @@
             <input type="hidden" id="editOldNis">
             <input type="hidden" id="editOldNama">
             <div class="form-group">
-                <label style="text-align:left;">NIS / NISN (Boleh Angka / -)</label>
+                <label style="text-align:left;">NRA (Boleh Angka / Huruf / -)</label>
                 <input type="text" id="editNis">
             </div>
             <div class="form-group">
@@ -780,6 +797,9 @@
     </div>
 </div>
 
+<!-- ======================================================================
+     8. LOGIKA JAVASCRIPT SYSTEM
+======================================================================= -->
 <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxzQmY4XGvBLnoeHRo6W4gMFXQAbNESiv8ZLN0fkGIgtMxLA_riQmBRFp-hyCLXDG6D/exec";
     
@@ -982,7 +1002,8 @@
 
         if (filtered.length > 0) {
             filtered.forEach((a, index) => {
-                let rawNis = a["NIS/NISN"] || a["NIS"] || a["nis"] || "-";
+                // Membaca NRA / NIS secara fleksibel
+                let rawNis = a["NRA"] || a["nra"] || a["NIS/NISN"] || a["NIS"] || a["nis"] || "-";
                 const nis = rawNis.toString().trim() || "-";
                 const nama = a["NAMA LENGKAP"] || a["Nama_Lengkap"] || a["nama"] || "-";
                 const kelas = a["KELAS"] || a["Kelas"] || a["kelas"] || "-";
@@ -1029,12 +1050,13 @@
         closeModal('editModal');
 
         const idx = globalDataMaster.findIndex(a => {
-            let rNis = String(a["NIS/NISN"] || a["NIS"] || a["nis"] || "").trim();
+            let rNis = String(a["NRA"] || a["nra"] || a["NIS/NISN"] || a["NIS"] || a["nis"] || "").trim();
             let rNama = String(a["NAMA LENGKAP"] || a["Nama_Lengkap"] || a["nama"] || "").trim();
             return (oldNis !== "-" && oldNis !== "") ? (rNis === oldNis) : (rNama.toLowerCase() === oldNama.toLowerCase());
         });
 
         if (idx !== -1) {
+            globalDataMaster[idx]["NRA"] = nis;
             globalDataMaster[idx]["NIS/NISN"] = nis;
             globalDataMaster[idx]["NAMA LENGKAP"] = nama;
             globalDataMaster[idx]["KELAS"] = kelas;
@@ -1043,13 +1065,13 @@
         }
 
         showCustomAlert("BERHASIL", "Data anggota berhasil diperbarui!");
-        sendDataToSheet({ action: "updateAnggota", oldNis, oldNama, nis, nama_lengkap: nama, kelas, jabatan });
+        sendDataToSheet({ action: "updateAnggota", oldNra: oldNis, oldNama, nra: nis, nama_lengkap: nama, kelas, jabatan });
     }
 
     function deleteAnggota(nis, nama) {
-        showCustomConfirm("HAPUS ANGGOTA", `Apakah Anda yakin ingin menghapus ${nama} [NIS: ${nis}] dari Data Master dan Open Recruitment?`, () => {
+        showCustomConfirm("HAPUS ANGGOTA", `Apakah Anda yakin ingin menghapus ${nama} [NRA: ${nis}] dari Data Master dan Open Recruitment?`, () => {
             globalDataMaster = globalDataMaster.filter(a => {
-                let rNis = String(a["NIS/NISN"] || a["NIS"] || a["nis"] || "").trim();
+                let rNis = String(a["NRA"] || a["nra"] || a["NIS/NISN"] || a["NIS"] || a["nis"] || "").trim();
                 let rNama = String(a["NAMA LENGKAP"] || a["Nama_Lengkap"] || a["nama"] || "").trim();
                 if (nis !== "-" && nis !== "") return rNis !== nis;
                 return rNama.toLowerCase() !== nama.toLowerCase();
@@ -1062,7 +1084,7 @@
 
             renderAllTables();
             showCustomAlert("TERHAPUS", "Data anggota berhasil dihapus!");
-            sendDataToSheet({ action: "deleteAnggota", nis, nama_lengkap: nama });
+            sendDataToSheet({ action: "deleteAnggota", nra: nis, nama_lengkap: nama });
         });
     }
 
@@ -1083,7 +1105,7 @@
         const select = document.getElementById("absensiSelectNama");
         select.innerHTML = '<option value="">-- PILIH ANGGOTA BERURUTAN --</option>';
         globalDataMaster.forEach(a => {
-            let rawNis = a["NIS/NISN"] || a["NIS"] || a["nis"] || "-";
+            let rawNis = a["NRA"] || a["nra"] || a["NIS/NISN"] || a["NIS"] || a["nis"] || "-";
             const nis = rawNis.toString().trim() || "-";
             const nama = a["NAMA LENGKAP"] || a["Nama_Lengkap"] || a["nama"] || "-";
             const kelas = a["KELAS"] || a["Kelas"] || a["kelas"] || "-";
@@ -1091,7 +1113,6 @@
         });
     }
 
-    // LOGIKA UPLOAD DOKUMENTASI FOTO
     function submitDokumentasiFoto(e) {
         e.preventDefault();
         const pertemuan = document.getElementById("docPertemuan").value;
@@ -1208,7 +1229,7 @@
 
     function getKelasByNamaOrNis(nama, nis) {
         const found = globalDataMaster.find(a => {
-            let rNis = String(a["NIS/NISN"] || a["NIS"] || a["nis"] || "").trim();
+            let rNis = String(a["NRA"] || a["nra"] || a["NIS/NISN"] || a["NIS"] || a["nis"] || "").trim();
             let rNama = String(a["NAMA LENGKAP"] || a["Nama_Lengkap"] || a["nama"] || "").trim();
             if (nis && nis !== "-" && rNis !== "-") return rNis === nis;
             return rNama.toLowerCase() === (nama || "").toLowerCase();
@@ -1301,7 +1322,7 @@
                     const rawTs = row.TimeStamp || row.Timestamp || row.timestamp || "";
                     let formattedDate = formatDateIndo(rawTs);
 
-                    let rawNis = row.NIS || row.nis || '-';
+                    let rawNis = row.NRA || row.nra || row.NIS || row.nis || '-';
                     const nis = rawNis.toString().trim() || "-";
                     const nama = row.Nama_Lengkap || row.nama_lengkap || row.Nama || '-';
                     
@@ -1481,10 +1502,10 @@
     }
 
     async function approveOR(nama, kelas) {
-        let inputNis = prompt(`Masukkan NIS / NISN untuk anggota ${nama} (Opsional, boleh dikosongkan):`);
+        let inputNis = prompt(`Masukkan NRA untuk anggota ${nama} (Opsional, boleh dikosongkan):`);
         if (inputNis === null) return;
 
-        let cleanNis = inputNis.replace(/\D/g, '');
+        let cleanNis = inputNis.trim();
         if (!cleanNis) cleanNis = "-";
 
         const idx = globalRecruitment.findIndex(r => (r.Nama_Pendaftar || r.nama_pendaftar) === nama);
@@ -1493,6 +1514,7 @@
         }
 
         globalDataMaster.push({
+            "NRA": cleanNis,
             "NIS/NISN": cleanNis,
             "NAMA LENGKAP": nama,
             "KELAS": kelas,
@@ -1506,7 +1528,7 @@
             action: "updateStatusRecruitment",
             nama_pendaftar: nama,
             kelas: kelas,
-            nis: cleanNis,
+            nra: cleanNis,
             status_seleksi: "Diterima"
         });
     }
@@ -1520,6 +1542,7 @@
         const jabatan = document.getElementById("masterJabatan").value;
 
         globalDataMaster.push({
+            "NRA": nis,
             "NIS/NISN": nis,
             "NAMA LENGKAP": nama,
             "KELAS": kelas,
@@ -1529,7 +1552,7 @@
 
         showCustomAlert("BERHASIL", "Anggota baru berhasil ditambahkan!");
         e.target.reset();
-        sendDataToSheet({ action: "addAnggota", nis, nama_lengkap: nama, kelas, jabatan });
+        sendDataToSheet({ action: "addAnggota", nra: nis, nama_lengkap: nama, kelas, jabatan });
     }
 
     async function submitORManualAdmin(e) {
@@ -1609,6 +1632,7 @@
 
         globalAbsensi.unshift({
             TimeStamp: formattedDateIndo,
+            NRA: nis,
             NIS: nis,
             Nama_Lengkap: nama,
             Kelas: kelas,
@@ -1621,7 +1645,7 @@
         select.value = "";
         sendDataToSheet({
             action: "addAbsensi",
-            nis: nis,
+            nra: nis,
             nama_lengkap: nama,
             kelas: kelas,
             pertemuan: pertemuan,
