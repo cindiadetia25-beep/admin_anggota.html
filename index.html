@@ -424,8 +424,7 @@
     </div>
 
     <div class="header-title-box">
-        ...
-        <div class="header-title-box">
+            <div class="header-title-box">
             <img id="dashboardLogo" class="custom-logo" src="assets/logo-paskibra.png" alt="Logo Paskibra">
             <h1>DASHBOARD MANAJEMEN PASKIBRA MAN 6 CIAMIS</h1>
         </div>
@@ -497,7 +496,6 @@
                 <button class="btn btn-download" onclick="downloadExcelDenganKop('anggota')"><i class="fas fa-file-download"></i> DOWNLOAD EXCEL ANGGOTA</button>
                 <button class="btn btn-primary" onclick="printAllCardsMassal()"><i class="fas fa-print"></i> CETAK SEMUA KARTU (MASSAL)</button>
                 <button class="btn btn-danger-all" onclick="confirmClearAll('anggota')"><i class="fas fa-trash-restore"></i> HAPUS SEMUA DATA ANGGOTA</button>
-                <button class="btn btn-primary" onclick="printAllCardsMassal()"><i class="fas fa-print"></i> CETAK SEMUA KARTU (MASSAL)</button>
                 <button class="btn btn-download" onclick="openGoogleDriveFolder()"><i class="fab fa-google-drive"></i> DRIVE KARTU MASSAL</button>
             </div>
         </div>
@@ -1256,10 +1254,13 @@ function printCard() {
                         <td style="white-space:nowrap;">${jabatan}</td>
                         <td style="text-align:center; white-space:nowrap;">
                             <button class="btn btn-edit" onclick="openEditModal('${nis}', '${nama.replace(/'/g, "\\'")}', '${kelas}', '${jabatan}')"><i class="fas fa-edit"></i> Edit</button>
+                            <button class="btn btn-delete" onclick="deleteAnggota('${nis}', '${nama.replace(/'/g, "\\'")}')"><i class="fas fa-trash-alt"></i> Hapus</button>
                             <button class="btn btn-download" style="padding: 5px 10px; font-size: 0.85rem;" onclick="openCardModal('${nis}', '${nama.replace(/'/g, "\\'")}', '${kelas}', '${jabatan}')">
                             <i class="fas fa-id-card"></i> Kartu
                             </button>
-                            <button class="btn btn-delete" onclick="deleteAnggota('${nis}', '${nama.replace(/'/g, "\\'")}')"><i class="fas fa-trash-alt"></i> Hapus</button>
+                            <button class="btn btn-primary" style="padding: 5px 10px; font-size: 0.85rem; background-color: #28a745; border-color: #28a745;" onclick="downloadSingleQrJpg('${nis}', '${nama.replace(/'/g, "\\'")}', '${kelas}', '${jabatan}')">
+        <i class="fas fa-qrcode"></i> QR
+    </button>
                         </td>
                     </tr>`;
             });
@@ -2234,6 +2235,86 @@ function printCardSingle() {
 // Buka Folder Google Drive Publik
 function openGoogleDriveFolder() {
     window.open(GOOGLE_DRIVE_FOLDER_URL, '_blank');
+}
+    // Fungsi Langsung Unduh Gambar QR / Kartu Per Anggota (Pas Layar HP)
+async function downloadSingleQrJpg(nis, nama, kelas, jabatan) {
+    showCustomAlert("MEMPROSES KARTU", `Sedang mengunduh QR Kartu untuk ${nama}...`, "fa-spinner fa-spin");
+
+    // Buat Wadah Kartu Sementara (Ukuran Proporsional Layar Smartphone / Card)
+    let tempBox = document.createElement("div");
+    tempBox.style.position = "absolute";
+    tempBox.style.left = "-9999px";
+    tempBox.innerHTML = `
+        <div id="singleCardJpgArea" style="
+            width: 360px; 
+            height: 580px; 
+            background: #32000a; 
+            border: 3px solid #ffd700; 
+            border-radius: 16px; 
+            padding: 20px; 
+            color: #fff; 
+            text-align: center; 
+            box-sizing: border-box; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: space-between;
+            font-family: 'American Captain', 'Segoe UI', sans-serif;">
+            
+            <div>
+                <img src="assets/logo-paskibra.png" style="width: 55px; height: 55px; margin-bottom: 6px; object-fit: contain;">
+                <h4 style="color: #ffd700; margin: 0; font-size: 1.2rem; letter-spacing: 1px; line-height: 1.1;">PASKIBRA MAN 6 CIAMIS</h4>
+                <p style="font-size: 0.8rem; color: #ffcc66; margin-top: 4px; letter-spacing: 1px;">KARTU TANDA ANGGOTA</p>
+                <div style="width: 80%; height: 1px; background: rgba(255, 215, 0, 0.4); margin: 8px auto;"></div>
+            </div>
+
+            <div>
+                <h3 style="color: #ffffff; font-size: 1.45rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; line-height: 1.1;">${nama}</h3>
+                <p style="color: #ffcc66; font-size: 0.95rem; margin-top: 4px; letter-spacing: 1px;">${kelas} | ${jabatan}</p>
+            </div>
+
+            <div>
+                <div id="singleTempQrBox" style="background: #ffffff; padding: 8px; border-radius: 8px; display: inline-block; line-height: 0;"></div>
+                <p style="color: #ffd700; font-size: 1.2rem; font-weight: bold; margin-top: 8px; letter-spacing: 1.5px;">${nis}</p>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(tempBox);
+
+    // Generate QR Code ke dalam wadah sementara
+    new QRCode(document.getElementById("singleTempQrBox"), {
+        text: nis,
+        width: 130,
+        height: 130,
+        correctLevel: QRCode.CorrectLevel.H
+    });
+
+    // Tunggu proses render QR selesai
+    await new Promise(resolve => setTimeout(resolve, 250));
+
+    // Convert ke format Gambar JPG Resolusi Tinggi menggunakan html2canvas
+    try {
+        const canvas = await html2canvas(document.getElementById("singleCardJpgArea"), {
+            scale: 3, // Kualitas Gambar Tajam di Layar HP
+            useCORS: true,
+            backgroundColor: "#32000a"
+        });
+
+        const image = canvas.toDataURL("image/jpeg", 1.0);
+        const link = document.createElement("a");
+        link.href = image;
+        link.download = `QR_Paskibra_${nis}_${nama.replace(/\s+/g, '_')}.jpg`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        closeModal('customDialogModal');
+    } catch (err) {
+        closeModal('customDialogModal');
+        showCustomAlert("GAGAL", "Gagal membuat gambar QR Kartu.", "fa-times-circle");
+    } finally {
+        document.body.removeChild(tempBox);
+    }
 }
     async function sendDataToSheet(payload) {
         try {
