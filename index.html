@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=1150, initial-scale=0.3, maximum-scale=3.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dashboard Manajemen PASKIBRA MAN 6 Ciamis</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.cdnfonts.com/css/american-captain" rel="stylesheet">
@@ -373,17 +373,89 @@
         .modal-content h3 { color: #ffd700; margin-bottom: 12px; font-size: 1.7rem; }
         .modal-content p { color: #ffcc66; font-size: 1.05rem; margin-bottom: 20px; line-height: 1.4; }
         .modal-actions { display: flex; gap: 12px; justify-content: center; }
+    
+    /* ============================================================================
+   RESPONSIF MOBILE (OTOMATIS PENYESUAIAN LAYAR SMARTPHONE)
+   ============================================================================ */
+    @media screen and max-width: 768px {
+    /* Header & Title Adjustments */
+    header {
+        padding: 15px 10px !important;
+    }
+    
+    .header-content h1 {
+        font-size: 1.4rem !important;
+        line-height: 1.2 !important;
+    }
 
-        @media (max-width: 600px) {
-            header h1 { font-size: 1.8rem; }
-            .custom-logo { width: 50px; height: 50px; }
-            .tab-btn { font-size: 1rem; padding: 8px 12px; }
-            
-            /* Disesuaikan agar layout desktop tidak gepeng/pecah ke bawah saat di HP */
-            .action-box { flex-direction: row; align-items: center; }
-            .btn { width: auto; }
-            .container { min-width: 1100px; }
-        }
+    .header-content p {
+        font-size: 0.85rem !important;
+        margin-bottom: 10px !important;
+    }
+
+    #clockContainer {
+        font-size: 0.8rem !important;
+        padding: 4px 10px !important;
+    }
+
+    /* Tab Navigation Responsive */
+    .nav-tabs {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 8px !important;
+        width: 100% !important;
+    }
+
+    .tab-btn {
+        width: 100% !important;
+        text-align: center !important;
+        padding: 10px !important;
+        font-size: 0.9rem !important;
+    }
+
+    /* Action Box & Buttons */
+    .action-box {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 8px !important;
+        width: 100% !important;
+    }
+
+    .action-box .btn {
+        width: 100% !important;
+        justify-content: center !important;
+        margin: 0 !important;
+    }
+
+    /* Table Auto Scroll Agar Tidak Terpotong */
+    .table-container, .table-responsive {
+        width: 100% !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+        border-radius: 8px;
+    }
+
+    table {
+        min-width: 650px !important; /* Menjaga struktur tabel tetap rapi saat di-scroll */
+    }
+
+    /* Modal Dialog Optimization for Mobile */
+    .modal-content {
+        width: 92% !important;
+        max-width: 92% !important;
+        padding: 15px !important;
+        margin: 10px auto !important;
+    }
+
+    .modal-actions {
+        flex-direction: column !important;
+        gap: 8px !important;
+    }
+
+    .modal-actions .btn {
+        width: 100% !important;
+    }
+}
     </style>
 </head>
 <body>
@@ -502,7 +574,7 @@
                 <button class="btn btn-download" onclick="downloadExcelDenganKop('anggota')"><i class="fas fa-file-download"></i> DOWNLOAD EXCEL ANGGOTA</button>
                 <button class="btn btn-primary" onclick="printAllCardsMassal()"><i class="fas fa-print"></i> CETAK SEMUA KARTU (MASSAL)</button>
                 <button class="btn btn-danger-all" onclick="confirmClearAll('anggota')"><i class="fas fa-trash-restore"></i> HAPUS SEMUA DATA ANGGOTA</button>
-                <button class="btn btn-download" onclick="openGoogleDriveFolder()"><i class="fab fa-google-drive"></i> DRIVE KARTU MASSAL</button>
+                <button class="btn btn-download" onclick="downloadAllCardsJpgMassal()"><i class="fas fa-file-download"></i> DOWNLOAD KARTU MASSAL (JPG)</button>
             </div>
         </div>
 
@@ -2185,7 +2257,103 @@ function openCardModal(nis, nama, kelas, jabatan) {
 function confirmCardOutputChoice() {
     document.getElementById("choiceModal").style.display = "flex";
 }
+// ============================================================================
+// LOGIKA DOWNLOAD KARTU MASSAL (JPG HD + QR DIPERBESAR)
+// ============================================================================
+async function downloadAllCardsJpgMassal() {
+    if (!globalDataMaster || globalDataMaster.length === 0) {
+        return showCustomAlert("PERINGATAN", "Tidak ada data anggota untuk diunduh!", "fa-exclamation-circle");
+    }
 
+    showCustomAlert("MEMPROSES KARTU MASSAL", "Sedang memproses seluruh gambar kartu JPG... Mohon tunggu.", "fa-spinner fa-spin");
+
+    // Container Tersembunyi untuk Render Kartu
+    let tempBox = document.createElement("div");
+    tempBox.style.position = "absolute";
+    tempBox.style.left = "-9999px";
+    document.body.appendChild(tempBox);
+
+    for (let idx = 0; idx < globalDataMaster.length; idx++) {
+        let a = globalDataMaster[idx];
+        let nis = a["NRA"] || a["nra"] || a["NIS/NISN"] || a["NIS"] || a["nis"] || "-";
+        let nama = a["NAMA LENGKAP"] || a["Nama_Lengkap"] || a["nama"] || "Anggota";
+        let kelas = a["KELAS"] || a["Kelas"] || a["kelas"] || "-";
+        let jabatan = a["JABATAN"] || a["Jabatan"] || "Anggota";
+
+        // Tampilan Kartu Persis Preview Cetak (Ukuran Proporsional HD 380px x 610px)
+        tempBox.innerHTML = `
+            <div id="tempCardJpg" style="
+                width: 380px; 
+                height: 610px; 
+                background: #32000a; 
+                border: 3px solid #ffd700; 
+                border-radius: 14px; 
+                padding: 20px 15px; 
+                color: #fff; 
+                text-align: center; 
+                box-sizing: border-box; 
+                display: flex; 
+                flex-direction: column; 
+                align-items: center; 
+                justify-content: space-between;
+                font-family: 'American Captain', 'Segoe UI', sans-serif;">
+                
+                <!-- HEADER LOGO & JUDUL -->
+                <div>
+                    <img src="assets/logo-paskibra.png" style="width: 52px; height: 52px; margin-bottom: 4px; object-fit: contain;">
+                    <h4 style="color: #ffd700; margin: 0; font-size: 1.15rem; letter-spacing: 1px; line-height: 1.1;">PASKIBRA MAN 6 CIAMIS</h4>
+                    <p style="font-size: 0.75rem; color: #ffcc66; margin-top: 3px; letter-spacing: 1px;">KARTU TANDA ANGGOTA</p>
+                    <div style="width: 85%; height: 1px; background: rgba(255, 215, 0, 0.4); margin: 8px auto;"></div>
+                </div>
+
+                <!-- DETAIL NAMA & KELAS -->
+                <div>
+                    <h3 style="color: #ffffff; font-size: 1.35rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; line-height: 1.1;">${nama}</h3>
+                    <p style="color: #ffcc66; font-size: 0.9rem; margin-top: 4px; letter-spacing: 1px;">${kelas} | ${jabatan}</p>
+                </div>
+
+                <!-- AREA QR CODE (DIPERBESAR SANGAT JELAS) -->
+                <div>
+                    <div id="tempQrBoxMassal" style="background: #ffffff; padding: 8px; border-radius: 8px; display: inline-block; line-height: 0;"></div>
+                    <p style="color: #ffd700; font-size: 1.15rem; font-weight: bold; margin-top: 8px; letter-spacing: 1.5px;">${nis}</p>
+                </div>
+            </div>
+        `;
+
+        // Render QR Code Ukuran Besar (140px x 140px)
+        new QRCode(document.getElementById("tempQrBoxMassal"), {
+            text: nis,
+            width: 140,
+            height: 140,
+            correctLevel: QRCode.CorrectLevel.H
+        });
+
+        // Jeda waktu render
+        await new Promise(r => setTimeout(r, 200));
+
+        // Konversi Kartu Ke Gambar JPG Kualitas Tinggi
+        const canvas = await html2canvas(document.getElementById("tempCardJpg"), {
+            scale: 3,
+            useCORS: true,
+            backgroundColor: "#32000a"
+        });
+
+        // Unduh Otomatis Beruntun
+        const image = canvas.toDataURL("image/jpeg", 1.0);
+        const link = document.createElement("a");
+        link.href = image;
+        link.download = `Kartu_Paskibra_${nis}_${nama.replace(/\s+/g, '_')}.jpg`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        await new Promise(r => setTimeout(r, 250));
+    }
+
+    document.body.removeChild(tempBox);
+    closeModal('customDialogModal');
+    showCustomAlert("SELESAI", "Seluruh gambar kartu JPG anggota berhasil diunduh secara massal!");
+}
 // OPSI 1: Download Kartu Format JPG (Pas Layar HP / Gambar)
 function downloadCardAsJpg() {
     closeModal('choiceModal');
@@ -2325,6 +2493,7 @@ async function downloadSingleQrJpg(nis, nama, kelas, jabatan) {
         document.body.removeChild(tempBox);
     }
 }
+    
     async function sendDataToSheet(payload) {
         try {
             await fetch(SCRIPT_URL, {
