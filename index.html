@@ -34,7 +34,18 @@
             margin: 0 auto; 
             width: 100%;
         }
-
+.version-badge {
+    background: rgba(255, 215, 0, 0.2);
+    border: 1px solid #ffd700;
+    color: #ffd700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    display: inline-block;
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+}        
         hr.section-divider {
             border: 0;
             height: 2px;
@@ -401,6 +412,13 @@
 ======================================================================= -->
 <div class="container">
     <header>
+    <!-- TAMBAHKAN DUA BARIS INI DI PALING ATAS HEADER -->
+    <div class="version-badge">
+        <i class="fas fa-code-branch"></i> VERSI APLIKASI: v2.5 (QR SCANNER & SOUND INTEGRATED)
+    </div>
+
+    <div class="header-title-box">
+        ...
         <div class="header-title-box">
             <img id="dashboardLogo" class="custom-logo" src="assets/logo-paskibra.png" alt="Logo Paskibra">
             <h1>DASHBOARD MANAJEMEN PASKIBRA MAN 6 CIAMIS</h1>
@@ -873,6 +891,57 @@ function onScanSuccess(decodedText) {
         showCustomAlert("TIDAK DITEMUKAN", `NRA [${scannedNra}] tidak terdaftar di Data Master!`, "fa-times-circle");
     }
 }
+    // 1. TAMBAHKAN VARIABEL SCANNER DI ATAS
+    let html5QrcodeScanner = null;
+
+    // 2. TAMBAHKAN FUNGSI BEEP SUARA HASIL SCAN
+    function playBeepSound() {
+        try {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); // Nada Beep (880 Hz)
+            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.15); // Durasi beep 0.15 detik
+        } catch (e) {
+            console.log("Audio tidak didukung browser:", e);
+        }
+    }
+
+    // 3. EDIT FUNGSI ON SCAN SUCCESS AGAR MEMBUNYIKAN SUARA & MUNCUL POP-UP
+    function onScanSuccess(decodedText) {
+        const scannedNra = decodedText.trim();
+        
+        // Cari anggota berdasarkan NRA / NIS
+        const anggota = globalDataMaster.find(a => {
+            let rNra = String(a["NRA"] || a["nra"] || a["NIS/NISN"] || a["NIS"] || "").trim();
+            return rNra.toLowerCase() === scannedNra.toLowerCase();
+        });
+
+        if (anggota) {
+            // Putar Suara Beep
+            playBeepSound();
+
+            const selectNama = document.getElementById("absensiSelectNama");
+            const namaLengkap = anggota["NAMA LENGKAP"] || anggota["Nama_Lengkap"] || anggota["nama"];
+            selectNama.value = namaLengkap;
+            
+            // Tampilkan Pop-Up Berhasil
+            showCustomAlert("SCAN QR BERHASIL", `Presensi terdeteksi!\n\nNama: ${namaLengkap}\nNRA: ${scannedNra}`);
+            
+            // Matikan kamera setelah scan berhasil
+            stopQRScanner();
+        } else {
+            showCustomAlert("TIDAK DITEMUKAN", `Anggota dengan NRA [${scannedNra}] tidak ditemukan di Data Master!`, "fa-times-circle");
+        }
+    }
     function initDefaultDateAdmin() {
         const today = new Date().toISOString().split('T')[0];
         const adminDateInput = document.getElementById("absensiTanggalInput");
