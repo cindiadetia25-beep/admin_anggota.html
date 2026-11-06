@@ -2,13 +2,14 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=1150, initial-scale=0.3, maximum-scale=3.0, user-scalable=yes">
     <title>Dashboard Manajemen PASKIBRA MAN 6 Ciamis</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.cdnfonts.com/css/american-captain" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <!-- Library Scan QR Code -->
     <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <!-- ======================================================================
          1. STYLE CSS UTAMA
     ======================================================================= -->
@@ -375,8 +376,11 @@
             header h1 { font-size: 1.8rem; }
             .custom-logo { width: 50px; height: 50px; }
             .tab-btn { font-size: 1rem; padding: 8px 12px; }
-            .action-box { flex-direction: column; align-items: stretch; }
-            .btn { width: 100%; }
+            
+            /* Disesuaikan agar layout desktop tidak gepeng/pecah ke bawah saat di HP */
+            .action-box { flex-direction: row; align-items: center; }
+            .btn { width: auto; }
+            .container { min-width: 1100px; }
         }
     </style>
 </head>
@@ -814,7 +818,35 @@
         </form>
     </div>
 </div>
+    
+<!-- MODAL CETAK KARTU ANGGOTA -->
+<div id="cardModal" class="modal">
+    <div class="modal-content" style="max-width: 400px;">
+        <h3><i class="fas fa-id-card"></i> KARTU ANGGOTA PASKIBRA</h3>
+        <hr class="section-divider">
+        
+        <!-- Desain Area Kartu yang Akan Dicetak -->
+        <div id="idCardPrintArea" style="background: linear-gradient(135deg, #4a000b, #2b0006); border: 2px solid #ffd700; border-radius: 12px; padding: 15px; color: #fff; text-align: center; width: 320px; margin: 0 auto;">
+            <img src="assets/logo-paskibra.png" style="width: 50px; height: 50px; margin-bottom: 5px;">
+            <h4 style="color: #ffd700; margin: 0; font-size: 1.1rem;">PASKIBRA MAN 6 CIAMIS</h4>
+            <p style="font-size: 0.75rem; color: #ffcc66; margin-bottom: 10px;">KARTU TANDA ANGGOTA</p>
+            <hr style="border: 0.5px solid rgba(255,215,0,0.3); margin-bottom: 10px;">
+            
+            <h3 id="cardNama" style="color: #fff; font-size: 1.2rem; margin-bottom: 2px;">-</h3>
+            <p id="cardKelasJabatan" style="color: #ffcc66; font-size: 0.85rem; margin-bottom: 10px;">-</p>
+            
+            <!-- Tempat QR Code Rendred -->
+            <div id="qrcodeBox" style="background: #fff; padding: 8px; border-radius: 8px; display: inline-block; margin-bottom: 5px;"></div>
+            <p id="cardNra" style="color: #ffd700; font-size: 0.9rem; font-weight: bold; margin: 0;">-</p>
+        </div>
 
+        <div class="modal-actions" style="margin-top:20px;">
+            <button class="btn btn-primary" onclick="printCard()"><i class="fas fa-print"></i> CETAK / DOWNLOAD</button>
+            <button class="btn btn-delete" onclick="closeModal('cardModal')">TUTUP</button>
+        </div>
+    </div>
+</div>
+    
 <!-- CUSTOM DIALOG NOTIFIKASI & KONFIRMASI -->
 <div id="customDialogModal" class="modal">
     <div class="modal-content">
@@ -939,6 +971,40 @@ function onScanSuccess(decodedText) {
             showCustomAlert("TIDAK DITEMUKAN", `Anggota dengan NRA [${scannedNra}] tidak ditemukan di Data Master!`, "fa-times-circle");
         }
     }
+    // Fungsi Membuka Kartu & Generate QR Code
+function openCardModal(nis, nama, kelas, jabatan) {
+    document.getElementById("cardNama").innerText = nama;
+    document.getElementById("cardKelasJabatan").innerText = `${kelas} | ${jabatan}`;
+    document.getElementById("cardNra").innerText = nis;
+
+    // Bersihkan QR Code lama
+    document.getElementById("qrcodeBox").innerHTML = "";
+
+    // Generate QR Code Baru berdasarkan NRA
+    new QRCode(document.getElementById("qrcodeBox"), {
+        text: nis,
+        width: 120,
+        height: 120
+    });
+
+    document.getElementById("cardModal").style.display = "flex";
+}
+
+// Fungsi Perintah Cetak
+function printCard() {
+    const printContent = document.getElementById("idCardPrintArea").innerHTML;
+    const printWindow = window.open('', '', 'height=600,width=400');
+    
+    printWindow.document.write('<html><head><title>Cetak Kartu Anggota</title>');
+    printWindow.document.write('<style>body{font-family:sans-serif; text-align:center; padding:20px;} .card-box{background:#4a000b; color:#fff; padding:15px; border-radius:10px; width:300px; margin:auto; border:2px solid #ffd700;}</style>');
+    printWindow.document.write('</head><body>');
+    printWindow.document.write('<div class="card-box">' + printContent + '</div>');
+    printWindow.document.write('</body></html>');
+    
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => { printWindow.print(); printWindow.close(); }, 500);
+}
     function initDefaultDateAdmin() {
         const today = new Date().toISOString().split('T')[0];
         const adminDateInput = document.getElementById("absensiTanggalInput");
@@ -1148,6 +1214,9 @@ function onScanSuccess(decodedText) {
                         <td style="white-space:nowrap;">${jabatan}</td>
                         <td style="text-align:center; white-space:nowrap;">
                             <button class="btn btn-edit" onclick="openEditModal('${nis}', '${nama.replace(/'/g, "\\'")}', '${kelas}', '${jabatan}')"><i class="fas fa-edit"></i> Edit</button>
+                            <button class="btn btn-download" style="padding: 5px 10px; font-size: 0.85rem;" onclick="openCardModal('${nis}', '${nama.replace(/'/g, "\\'")}', '${kelas}', '${jabatan}')">
+                            <i class="fas fa-id-card"></i> Kartu
+                            </button>
                             <button class="btn btn-delete" onclick="deleteAnggota('${nis}', '${nama.replace(/'/g, "\\'")}')"><i class="fas fa-trash-alt"></i> Hapus</button>
                         </td>
                     </tr>`;
