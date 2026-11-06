@@ -2258,7 +2258,7 @@ function confirmCardOutputChoice() {
     document.getElementById("choiceModal").style.display = "flex";
 }
 // ============================================================================
-// LOGIKA DOWNLOAD KARTU MASSAL (JPG HD + QR DIPERBESAR)
+// PERBAIKAN DOWNLOAD KARTU MASSAL (JPG HD + RENDER QR PASTI TERPERIKSA)
 // ============================================================================
 async function downloadAllCardsJpgMassal() {
     if (!globalDataMaster || globalDataMaster.length === 0) {
@@ -2267,10 +2267,11 @@ async function downloadAllCardsJpgMassal() {
 
     showCustomAlert("MEMPROSES KARTU MASSAL", "Sedang memproses seluruh gambar kartu JPG... Mohon tunggu.", "fa-spinner fa-spin");
 
-    // Container Tersembunyi untuk Render Kartu
     let tempBox = document.createElement("div");
-    tempBox.style.position = "absolute";
+    tempBox.style.position = "fixed";
+    tempBox.style.top = "-9999px";
     tempBox.style.left = "-9999px";
+    tempBox.style.zIndex = "-9999";
     document.body.appendChild(tempBox);
 
     for (let idx = 0; idx < globalDataMaster.length; idx++) {
@@ -2280,7 +2281,6 @@ async function downloadAllCardsJpgMassal() {
         let kelas = a["KELAS"] || a["Kelas"] || a["kelas"] || "-";
         let jabatan = a["JABATAN"] || a["Jabatan"] || "Anggota";
 
-        // Tampilan Kartu Persis Preview Cetak (Ukuran Proporsional HD 380px x 610px)
         tempBox.innerHTML = `
             <div id="tempCardJpg" style="
                 width: 380px; 
@@ -2298,7 +2298,6 @@ async function downloadAllCardsJpgMassal() {
                 justify-content: space-between;
                 font-family: 'American Captain', 'Segoe UI', sans-serif;">
                 
-                <!-- HEADER LOGO & JUDUL -->
                 <div>
                     <img src="assets/logo-paskibra.png" style="width: 52px; height: 52px; margin-bottom: 4px; object-fit: contain;">
                     <h4 style="color: #ffd700; margin: 0; font-size: 1.15rem; letter-spacing: 1px; line-height: 1.1;">PASKIBRA MAN 6 CIAMIS</h4>
@@ -2306,13 +2305,11 @@ async function downloadAllCardsJpgMassal() {
                     <div style="width: 85%; height: 1px; background: rgba(255, 215, 0, 0.4); margin: 8px auto;"></div>
                 </div>
 
-                <!-- DETAIL NAMA & KELAS -->
                 <div>
                     <h3 style="color: #ffffff; font-size: 1.35rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; line-height: 1.1;">${nama}</h3>
                     <p style="color: #ffcc66; font-size: 0.9rem; margin-top: 4px; letter-spacing: 1px;">${kelas} | ${jabatan}</p>
                 </div>
 
-                <!-- AREA QR CODE (DIPERBESAR SANGAT JELAS) -->
                 <div>
                     <div id="tempQrBoxMassal" style="background: #ffffff; padding: 8px; border-radius: 8px; display: inline-block; line-height: 0;"></div>
                     <p style="color: #ffd700; font-size: 1.15rem; font-weight: bold; margin-top: 8px; letter-spacing: 1.5px;">${nis}</p>
@@ -2320,25 +2317,26 @@ async function downloadAllCardsJpgMassal() {
             </div>
         `;
 
-        // Render QR Code Ukuran Besar (140px x 140px)
-        new QRCode(document.getElementById("tempQrBoxMassal"), {
-            text: nis,
+        const qrBox = document.getElementById("tempQrBoxMassal");
+        qrBox.innerHTML = "";
+
+        new QRCode(qrBox, {
+            text: String(nis),
             width: 140,
             height: 140,
             correctLevel: QRCode.CorrectLevel.H
         });
 
-        // Jeda waktu render
-        await new Promise(r => setTimeout(r, 200));
+        // Tunggu 500ms per kartu agar QR Code ter-render utuh
+        await new Promise(r => setTimeout(r, 500));
 
-        // Konversi Kartu Ke Gambar JPG Kualitas Tinggi
         const canvas = await html2canvas(document.getElementById("tempCardJpg"), {
             scale: 3,
             useCORS: true,
+            allowTaint: true,
             backgroundColor: "#32000a"
         });
 
-        // Unduh Otomatis Beruntun
         const image = canvas.toDataURL("image/jpeg", 1.0);
         const link = document.createElement("a");
         link.href = image;
@@ -2347,10 +2345,12 @@ async function downloadAllCardsJpgMassal() {
         link.click();
         document.body.removeChild(link);
 
-        await new Promise(r => setTimeout(r, 250));
+        await new Promise(r => setTimeout(r, 300));
     }
 
-    document.body.removeChild(tempBox);
+    if (document.body.contains(tempBox)) {
+        document.body.removeChild(tempBox);
+    }
     closeModal('customDialogModal');
     showCustomAlert("SELESAI", "Seluruh gambar kartu JPG anggota berhasil diunduh secara massal!");
 }
@@ -2410,14 +2410,19 @@ function printCardSingle() {
 function openGoogleDriveFolder() {
     window.open(GOOGLE_DRIVE_FOLDER_URL, '_blank');
 }
-    // Fungsi Langsung Unduh Gambar JPG Kartu (Persis Tampilan Cetak & QR Lebih Besar)
+  // ============================================================================
+// PERBAIKAN DOWNLOAD QR PER ANGGOTA (DENGAN JEDA RENDER QR SANGAT AKURAT)
+// ============================================================================
 async function downloadSingleQrJpg(nis, nama, kelas, jabatan) {
     showCustomAlert("MEMPROSES KARTU", `Sedang mengunduh Kartu JPG untuk ${nama}...`, "fa-spinner fa-spin");
 
-    // Wadah Kartu Sementara (Ukuran Fisik 6,5 cm x 10,5 cm disesuaikan ke Pixel Kualitas Tinggi)
+    // Wadah Kartu Sementara (Dipasang ke DOM dengan visibilitas tersembunyi agar QR dirender sempurna)
     let tempBox = document.createElement("div");
-    tempBox.style.position = "absolute";
+    tempBox.style.position = "fixed";
+    tempBox.style.top = "-9999px";
     tempBox.style.left = "-9999px";
+    tempBox.style.zIndex = "-9999";
+    
     tempBox.innerHTML = `
         <div id="singleCardJpgArea" style="
             width: 380px; 
@@ -2449,7 +2454,7 @@ async function downloadSingleQrJpg(nis, nama, kelas, jabatan) {
                 <p style="color: #ffcc66; font-size: 0.9rem; margin-top: 4px; letter-spacing: 1px;">${kelas} | ${jabatan}</p>
             </div>
 
-            <!-- AREA QR CODE (DIPERBESAR SANGAT JELAS) -->
+            <!-- AREA QR CODE -->
             <div>
                 <div id="singleTempQrBox" style="background: #ffffff; padding: 8px; border-radius: 8px; display: inline-block; line-height: 0;"></div>
                 <p style="color: #ffd700; font-size: 1.15rem; font-weight: bold; margin-top: 8px; letter-spacing: 1.5px;">${nis}</p>
@@ -2458,22 +2463,26 @@ async function downloadSingleQrJpg(nis, nama, kelas, jabatan) {
     `;
     document.body.appendChild(tempBox);
 
-    // Generate QR Code dengan Ukuran Diperbesar (140px x 140px)
-    new QRCode(document.getElementById("singleTempQrBox"), {
-        text: nis,
+    const qrContainer = document.getElementById("singleTempQrBox");
+    qrContainer.innerHTML = "";
+
+    // Render QR Code
+    new QRCode(qrContainer, {
+        text: String(nis),
         width: 140,
         height: 140,
         correctLevel: QRCode.CorrectLevel.H
     });
 
-    // Tunggu render QR selesai
-    await new Promise(resolve => setTimeout(resolve, 250));
+    // Wajib beri jeda 500ms agar library QR Code selesai menggambar canvas/img di DOM
+    await new Promise(resolve => setTimeout(resolve, 500));
 
-    // Convert ke JPG HD menggunakan html2canvas
     try {
-        const canvas = await html2canvas(document.getElementById("singleCardJpgArea"), {
-            scale: 3, // Hasil gambar tajam & jernih saat dibuka di galeri HP
+        const targetElement = document.getElementById("singleCardJpgArea");
+        const canvas = await html2canvas(targetElement, {
+            scale: 3,
             useCORS: true,
+            allowTaint: true,
             backgroundColor: "#32000a"
         });
 
@@ -2490,7 +2499,9 @@ async function downloadSingleQrJpg(nis, nama, kelas, jabatan) {
         closeModal('customDialogModal');
         showCustomAlert("GAGAL", "Gagal mengunduh gambar kartu JPG.", "fa-times-circle");
     } finally {
-        document.body.removeChild(tempBox);
+        if (document.body.contains(tempBox)) {
+            document.body.removeChild(tempBox);
+        }
     }
 }
     
