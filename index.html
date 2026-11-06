@@ -446,7 +446,7 @@
 
         <hr class="section-divider">
 
-       <div class="action-box">
+        <div class="action-box">
             <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                 <span><strong>Filter Kelas:</strong></span>
                 <select id="filterAnggotaKelas" onchange="renderTableMaster()" style="padding: 8px; border-radius: 6px; background: #2b0006; color: #fff; border: 1px solid #ffd700;">
@@ -463,6 +463,26 @@
                 <button class="btn btn-danger-all" onclick="confirmClearAll('anggota')"><i class="fas fa-trash-restore"></i> HAPUS SEMUA DATA ANGGOTA</button>
             </div>
         </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:50px; text-align:center; white-space:nowrap;">NO.</th>
+                        <th style="width:120px; white-space:nowrap;">NIS / NISN</th>
+                        <th style="min-width:180px; white-space:nowrap;">NAMA LENGKAP</th>
+                        <th style="width:100px; text-align:center; white-space:nowrap;">KELAS</th>
+                        <th style="width:140px; white-space:nowrap;">JABATAN</th>
+                        <th style="width:140px; text-align:center; white-space:nowrap;">AKSI</th>
+                    </tr>
+                </thead>
+                <tbody id="tableAnggota">
+                    <tr><td colspan="6" style="text-align:center;"><i class="fas fa-spinner fa-spin"></i> Memuat data master anggota...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
     <!-- TAB 2: ABSENSI LATIHAN RUTIN & UPLOAD DOKUMENTASI -->
     <div id="tab-absensi" class="card tab-content">
         <h2>UPLOAD DOKUMENTASI FOTO LATIHAN</h2>
@@ -632,7 +652,7 @@
 
         <h2>DAFTAR PENDAFTAR CALON ANGGOTA PASKIBRA BARU (OR)</h2>
 
-       <div class="action-box">
+        <div class="action-box">
             <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                 <span><strong>Filter Alumni SMP/MTs:</strong></span>
                 <select id="filterOrAlumni" onchange="renderTableOR()" style="padding: 8px; border-radius: 6px; background: #2b0006; color: #fff; border: 1px solid #ffd700;">
@@ -664,7 +684,6 @@
                         <th style="min-width:160px; white-space:nowrap;">NAMA PENDAFTAR</th>
                         <th style="width:120px; white-space:nowrap;">ALUMNI SMP/MTS</th>
                         <th style="width:80px; text-align:center; white-space:nowrap;">KELAS</th>
-                        <!-- KOLOM BARU DITAMBAHKAN DI SINI -->
                         <th style="width:100px; text-align:center; white-space:nowrap;">TINGGI BADAN</th>
                         <th style="width:100px; text-align:center; white-space:nowrap;">BERAT BADAN</th>
                         <th style="width:110px; white-space:nowrap;">STATUS SELEKSI</th>
@@ -883,7 +902,7 @@
             document.getElementById("tablePreviewAbsensi").innerHTML = "<tr><td colspan='8' style='text-align:center;'><i class='fas fa-spinner fa-spin'></i> Memuat rekap absensi...</td></tr>";
         }
         if (globalRecruitment.length === 0) {
-            document.getElementById("tableOR").innerHTML = "<tr><td colspan='7' style='text-align:center;'><i class='fas fa-spinner fa-spin'></i> Memuat data pendaftar...</td></tr>";
+            document.getElementById("tableOR").innerHTML = "<tr><td colspan='9' style='text-align:center;'><i class='fas fa-spinner fa-spin'></i> Memuat data pendaftar...</td></tr>";
         }
 
         try {
@@ -902,7 +921,7 @@
         }
     }
 
-  function renderAllTables() {
+    function renderAllTables() {
         populateFilterAnggotaOptions();
         renderTableMaster();
         populateSelectAnggota();
@@ -911,7 +930,7 @@
         renderTableOR();
     }
 
-function populateFilterAnggotaOptions() {
+    function populateFilterAnggotaOptions() {
         const selectKelas = document.getElementById("filterAnggotaKelas");
         const selectJabatan = document.getElementById("filterAnggotaJabatan");
 
@@ -1123,7 +1142,6 @@ function populateFilterAnggotaOptions() {
         }
 
         globalDokumentasi.forEach(item => {
-            // Menentukan nama file saat didownload
             const fileName = `Dokumentasi_${item.pertemuan.replace(/\s+/g, '_')}_${item.tanggal.replace(/\//g, '-')}.png`;
 
             gallery.innerHTML += `
@@ -1133,12 +1151,9 @@ function populateFilterAnggotaOptions() {
                     <div class="doc-desc">${item.ket} (${item.tanggal})</div>
                     
                     <div style="display: flex; gap: 6px; justify-content: center; margin-top: 4px;">
-                        <!-- TOMBOL DOWNLOAD FOTO -->
                         <a href="${item.imgData}" download="${fileName}" class="btn btn-download" style="padding:4px 8px; font-size:0.8rem; text-decoration:none;">
                             <i class="fas fa-download"></i> Download
                         </a>
-                        
-                        <!-- TOMBOL HAPUS FOTO -->
                         <button class="btn btn-delete" style="padding:4px 8px; font-size:0.8rem;" onclick="deleteDokumentasi(${item.id})">
                             <i class="fas fa-trash-alt"></i> Hapus
                         </button>
@@ -1146,6 +1161,7 @@ function populateFilterAnggotaOptions() {
                 </div>`;
         });
     }
+
     function deleteDokumentasi(id) {
         showCustomConfirm("HAPUS FOTO", "Apakah Anda yakin ingin menghapus foto dokumentasi ini?", () => {
             globalDokumentasi = globalDokumentasi.filter(d => d.id !== id);
@@ -1210,7 +1226,6 @@ function populateFilterAnggotaOptions() {
         }
     }
 
-    // RENDER PREVIEW ABSENSI DENGAN FILTER PERTEMUAN & KETERANGAN
     function renderPreviewAbsensi() {
         const tbody = document.getElementById("tablePreviewAbsensi");
         const tipeWaktu = document.getElementById("filterRekapTipe").value;
@@ -1378,7 +1393,7 @@ function populateFilterAnggotaOptions() {
         });
     }
 
-function populateFilterOROptions() {
+    function populateFilterOROptions() {
         const selectAlumni = document.getElementById("filterOrAlumni");
         const selectKelas = document.getElementById("filterOrKelas");
 
@@ -1464,6 +1479,7 @@ function populateFilterOROptions() {
             tbody.innerHTML = "<tr><td colspan='9' style='text-align:center;'>Tidak ada data pendaftar OR yang sesuai filter.</td></tr>";
         }
     }
+
     async function approveOR(nama, kelas) {
         let inputNis = prompt(`Masukkan NIS / NISN untuk anggota ${nama} (Opsional, boleh dikosongkan):`);
         if (inputNis === null) return;
@@ -1527,9 +1543,6 @@ function populateFilterOROptions() {
         const berat = document.getElementById("orBeratManual").value.trim();
         const alasan_bergabung = document.getElementById("orAlasanManual").value.trim();
 
-        // KUNCI SINKRONISASI:
-        // Masukkan kunci variasi (Tinggi_Badan, tinggi_badan, "Tinggi Badan") sekaligus
-        // agar renderTableOR dapat membacanya secara instan tanpa tunda.
         const newRecord = {
             TimeStamp: formatDateIndo(new Date()),
             Nama_Pendaftar: nama,
@@ -1548,16 +1561,13 @@ function populateFilterOROptions() {
             Status_Seleksi: "Pending"
         };
 
-        // Tambahkan ke memori lokal paling atas
         globalRecruitment.unshift(newRecord);
 
-        // Render ulang tabel secara langsung
-        renderTableOR();
+        renderAllTables();
 
         showCustomAlert("BERHASIL", "Calon anggota OR berhasil ditambahkan!");
         e.target.reset();
 
-        // Kirim data ke Google Sheets melalui Apps Script
         sendDataToSheet({
             action: "submitOR",
             nama_pendaftar: nama,
@@ -1570,6 +1580,7 @@ function populateFilterOROptions() {
             alasan_bergabung: alasan_bergabung
         });
     }
+
     async function submitAbsensi(e) {
         e.preventDefault();
         const select = document.getElementById("absensiSelectNama");
