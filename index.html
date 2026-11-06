@@ -2355,7 +2355,6 @@ async function downloadAllCardsJpgMassal() {
 // ============================================================================
 // PERBAIKAN DOWNLOAD JPG DARI MODAL KARTU (PASTI MENCETAK QR CODE TERANG)
 // ============================================================================
-// PERBAIKAN UTAMA: DOWNLOAD KARTU SINGLE JPG (QR CODE PASTI TERBACA)
 // PERBAIKAN TOTAL: DOWNLOAD KARTU SINGLE DENGAN RE-GENERATE QR PASTI MUNCUL
 async function downloadCardAsJpg() {
     const namaText = document.getElementById("cardNama") ? document.getElementById("cardNama").innerText : "Anggota";
@@ -2411,7 +2410,7 @@ async function downloadCardAsJpg() {
     `;
     document.body.appendChild(tempContainer);
 
-    // Generate QR Code baru dengan tingkat ketajaman tinggi
+    // Generate QR Code baru di wadah tersembunyi
     new QRCode(document.getElementById("tempQrRenderBox"), {
         text: String(nraText),
         width: 140,
@@ -2419,7 +2418,7 @@ async function downloadCardAsJpg() {
         correctLevel: QRCode.CorrectLevel.H
     });
 
-    // Wajib beri jeda 500ms agar elemen QR selesai dirender utuh di memori
+    // Beri jeda 500ms agar QR Code ter-render sempurna sebelum di-capture
     await new Promise(resolve => setTimeout(resolve, 500));
 
     try {
@@ -2450,7 +2449,6 @@ async function downloadCardAsJpg() {
         }
     }
 }
-
 // OPSI 2: Cetak Kartu Ukuran Fisik (6,5 cm x 10,5 cm)
 function printCardSingle() {
     closeModal('choiceModal');
