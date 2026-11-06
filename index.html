@@ -493,6 +493,7 @@
             </div>
             <div style="display:flex; gap:10px; flex-wrap:wrap;">
                 <button class="btn btn-download" onclick="downloadExcelDenganKop('anggota')"><i class="fas fa-file-download"></i> DOWNLOAD EXCEL ANGGOTA</button>
+                <button class="btn btn-primary" onclick="printAllCardsMassal()"><i class="fas fa-print"></i> CETAK SEMUA KARTU (MASSAL)</button>
                 <button class="btn btn-danger-all" onclick="confirmClearAll('anggota')"><i class="fas fa-trash-restore"></i> HAPUS SEMUA DATA ANGGOTA</button>
             </div>
         </div>
@@ -820,29 +821,51 @@
 </div>
     
 <!-- MODAL CETAK KARTU ANGGOTA -->
+<!-- MODAL CETAK KARTU ANGGOTA PERORANGAN -->
 <div id="cardModal" class="modal">
-    <div class="modal-content" style="max-width: 400px;">
-        <h3><i class="fas fa-id-card"></i> KARTU ANGGOTA PASKIBRA</h3>
-        <hr class="section-divider">
+    <div class="modal-content" style="max-width: 450px; background: rgba(50, 0, 10, 0.95); border: 2px solid #ffd700;">
+        <h3 style="color: #ffd700; margin-bottom: 15px;"><i class="fas fa-id-card"></i> KARTU ANGGOTA PASKIBRA</h3>
+        <hr class="section-divider" style="margin: 10px 0 20px 0;">
         
-        <!-- Desain Area Kartu yang Akan Dicetak -->
-        <div id="idCardPrintArea" style="background: linear-gradient(135deg, #4a000b, #2b0006); border: 2px solid #ffd700; border-radius: 12px; padding: 15px; color: #fff; text-align: center; width: 320px; margin: 0 auto;">
-            <img src="assets/logo-paskibra.png" style="width: 50px; height: 50px; margin-bottom: 5px;">
-            <h4 style="color: #ffd700; margin: 0; font-size: 1.1rem;">PASKIBRA MAN 6 CIAMIS</h4>
-            <p style="font-size: 0.75rem; color: #ffcc66; margin-bottom: 10px;">KARTU TANDA ANGGOTA</p>
-            <hr style="border: 0.5px solid rgba(255,215,0,0.3); margin-bottom: 10px;">
+        <!-- Wadah Kartu Persis Sesuai Gambar (Ukuran 6.5 cm x 10.5 cm) -->
+        <div id="idCardPrintArea" style="
+            width: 6.5cm; 
+            height: 10.5cm; 
+            background: #32000a; 
+            border: 2px solid #ffd700; 
+            border-radius: 12px; 
+            padding: 15px; 
+            color: #fff; 
+            text-align: center; 
+            margin: 0 auto; 
+            box-sizing: border-box; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: space-between;
+            font-family: 'American Captain', 'Segoe UI', sans-serif;">
             
-            <h3 id="cardNama" style="color: #fff; font-size: 1.2rem; margin-bottom: 2px;">-</h3>
-            <p id="cardKelasJabatan" style="color: #ffcc66; font-size: 0.85rem; margin-bottom: 10px;">-</p>
-            
-            <!-- Tempat QR Code Rendred -->
-            <div id="qrcodeBox" style="background: #fff; padding: 8px; border-radius: 8px; display: inline-block; margin-bottom: 5px;"></div>
-            <p id="cardNra" style="color: #ffd700; font-size: 0.9rem; font-weight: bold; margin: 0;">-</p>
+            <div>
+                <img src="assets/logo-paskibra.png" alt="Logo Paskibra" style="width: 48px; height: 48px; margin-bottom: 6px; object-fit: contain;">
+                <h4 style="color: #ffd700; margin: 0; font-size: 1.05rem; letter-spacing: 1px; line-height: 1.1;">PASKIBRA MAN 6 CIAMIS</h4>
+                <p style="font-size: 0.7rem; color: #ffcc66; margin-top: 2px; letter-spacing: 1px;">KARTU TANDA ANGGOTA</p>
+                <div style="width: 80%; height: 1px; background: rgba(255, 215, 0, 0.4); margin: 6px auto;"></div>
+            </div>
+
+            <div>
+                <h3 id="cardNama" style="color: #ffffff; font-size: 1.25rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; line-height: 1.1;">ALEX ADRIANSAH</h3>
+                <p id="cardKelasJabatan" style="color: #ffcc66; font-size: 0.85rem; margin-top: 3px; letter-spacing: 1px;">XII | PASKIBRA</p>
+            </div>
+
+            <div>
+                <div id="qrcodeBox" style="background: #ffffff; padding: 6px; border-radius: 6px; display: inline-block; line-height: 0;"></div>
+                <p id="cardNra" style="color: #ffd700; font-size: 1.05rem; font-weight: bold; margin-top: 6px; letter-spacing: 1.5px;">222025008</p>
+            </div>
         </div>
 
-        <div class="modal-actions" style="margin-top:20px;">
-            <button class="btn btn-primary" onclick="printCard()"><i class="fas fa-print"></i> CETAK / DOWNLOAD</button>
-            <button class="btn btn-delete" onclick="closeModal('cardModal')">TUTUP</button>
+        <div class="modal-actions" style="margin-top:20px; display: flex; gap: 10px; justify-content: center;">
+            <button class="btn btn-primary" onclick="printCardSingle()" style="flex: 1;"><i class="fas fa-print"></i> CETAK / DOWNLOAD</button>
+            <button class="btn btn-delete" onclick="closeModal('cardModal')" style="flex: 1;">TUTUP</button>
         </div>
     </div>
 </div>
@@ -1954,7 +1977,160 @@ function printCard() {
         a.click();
         document.body.removeChild(a);
     }
+// ============================================================================
+// LOGIKA CETAK KARTU PERORANGAN & MASSAL (QR CODE INTEGRATED)
+// ============================================================================
 
+// 1. Membuka Modal Kartu Single & Generate QR Code
+function openCardModal(nis, nama, kelas, jabatan) {
+    document.getElementById("cardNama").innerText = nama;
+    document.getElementById("cardKelasJabatan").innerText = `${kelas} | ${jabatan}`;
+    document.getElementById("cardNra").innerText = nis;
+
+    document.getElementById("qrcodeBox").innerHTML = "";
+
+    new QRCode(document.getElementById("qrcodeBox"), {
+        text: nis,
+        width: 110,
+        height: 110,
+        correctLevel: QRCode.CorrectLevel.H
+    });
+
+    document.getElementById("cardModal").style.display = "flex";
+}
+
+// 2. Fungsi Cetak Single (1 Kartu Ukuran 6,5 cm x 10,5 cm)
+function printCardSingle() {
+    const cardHtml = document.getElementById("idCardPrintArea").outerHTML;
+    const printWin = window.open('', '_blank');
+    
+    printWin.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Cetak Kartu Anggota</title>
+            <link href="https://fonts.cdnfonts.com/css/american-captain" rel="stylesheet">
+            <style>
+                @page { size: 6.5cm 10.5cm; margin: 0; }
+                body { margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; background: #fff; }
+                * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            </style>
+        </head>
+        <body onload="window.print(); window.close();">
+            ${cardHtml}
+        </body>
+        </html>
+    `);
+    printWin.document.close();
+}
+
+// 3. Fungsi Cetak Massal (Banyak Kartu per Lembar A4/F4 Otomatis Grid)
+function printAllCardsMassal() {
+    if (!globalDataMaster || globalDataMaster.length === 0) {
+        return showCustomAlert("PERINGATAN", "Tidak ada data anggota untuk dicetak!", "fa-exclamation-circle");
+    }
+
+    let hiddenContainer = document.createElement("div");
+    hiddenContainer.id = "tempMassalContainer";
+    hiddenContainer.style.position = "absolute";
+    hiddenContainer.style.left = "-9999px";
+    document.body.appendChild(hiddenContainer);
+
+    let cardsHTML = "";
+
+    globalDataMaster.forEach((a, idx) => {
+        let nis = a["NRA"] || a["nra"] || a["NIS/NISN"] || a["NIS"] || a["nis"] || "-";
+        let nama = a["NAMA LENGKAP"] || a["Nama_Lengkap"] || a["nama"] || "-";
+        let kelas = a["KELAS"] || a["Kelas"] || a["kelas"] || "-";
+        let jabatan = a["JABATAN"] || a["Jabatan"] || "Anggota";
+        let qrContainerId = `qr_massal_${idx}`;
+
+        cardsHTML += `
+            <div class="card-item" style="
+                width: 6.5cm; 
+                height: 10.5cm; 
+                background: #32000a; 
+                border: 2px solid #ffd700; 
+                border-radius: 12px; 
+                padding: 15px; 
+                color: #fff; 
+                text-align: center; 
+                box-sizing: border-box; 
+                display: flex; 
+                flex-direction: column; 
+                align-items: center; 
+                justify-content: space-between;
+                page-break-inside: avoid;
+                font-family: 'American Captain', 'Segoe UI', sans-serif;">
+                
+                <div>
+                    <img src="assets/logo-paskibra.png" style="width: 48px; height: 48px; margin-bottom: 6px; object-fit: contain;">
+                    <h4 style="color: #ffd700; margin: 0; font-size: 1.05rem; letter-spacing: 1px; line-height: 1.1;">PASKIBRA MAN 6 CIAMIS</h4>
+                    <p style="font-size: 0.7rem; color: #ffcc66; margin-top: 2px; letter-spacing: 1px;">KARTU TANDA ANGGOTA</p>
+                    <div style="width: 80%; height: 1px; background: rgba(255, 215, 0, 0.4); margin: 6px auto;"></div>
+                </div>
+
+                <div>
+                    <h3 style="color: #ffffff; font-size: 1.25rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; line-height: 1.1;">${nama}</h3>
+                    <p style="color: #ffcc66; font-size: 0.85rem; margin-top: 3px; letter-spacing: 1px;">${kelas} | ${jabatan}</p>
+                </div>
+
+                <div>
+                    <div id="${qrContainerId}" class="qr-box" style="background: #ffffff; padding: 6px; border-radius: 6px; display: inline-block; line-height: 0;"></div>
+                    <p style="color: #ffd700; font-size: 1.05rem; font-weight: bold; margin-top: 6px; letter-spacing: 1.5px;">${nis}</p>
+                </div>
+            </div>
+        `;
+    });
+
+    hiddenContainer.innerHTML = cardsHTML;
+
+    globalDataMaster.forEach((a, idx) => {
+        let nis = a["NRA"] || a["nra"] || a["NIS/NISN"] || a["NIS"] || a["nis"] || "-";
+        new QRCode(document.getElementById(`qr_massal_${idx}`), {
+            text: nis,
+            width: 110,
+            height: 110,
+            correctLevel: QRCode.CorrectLevel.H
+        });
+    });
+
+    setTimeout(() => {
+        const fullContent = hiddenContainer.innerHTML;
+        document.body.removeChild(hiddenContainer);
+
+        const printWin = window.open('', '_blank');
+        printWin.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Cetak Massal Kartu Anggota</title>
+                <link href="https://fonts.cdnfonts.com/css/american-captain" rel="stylesheet">
+                <style>
+                    @page { size: A4 portrait; margin: 1cm; }
+                    body { margin: 0; padding: 0; background: #fff; font-family: sans-serif; }
+                    .grid-container {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: 0.5cm;
+                        justify-content: flex-start;
+                    }
+                    .card-item {
+                        -webkit-print-color-adjust: exact !important; 
+                        print-color-adjust: exact !important;
+                    }
+                </style>
+            </head>
+            <body onload="setTimeout(function(){ window.print(); window.close(); }, 500);">
+                <div class="grid-container">
+                    ${fullContent}
+                </div>
+            </body>
+            </html>
+        `);
+        printWin.document.close();
+    }, 400);
+}
     async function sendDataToSheet(payload) {
         try {
             await fetch(SCRIPT_URL, {
