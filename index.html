@@ -7,13 +7,13 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.cdnfonts.com/css/american-captain" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<!-- Library Scan QR Code -->
+    <!-- Library Scan QR Code -->
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<!-- LIBRARY UNTUK CONVERT HTML KARTU KE GAMBAR JPG -->
+    <!-- LIBRARY UNTUK CONVERT HTML KARTU KE GAMBAR & PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<!-- Library jsPDF untuk Export Kartu ke PDF Presisi -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
     <!-- ======================================================================
          1. STYLE CSS UTAMA
     ======================================================================= -->
@@ -39,18 +39,20 @@
             margin: 0 auto; 
             width: 100%;
         }
-.version-badge {
-    background: rgba(255, 215, 0, 0.2);
-    border: 1px solid #ffd700;
-    color: #ffd700;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.9rem;
-    display: inline-block;
-    margin-bottom: 10px;
-    letter-spacing: 1px;
-    box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
-}        
+
+        .version-badge {
+            background: rgba(255, 215, 0, 0.2);
+            border: 1px solid #ffd700;
+            color: #ffd700;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: inline-block;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+        }        
+        
         hr.section-divider {
             border: 0;
             height: 2px;
@@ -375,89 +377,22 @@
         .modal-content h3 { color: #ffd700; margin-bottom: 12px; font-size: 1.7rem; }
         .modal-content p { color: #ffcc66; font-size: 1.05rem; margin-bottom: 20px; line-height: 1.4; }
         .modal-actions { display: flex; gap: 12px; justify-content: center; }
-    
-    /* ============================================================================
-   RESPONSIF MOBILE (OTOMATIS PENYESUAIAN LAYAR SMARTPHONE)
-   ============================================================================ */
-    @media screen and max-width: 768px {
-    /* Header & Title Adjustments */
-    header {
-        padding: 15px 10px !important;
-    }
-    
-    .header-content h1 {
-        font-size: 1.4rem !important;
-        line-height: 1.2 !important;
-    }
 
-    .header-content p {
-        font-size: 0.85rem !important;
-        margin-bottom: 10px !important;
-    }
-
-    #clockContainer {
-        font-size: 0.8rem !important;
-        padding: 4px 10px !important;
-    }
-
-    /* Tab Navigation Responsive */
-    .nav-tabs {
-        display: flex !important;
-        flex-direction: column !important;
-        gap: 8px !important;
-        width: 100% !important;
-    }
-
-    .tab-btn {
-        width: 100% !important;
-        text-align: center !important;
-        padding: 10px !important;
-        font-size: 0.9rem !important;
-    }
-
-    /* Action Box & Buttons */
-    .action-box {
-        display: flex !important;
-        flex-direction: column !important;
-        gap: 8px !important;
-        width: 100% !important;
-    }
-
-    .action-box .btn {
-        width: 100% !important;
-        justify-content: center !important;
-        margin: 0 !important;
-    }
-
-    /* Table Auto Scroll Agar Tidak Terpotong */
-    .table-container, .table-responsive {
-        width: 100% !important;
-        overflow-x: auto !important;
-        -webkit-overflow-scrolling: touch;
-        border-radius: 8px;
-    }
-
-    table {
-        min-width: 650px !important; /* Menjaga struktur tabel tetap rapi saat di-scroll */
-    }
-
-    /* Modal Dialog Optimization for Mobile */
-    .modal-content {
-        width: 92% !important;
-        max-width: 92% !important;
-        padding: 15px !important;
-        margin: 10px auto !important;
-    }
-
-    .modal-actions {
-        flex-direction: column !important;
-        gap: 8px !important;
-    }
-
-    .modal-actions .btn {
-        width: 100% !important;
-    }
-}
+        @media screen and (max-width: 768px) {
+            header { padding: 15px 10px !important; }
+            .header-content h1 { font-size: 1.4rem !important; line-height: 1.2 !important; }
+            .header-content p { font-size: 0.85rem !important; margin-bottom: 10px !important; }
+            #clockContainer { font-size: 0.8rem !important; padding: 4px 10px !important; }
+            .nav-tabs { display: flex !important; flex-direction: column !important; gap: 8px !important; width: 100% !important; }
+            .tab-btn { width: 100% !important; text-align: center !important; padding: 10px !important; font-size: 0.9rem !important; }
+            .action-box { display: flex !important; flex-direction: column !important; gap: 8px !important; width: 100% !important; }
+            .action-box .btn { width: 100% !important; justify-content: center !important; margin: 0 !important; }
+            .table-container, .table-responsive { width: 100% !important; overflow-x: auto !important; -webkit-overflow-scrolling: touch; border-radius: 8px; }
+            table { min-width: 650px !important; }
+            .modal-content { width: 92% !important; max-width: 92% !important; padding: 15px !important; margin: 10px auto !important; }
+            .modal-actions { flex-direction: column !important; gap: 8px !important; }
+            .modal-actions .btn { width: 100% !important; }
+        }
     </style>
 </head>
 <body>
@@ -492,23 +427,19 @@
 ======================================================================= -->
 <div class="container">
     <header>
-    <!-- TAMBAHKAN DUA BARIS INI DI PALING ATAS HEADER -->
-    <div class="version-badge">
-        <i class="fas fa-code-branch"></i> VERSI APLIKASI: v2.5 (QR SCANNER & SOUND INTEGRATED)
-    </div>
+        <div class="version-badge">
+            <i class="fas fa-code-branch"></i> VERSI APLIKASI: v2.6 (INSTANT QR ABSEN & PDF INTEGRATED)
+        </div>
 
-    <div class="header-content" style="text-align: center; width: 100%;">
-    <!-- LOGO DAN JUDUL UTAMA -->
-    <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 8px;">
-        <img id="dashboardLogo" class="custom-logo" src="assets/logo-paskibra.png" alt="Logo Paskibra" style="width: 60px; height: 60px; object-fit: contain;">
-        <h1 style="margin: 0; font-family: 'American Captain', sans-serif; color: #ffd700; letter-spacing: 1.5px;">DASHBOARD MANAJEMEN PASKIBRA MAN 6 CIAMIS</h1>
-    </div>
-
-    <!-- SUBTITLE TEPAT DI BAWAH JUDUL UTAMA -->
-    <p style="margin: 0 0 15px 0; color: #ffcc66; font-size: 1rem; font-weight: 500; letter-spacing: 0.8px;">
-        Sistem Informasi Anggota, Presensi Latihan Rutin, dan Open Recruitment
-    </p>
-</div>
+        <div class="header-content" style="text-align: center; width: 100%;">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 8px;">
+                <img id="dashboardLogo" class="custom-logo" src="assets/logo-paskibra.png" alt="Logo Paskibra" style="width: 60px; height: 60px; object-fit: contain;">
+                <h1 style="margin: 0; font-family: 'American Captain', sans-serif; color: #ffd700; letter-spacing: 1.5px;">DASHBOARD MANAJEMEN PASKIBRA MAN 6 CIAMIS</h1>
+            </div>
+            <p style="margin: 0 0 15px 0; color: #ffcc66; font-size: 1rem; font-weight: 500; letter-spacing: 0.8px;">
+                Sistem Informasi Anggota, Presensi Latihan Rutin, dan Open Recruitment
+            </p>
+        </div>
         
         <div class="header-controls">
             <div class="clock-box">
@@ -531,7 +462,7 @@
     <hr class="section-divider">
 
     <!-- ==================================================================
-         4. TAB 1: DATA MASTER ANGGOTA (DENGAN NRA & FILTER)
+         4. TAB 1: DATA MASTER ANGGOTA
     =================================================================== -->
     <div id="tab-anggota" class="card tab-content active">
         <h2>DAFTAR ANGGOTA PASKIBRA (DATA MASTER)</h2>
@@ -576,7 +507,6 @@
                 <button class="btn btn-download" onclick="downloadExcelDenganKop('anggota')"><i class="fas fa-file-download"></i> DOWNLOAD EXCEL ANGGOTA</button>
                 <button class="btn btn-primary" onclick="printAllCardsMassal()"><i class="fas fa-print"></i> CETAK SEMUA KARTU (MASSAL)</button>
                 <button class="btn btn-danger-all" onclick="confirmClearAll('anggota')"><i class="fas fa-trash-restore"></i> HAPUS SEMUA DATA ANGGOTA</button>
-                <button class="btn btn-download" onclick="downloadAllCardsJpgMassal()"><i class="fas fa-file-download"></i> DOWNLOAD KARTU MASSAL (JPG)</button>
             </div>
         </div>
 
@@ -632,20 +562,22 @@
         </div>
 
         <hr class="section-divider">
-<!-- WADAH SCANNER QR CODE -->
-<div class="card" style="background: rgba(0,0,0,0.3); border: 1px solid #ffd700; text-align: center; margin-bottom: 20px;">
-    <h3><i class="fas fa-qrcode"></i> SCAN QR CODE KARTU ANGGOTA</h3>
-    <p style="color: #ffcc66; font-size: 0.9rem; margin-bottom: 10px;">Arahkan kamera ke QR Code NRA Anggota untuk absensi otomatis</p>
-    
-    <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 15px;">
-        <button type="button" class="btn btn-primary" onclick="startQRScanner()"><i class="fas fa-camera"></i> BUKA KAMERA</button>
-        <button type="button" class="btn btn-delete" id="btnStopScan" onclick="stopQRScanner()" style="display: none;"><i class="fas fa-stop-circle"></i> STOP KAMERA</button>
-    </div>
 
-    <!-- Area Video Kamera -->
-    <div id="reader" style="width: 100%; max-width: 400px; margin: 0 auto; border-radius: 10px; overflow: hidden;"></div>
-</div>
-        <h2>INPUT ABSENSI LATIHAN RUTIN (ADMIN MANUAL)</h2>
+        <!-- WADAH SCANNER QR CODE OTOMATIS -->
+        <div class="card" style="background: rgba(0,0,0,0.3); border: 1px solid #ffd700; text-align: center; margin-bottom: 20px;">
+            <h3><i class="fas fa-qrcode"></i> SCAN QR CODE KARTU ANGGOTA (INSTANT SCAN)</h3>
+            <p style="color: #ffcc66; font-size: 0.9rem; margin-bottom: 10px;">Pilih Pertemuan & Tanggal terlebih dahulu, lalu buka kamera untuk scan otomatis beruntun</p>
+            
+            <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 15px;">
+                <button type="button" class="btn btn-primary" onclick="startQRScanner()"><i class="fas fa-camera"></i> BUKA KAMERA</button>
+                <button type="button" class="btn btn-delete" id="btnStopScan" onclick="stopQRScanner()" style="display: none;"><i class="fas fa-stop-circle"></i> STOP KAMERA</button>
+            </div>
+
+            <!-- Area Video Kamera -->
+            <div id="reader" style="width: 100%; max-width: 400px; margin: 0 auto; border-radius: 10px; overflow: hidden;"></div>
+        </div>
+
+        <h2>INPUT ABSENSI LATIHAN RUTIN (MANUAL ADMIN)</h2>
         <form id="formAbsensi" onsubmit="submitAbsensi(event)">
             <div class="form-group">
                 <label>Cari / Pilih Anggota (Cari atau Pilih Berurutan)</label>
@@ -738,7 +670,7 @@
     </div>
 
     <!-- ==================================================================
-         6. TAB 3: OPEN RECRUITMENT (OR DENGAN FILTER ALUMNI & KELAS)
+         6. TAB 3: OPEN RECRUITMENT
     =================================================================== -->
     <div id="tab-recruitment" class="card tab-content">
         <h2>TAMBAH CALON ANGGOTA MANUAL (OR)</h2>
@@ -945,24 +877,21 @@
         </div>
 
         <div class="modal-actions" style="margin-top:20px; display: flex; gap: 10px; justify-content: center;">
-            <button class="btn btn-primary" onclick="confirmCardOutputChoice()" style="flex: 1;"><i class="fas fa-download"></i> CETAK / DOWNLOAD</button>
-            <!-- FIX TOMBOL TUTUP KARTU -->
+            <button type="button" class="btn btn-primary" onclick="confirmCardOutputChoice()" style="flex: 1;"><i class="fas fa-download"></i> CETAK / DOWNLOAD</button>
             <button type="button" class="btn btn-delete" onclick="closeModal('cardModal')" style="flex: 1;">TUTUP</button>
         </div>
     </div>
 </div>
 
-<!-- MODAL OPSI CETAK / DOWNLOAD PDF -->
+<!-- MODAL DIALOG KONFIRMASI OPSI CETAK / DOWNLOAD PDF -->
 <div id="choiceModal" class="modal">
     <div class="modal-content" style="max-width: 400px; text-align: center;">
         <h3 style="color: #ffd700;"><i class="fas fa-question-circle"></i> PILIH ACTION KARTU</h3>
         <hr class="section-divider">
         <p style="color: #ffcc66; margin-bottom: 20px;">Silakan pilih format output kartu yang Anda inginkan:</p>
         <div style="display: flex; flex-direction: column; gap: 12px;">
-            <!-- GANTI DOWNLOAD JPG MENJADI DOWNLOAD PDF -->
-            <button class="btn btn-primary" onclick="downloadCardAsPdf()"><i class="fas fa-file-pdf"></i> DOWNLOAD KARTU (PDF)</button>
-            <button class="btn btn-download" onclick="printCardSingle()"><i class="fas fa-print"></i> CETAK UKURAN FISIK (6.5 X 10.5 CM)</button>
-            <!-- FIX TOMBOL BATAL -->
+            <button type="button" class="btn btn-primary" onclick="downloadCardAsPdf()"><i class="fas fa-file-pdf"></i> DOWNLOAD KARTU (PDF)</button>
+            <button type="button" class="btn btn-download" onclick="printCardSingle()"><i class="fas fa-print"></i> CETAK UKURAN FISIK (6.5 x 10.5 CM)</button>
             <button type="button" class="btn btn-delete" onclick="closeModal('choiceModal')">BATAL</button>
         </div>
     </div>
@@ -994,153 +923,127 @@
     let globalDokumentasi = [];
     let html5QrcodeScanner = null;
 
-// ============================================================================
-// LOGIKA SCANNER QR CODE OTOMATIS (LANGSUNG MASUK REKAP WITHOUT POP-UP)
-// ============================================================================
+    let lastScannedNra = "";
+    let lastScanTime = 0;
 
-let lastScannedNra = "";
-let lastScanTime = 0;
+    // ============================================================================
+    // LOGIKA SCANNER QR CODE OTOMATIS (LANGSUNG PRESENSI WITHOUT POP-UP)
+    // ============================================================================
 
-// 1. Membuka Kamera Scanner
-function startQRScanner() {
-    const pertemuan = document.getElementById("absensiPertemuan").value;
-    if (!pertemuan) {
-        return showCustomAlert("PERINGATAN", "Pilih Pertemuan Latihan terlebih dahulu sebelum membuka kamera!", "fa-exclamation-circle");
+    function startQRScanner() {
+        const pertemuan = document.getElementById("absensiPertemuan").value;
+        if (!pertemuan) {
+            return showCustomAlert("PERINGATAN", "Pilih Pertemuan Latihan terlebih dahulu sebelum membuka kamera!", "fa-exclamation-circle");
+        }
+
+        document.getElementById("btnStopScan").style.display = "inline-flex";
+        html5QrcodeScanner = new Html5Qrcode("reader");
+        
+        const config = { fps: 15, qrbox: { width: 250, height: 250 } };
+        
+        html5QrcodeScanner.start(
+            { facingMode: "environment" },
+            config,
+            onScanSuccessAuto
+        ).catch(err => {
+            showCustomAlert("KAMERA ERROR", "Gagal mengakses kamera. Pastikan izin kamera diberikan!", "fa-exclamation-circle");
+        });
     }
 
-    document.getElementById("btnStopScan").style.display = "inline-flex";
-    html5QrcodeScanner = new Html5Qrcode("reader");
-    
-    const config = { fps: 15, qrbox: { width: 250, height: 250 } };
-    
-    html5QrcodeScanner.start(
-        { facingMode: "environment" },
-        config,
-        onScanSuccessAuto
-    ).catch(err => {
-        showCustomAlert("KAMERA ERROR", "Gagal mengakses kamera. Pastikan izin kamera diberikan!", "fa-exclamation-circle");
-    });
-}
-
-// 2. Menghentikan Kamera
-function stopQRScanner() {
-    if (html5QrcodeScanner) {
-        html5QrcodeScanner.stop().then(() => {
-            document.getElementById("btnStopScan").style.display = "none";
-            document.getElementById("reader").innerHTML = "";
-        }).catch(err => console.error(err));
-    }
-}
-
-// 3. Suara Beep Khas Scanner
-function playBeepSound() {
-    try {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const oscillator = audioCtx.createOscillator();
-        const gainNode = audioCtx.createGain();
-
-        oscillator.type = 'sine';
-        oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
-        gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
-
-        oscillator.connect(gainNode);
-        gainNode.connect(audioCtx.destination);
-
-        oscillator.start();
-        oscillator.stop(audioCtx.currentTime + 0.15);
-    } catch (e) { console.log(e); }
-}
-
-// 4. LOGIKA SCAN OTOMATIS BERUNTUN (LANGSUNG INPUT ABSEN)
-async function onScanSuccessAuto(decodedText) {
-    const now = Date.now();
-    const scannedNra = decodedText.trim();
-
-    // Anti double-scan (Jeda 3 detik untuk NRA/kartu yang sama)
-    if (scannedNra === lastScannedNra && (now - lastScanTime) < 3000) {
-        return;
+    function stopQRScanner() {
+        if (html5QrcodeScanner) {
+            html5QrcodeScanner.stop().then(() => {
+                document.getElementById("btnStopScan").style.display = "none";
+                document.getElementById("reader").innerHTML = "";
+            }).catch(err => console.error(err));
+        }
     }
 
-    lastScannedNra = scannedNra;
-    lastScanTime = now;
+    function playBeepSound() {
+        try {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
 
-    // Cari anggota di Data Master
-    const anggota = globalDataMaster.find(a => {
-        let rNra = String(a["NRA"] || a["nra"] || a["NIS/NISN"] || a["NIS"] || "").trim();
-        return rNra.toLowerCase() === scannedNra.toLowerCase();
-    });
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
+            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
 
-    if (!anggota) {
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.15);
+        } catch (e) { console.log("AudioContext error:", e); }
+    }
+
+    async function onScanSuccessAuto(decodedText) {
+        const now = Date.now();
+        const scannedNra = decodedText.trim();
+
+        // Anti double-scan (Jeda 3 detik untuk NRA yang sama)
+        if (scannedNra === lastScannedNra && (now - lastScanTime) < 3000) {
+            return;
+        }
+
+        lastScannedNra = scannedNra;
+        lastScanTime = now;
+
+        const anggota = globalDataMaster.find(a => {
+            let rNra = String(a["NRA"] || a["nra"] || a["NIS/NISN"] || a["NIS"] || "").trim();
+            return rNra.toLowerCase() === scannedNra.toLowerCase();
+        });
+
+        if (!anggota) {
+            playBeepSound();
+            console.warn(`NRA [${scannedNra}] tidak terdaftar di Data Master.`);
+            return;
+        }
+
+        const nama = anggota["NAMA LENGKAP"] || anggota["Nama_Lengkap"] || anggota["nama"] || "-";
+        const kelas = anggota["KELAS"] || anggota["Kelas"] || anggota["kelas"] || "-";
+        const pertemuan = document.getElementById("absensiPertemuan").value || "Pertemuan 1 (Senin)";
+        const status = document.getElementById("absensiStatus") ? document.getElementById("absensiStatus").value : "Hadir";
+        const dateVal = document.getElementById("absensiTanggalInput").value || new Date().toISOString().split('T')[0];
+        const formattedDateIndo = formatDateIndo(dateVal);
+
+        const isDuplicate = globalAbsensi.some(a => {
+            const rNama = a.Nama_Lengkap || a.nama_lengkap || a.Nama || "";
+            const rawTs = a.TimeStamp || a.Timestamp || a.timestamp || "";
+            const dStr = formatDateIndo(rawTs);
+            return rNama.toLowerCase() === nama.toLowerCase() && dStr === formattedDateIndo;
+        });
+
+        if (isDuplicate) {
+            playBeepSound();
+            console.log(`Anggota ${nama} sudah presensi hari ini.`);
+            return;
+        }
+
+        globalAbsensi.unshift({
+            TimeStamp: formattedDateIndo,
+            NRA: scannedNra,
+            NIS: scannedNra,
+            Nama_Lengkap: nama,
+            Kelas: kelas,
+            Pertemuan: pertemuan,
+            Keterangan: status
+        });
+
         playBeepSound();
-        console.warn(`NRA [${scannedNra}] tidak terdaftar di Data Master.`);
-        return;
+        renderPreviewAbsensi();
+
+        sendDataToSheet({
+            action: "addAbsensi",
+            nra: scannedNra,
+            nama_lengkap: nama,
+            kelas: kelas,
+            pertemuan: pertemuan,
+            keterangan: status,
+            timestamp: formattedDateIndo
+        });
     }
 
-    const nama = anggota["NAMA LENGKAP"] || anggota["Nama_Lengkap"] || anggota["nama"] || "-";
-    const kelas = anggota["KELAS"] || anggota["Kelas"] || anggota["kelas"] || "-";
-    const pertemuan = document.getElementById("absensiPertemuan").value || "Pertemuan 1 (Senin)";
-    const status = document.getElementById("absensiStatus") ? document.getElementById("absensiStatus").value : "Hadir";
-    const dateVal = document.getElementById("absensiTanggalInput").value || new Date().toISOString().split('T')[0];
-    const formattedDateIndo = formatDateIndo(dateVal);
-
-    // Cek apakah sudah absen hari ini
-    const isDuplicate = globalAbsensi.some(a => {
-        const rNama = a.Nama_Lengkap || a.nama_lengkap || a.Nama || "";
-        const rawTs = a.TimeStamp || a.Timestamp || a.timestamp || "";
-        const dStr = formatDateIndo(rawTs);
-        return rNama.toLowerCase() === nama.toLowerCase() && dStr === formattedDateIndo;
-    });
-
-    if (isDuplicate) {
-        playBeepSound();
-        console.log(`Anggota ${nama} sudah absen untuk tanggal ${formattedDateIndo}`);
-        return;
-    }
-
-    // Input Otomatis ke State Lokal
-    globalAbsensi.unshift({
-        TimeStamp: formattedDateIndo,
-        NRA: scannedNra,
-        NIS: scannedNra,
-        Nama_Lengkap: nama,
-        Kelas: kelas,
-        Pertemuan: pertemuan,
-        Keterangan: status
-    });
-
-    // Bunyikan Beep Indikator Berhasil
-    playBeepSound();
-
-    // Render ulang tabel preview secara instan
-    renderPreviewAbsensi();
-
-    // Kirim data ke Google Sheets di background tanpa menghentikan kamera
-    sendDataToSheet({
-        action: "addAbsensi",
-        nra: scannedNra,
-        nama_lengkap: nama,
-        kelas: kelas,
-        pertemuan: pertemuan,
-        keterangan: status,
-        timestamp: formattedDateIndo
-    });
-}
-    // Fungsi Membuka Kartu & Generate QR Code
-// Fungsi Perintah Cetak
-function printCard() {
-    const printContent = document.getElementById("idCardPrintArea").innerHTML;
-    const printWindow = window.open('', '', 'height=600,width=400');
-    
-    printWindow.document.write('<html><head><title>Cetak Kartu Anggota</title>');
-    printWindow.document.write('<style>body{font-family:sans-serif; text-align:center; padding:20px;} .card-box{background:#4a000b; color:#fff; padding:15px; border-radius:10px; width:300px; margin:auto; border:2px solid #ffd700;}</style>');
-    printWindow.document.write('</head><body>');
-    printWindow.document.write('<div class="card-box">' + printContent + '</div>');
-    printWindow.document.write('</body></html>');
-    
-    printWindow.document.close();
-    printWindow.focus();
-    setTimeout(() => { printWindow.print(); printWindow.close(); }, 500);
-}
     function initDefaultDateAdmin() {
         const today = new Date().toISOString().split('T')[0];
         const adminDateInput = document.getElementById("absensiTanggalInput");
@@ -1213,13 +1116,12 @@ function printCard() {
         document.getElementById("customDialogModal").style.display = "flex";
     }
 
-   // 1. Fungsi Penutup Modal (Menjamin Tombol TUTUP & BATAL Bekerja 100%)
     function closeModal(modalId) {
-    const targetModal = document.getElementById(modalId);
-    if (targetModal) {
-        targetModal.style.display = "none";
+        const targetModal = document.getElementById(modalId);
+        if (targetModal) {
+            targetModal.style.display = "none";
+        }
     }
-}
 
     function switchTab(tabId, btnElement) {
         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -1338,7 +1240,6 @@ function printCard() {
 
         if (filtered.length > 0) {
             filtered.forEach((a, index) => {
-                // Membaca NRA / NIS secara fleksibel
                 let rawNis = a["NRA"] || a["nra"] || a["NIS/NISN"] || a["NIS"] || a["nis"] || "-";
                 const nis = rawNis.toString().trim() || "-";
                 const nama = a["NAMA LENGKAP"] || a["Nama_Lengkap"] || a["nama"] || "-";
@@ -1386,7 +1287,7 @@ function printCard() {
         const kelas = document.getElementById("editKelas").value;
         const jabatan = document.getElementById("editJabatan").value;
 
-        Modal('editModal');
+        closeModal('editModal');
 
         const idx = globalDataMaster.findIndex(a => {
             let rNis = String(a["NRA"] || a["nra"] || a["NIS/NISN"] || a["NIS"] || a["nis"] || "").trim();
@@ -1710,7 +1611,7 @@ function printCard() {
         const keterangan = document.getElementById("editAbsensiKeterangan").value;
         const rawTs = document.getElementById("editAbsensiRawTs").value;
 
-        Modal("editAbsensiModal");
+        closeModal("editAbsensiModal");
 
         const idx = globalAbsensi.findIndex(a => {
             const rNama = a.Nama_Lengkap || a.nama_lengkap || a.Nama || "";
@@ -2094,468 +1995,233 @@ function printCard() {
         a.click();
         document.body.removeChild(a);
     }
-// ============================================================================
-// LOGIKA CETAK KARTU PERORANGAN & MASSAL (QR CODE INTEGRATED)
-// ============================================================================
 
-// 2. Fungsi Cetak Single (1 Kartu Ukuran 6,5 cm x 10,5 cm)
-function printCardSingle() {
-    const cardHtml = document.getElementById("idCardPrintArea").outerHTML;
-    const printWin = window.open('', '_blank');
-    
-    printWin.document.write(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Cetak Kartu Anggota</title>
-            <link href="https://fonts.cdnfonts.com/css/american-captain" rel="stylesheet">
-            <style>
-                @page { size: 6.5cm 10.5cm; margin: 0; }
-                body { margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; background: #fff; }
-                * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-            </style>
-        </head>
-        <body onload="window.print(); window.();">
-            ${cardHtml}
-        </body>
-        </html>
-    `);
-    printWin.document.();
-}
+    // ============================================================================
+    // LOGIKA CARD MODAL & EXPORT KARTU KE FORMAT PDF (PRESISI 6.5 x 10.5 CM)
+    // ============================================================================
 
-// 3. Fungsi Cetak Massal (Banyak Kartu per Lembar A4/F4 Otomatis Grid)
-function printAllCardsMassal() {
-    if (!globalDataMaster || globalDataMaster.length === 0) {
-        return showCustomAlert("PERINGATAN", "Tidak ada data anggota untuk dicetak!", "fa-exclamation-circle");
-    }
+    function openCardModal(nis, nama, kelas, jabatan) {
+        document.getElementById("cardNama").innerText = nama;
+        document.getElementById("cardKelasJabatan").innerText = `${kelas} | ${jabatan}`;
+        document.getElementById("cardNra").innerText = nis;
 
-    let hiddenContainer = document.createElement("div");
-    hiddenContainer.id = "tempMassalContainer";
-    hiddenContainer.style.position = "absolute";
-    hiddenContainer.style.left = "-9999px";
-    document.body.appendChild(hiddenContainer);
+        const qrBox = document.getElementById("qrcodeBox");
+        qrBox.innerHTML = "";
 
-    let cardsHTML = "";
-
-    globalDataMaster.forEach((a, idx) => {
-        let nis = a["NRA"] || a["nra"] || a["NIS/NISN"] || a["NIS"] || a["nis"] || "-";
-        let nama = a["NAMA LENGKAP"] || a["Nama_Lengkap"] || a["nama"] || "-";
-        let kelas = a["KELAS"] || a["Kelas"] || a["kelas"] || "-";
-        let jabatan = a["JABATAN"] || a["Jabatan"] || "Anggota";
-        let qrContainerId = `qr_massal_${idx}`;
-
-        cardsHTML += `
-            <div class="card-item" style="
-                width: 6.5cm; 
-                height: 10.5cm; 
-                background: #32000a; 
-                border: 2px solid #ffd700; 
-                border-radius: 12px; 
-                padding: 15px; 
-                color: #fff; 
-                text-align: center; 
-                box-sizing: border-box; 
-                display: flex; 
-                flex-direction: column; 
-                align-items: center; 
-                justify-content: space-between;
-                page-break-inside: avoid;
-                font-family: 'American Captain', 'Segoe UI', sans-serif;">
-                
-                <div>
-                    <img src="assets/logo-paskibra.png" style="width: 48px; height: 48px; margin-bottom: 6px; object-fit: contain;">
-                    <h4 style="color: #ffd700; margin: 0; font-size: 1.05rem; letter-spacing: 1px; line-height: 1.1;">PASKIBRA MAN 6 CIAMIS</h4>
-                    <p style="font-size: 0.7rem; color: #ffcc66; margin-top: 2px; letter-spacing: 1px;">KARTU TANDA ANGGOTA</p>
-                    <div style="width: 80%; height: 1px; background: rgba(255, 215, 0, 0.4); margin: 6px auto;"></div>
-                </div>
-
-                <div>
-                    <h3 style="color: #ffffff; font-size: 1.25rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; line-height: 1.1;">${nama}</h3>
-                    <p style="color: #ffcc66; font-size: 0.85rem; margin-top: 3px; letter-spacing: 1px;">${kelas} | ${jabatan}</p>
-                </div>
-
-                <div>
-                    <div id="${qrContainerId}" class="qr-box" style="background: #ffffff; padding: 6px; border-radius: 6px; display: inline-block; line-height: 0;"></div>
-                    <p style="color: #ffd700; font-size: 1.05rem; font-weight: bold; margin-top: 6px; letter-spacing: 1.5px;">${nis}</p>
-                </div>
-            </div>
-        `;
-    });
-
-    hiddenContainer.innerHTML = cardsHTML;
-
-    globalDataMaster.forEach((a, idx) => {
-        let nis = a["NRA"] || a["nra"] || a["NIS/NISN"] || a["NIS"] || a["nis"] || "-";
-        new QRCode(document.getElementById(`qr_massal_${idx}`), {
-            text: nis,
-            width: 110,
-            height: 110,
+        new QRCode(qrBox, {
+            text: String(nis || "-"),
+            width: 120,
+            height: 120,
             correctLevel: QRCode.CorrectLevel.H
         });
-    });
 
-    setTimeout(() => {
-        const fullContent = hiddenContainer.innerHTML;
-        document.body.removeChild(hiddenContainer);
+        document.getElementById("cardModal").style.display = "flex";
+    }
 
+    function confirmCardOutputChoice() {
+        document.getElementById("choiceModal").style.display = "flex";
+    }
+
+    async function downloadCardAsPdf() {
+        const cardArea = document.getElementById("idCardPrintArea");
+        const namaText = document.getElementById("cardNama") ? document.getElementById("cardNama").innerText : "Anggota";
+        const nraText = document.getElementById("cardNra") ? document.getElementById("cardNra").innerText : "NRA";
+
+        if (!cardArea) {
+            return showCustomAlert("GAGAL", "Area kartu tidak ditemukan!", "fa-times-circle");
+        }
+
+        closeModal('choiceModal');
+        showCustomAlert("MEMPROSES PDF", "Sedang mengunduh kartu format PDF...", "fa-spinner fa-spin");
+
+        // Paksa konversi elemen <canvas> QR Code ke tag <img> Base64 murni agar 100% terbaca
+        const qrBox = document.getElementById("qrcodeBox");
+        if (qrBox) {
+            const qrCanvas = qrBox.querySelector("canvas");
+            if (qrCanvas) {
+                const qrDataUrl = qrCanvas.toDataURL("image/png");
+                qrBox.innerHTML = `<img src="${qrDataUrl}" style="width:120px; height:120px; display:block; margin:0 auto;">`;
+            }
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 300));
+
+        try {
+            const canvas = await html2canvas(cardArea, {
+                scale: 3,
+                useCORS: true,
+                allowTaint: true,
+                backgroundColor: "#32000a",
+                logging: false
+            });
+
+            const imgData = canvas.toDataURL("image/png");
+
+            // Buat PDF Presisi Ukuran Fisik Kartu ID (65 mm x 105 mm)
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: [65, 105]
+            });
+
+            pdf.addImage(imgData, 'PNG', 0, 0, 65, 105);
+            pdf.save(`Kartu_Paskibra_${nraText}_${namaText.replace(/\s+/g, '_')}.pdf`);
+
+            closeModal('customDialogModal');
+        } catch (err) {
+            console.error("Error download PDF:", err);
+            closeModal('customDialogModal');
+            showCustomAlert("GAGAL", "Gagal mengunduh kartu format PDF.", "fa-times-circle");
+        }
+    }
+
+    function printCardSingle() {
+        closeModal('choiceModal');
+        const cardHtml = document.getElementById("idCardPrintArea").outerHTML;
         const printWin = window.open('', '_blank');
+        
         printWin.document.write(`
             <!DOCTYPE html>
             <html>
             <head>
-                <title>Cetak Massal Kartu Anggota</title>
+                <title>Cetak Kartu Anggota</title>
                 <link href="https://fonts.cdnfonts.com/css/american-captain" rel="stylesheet">
                 <style>
-                    @page { size: A4 portrait; margin: 1cm; }
-                    body { margin: 0; padding: 0; background: #fff; font-family: sans-serif; }
-                    .grid-container {
-                        display: flex;
-                        flex-wrap: wrap;
-                        gap: 0.5cm;
-                        justify-content: flex-start;
-                    }
-                    .card-item {
-                        -webkit-print-color-adjust: exact !important; 
-                        print-color-adjust: exact !important;
-                    }
+                    @page { size: 6.5cm 10.5cm; margin: 0; }
+                    body { margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; background: #fff; }
+                    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
                 </style>
             </head>
-            <body onload="setTimeout(function(){ window.print(); window.(); }, 500);">
-                <div class="grid-container">
-                    ${fullContent}
-                </div>
+            <body onload="window.print(); window.close();">
+                ${cardHtml}
             </body>
             </html>
         `);
-        printWin.document.();
-    }, 400);
-}
-    // ============================================================================
-    // LOGIKA KONFIRMASI DOWNLOAD JPG / CETAK FISIK & GOOGLE DRIVE MASSAL
-    // ============================================================================
-
-// Tentukan Link Folder Google Drive Publik Anda di sini:
-const GOOGLE_DRIVE_FOLDER_URL = "https://drive.google.com/drive/folders/160YVy_frru0CHtYS0IaIWnealkt2tlJb?usp=sharing";
-
-function openCardModal(nis, nama, kelas, jabatan) {
-    document.getElementById("cardNama").innerText = nama;
-    document.getElementById("cardKelasJabatan").innerText = `${kelas} | ${jabatan}`;
-    document.getElementById("cardNra").innerText = nis;
-
-    document.getElementById("qrcodeBox").innerHTML = "";
-
-    new QRCode(document.getElementById("qrcodeBox"), {
-        text: nis,
-        width: 110,
-        height: 110,
-        correctLevel: QRCode.CorrectLevel.H
-    });
-
-    document.getElementById("cardModal").style.display = "flex";
-}
-
-// Buka Modal Pertanyaan Konfirmasi
-function confirmCardOutputChoice() {
-    document.getElementById("choiceModal").style.display = "flex";
-}
-// ============================================================================
-// PERBAIKAN DOWNLOAD KARTU MASSAL (JPG HD + RENDER QR PASTI TERPERIKSA)
-// ============================================================================
-async function downloadAllCardsJpgMassal() {
-    if (!globalDataMaster || globalDataMaster.length === 0) {
-        return showCustomAlert("PERINGATAN", "Tidak ada data anggota untuk diunduh!", "fa-exclamation-circle");
+        printWin.document.close();
     }
 
-    showCustomAlert("MEMPROSES KARTU MASSAL", "Sedang memproses seluruh gambar kartu JPG... Mohon tunggu.", "fa-spinner fa-spin");
-
-    let tempBox = document.createElement("div");
-    tempBox.style.position = "fixed";
-    tempBox.style.top = "-9999px";
-    tempBox.style.left = "-9999px";
-    tempBox.style.zIndex = "-9999";
-    document.body.appendChild(tempBox);
-
-    for (let idx = 0; idx < globalDataMaster.length; idx++) {
-        let a = globalDataMaster[idx];
-        let nis = a["NRA"] || a["nra"] || a["NIS/NISN"] || a["NIS"] || a["nis"] || "-";
-        let nama = a["NAMA LENGKAP"] || a["Nama_Lengkap"] || a["nama"] || "Anggota";
-        let kelas = a["KELAS"] || a["Kelas"] || a["kelas"] || "-";
-        let jabatan = a["JABATAN"] || a["Jabatan"] || "Anggota";
-
-        tempBox.innerHTML = `
-            <div id="tempCardJpg" style="
-                width: 380px; 
-                height: 610px; 
-                background: #32000a; 
-                border: 3px solid #ffd700; 
-                border-radius: 14px; 
-                padding: 20px 15px; 
-                color: #fff; 
-                text-align: center; 
-                box-sizing: border-box; 
-                display: flex; 
-                flex-direction: column; 
-                align-items: center; 
-                justify-content: space-between;
-                font-family: 'American Captain', 'Segoe UI', sans-serif;">
-                
-                <div>
-                    <img src="assets/logo-paskibra.png" style="width: 52px; height: 52px; margin-bottom: 4px; object-fit: contain;">
-                    <h4 style="color: #ffd700; margin: 0; font-size: 1.15rem; letter-spacing: 1px; line-height: 1.1;">PASKIBRA MAN 6 CIAMIS</h4>
-                    <p style="font-size: 0.75rem; color: #ffcc66; margin-top: 3px; letter-spacing: 1px;">KARTU TANDA ANGGOTA</p>
-                    <div style="width: 85%; height: 1px; background: rgba(255, 215, 0, 0.4); margin: 8px auto;"></div>
-                </div>
-
-                <div>
-                    <h3 style="color: #ffffff; font-size: 1.35rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; line-height: 1.1;">${nama}</h3>
-                    <p style="color: #ffcc66; font-size: 0.9rem; margin-top: 4px; letter-spacing: 1px;">${kelas} | ${jabatan}</p>
-                </div>
-
-                <div>
-                    <div id="tempQrBoxMassal" style="background: #ffffff; padding: 8px; border-radius: 8px; display: inline-block; line-height: 0;"></div>
-                    <p style="color: #ffd700; font-size: 1.15rem; font-weight: bold; margin-top: 8px; letter-spacing: 1.5px;">${nis}</p>
-                </div>
-            </div>
-        `;
-
-        const qrBox = document.getElementById("tempQrBoxMassal");
-        qrBox.innerHTML = "";
-
-        new QRCode(qrBox, {
-            text: String(nis),
-            width: 140,
-            height: 140,
-            correctLevel: QRCode.CorrectLevel.H
-        });
-
-        // Tunggu 500ms per kartu agar QR Code ter-render utuh
-        await new Promise(r => setTimeout(r, 500));
-
-        const canvas = await html2canvas(document.getElementById("tempCardJpg"), {
-            scale: 3,
-            useCORS: true,
-            allowTaint: true,
-            backgroundColor: "#32000a"
-        });
-
-        const image = canvas.toDataURL("image/jpeg", 1.0);
-        const link = document.createElement("a");
-        link.href = image;
-        link.download = `Kartu_Paskibra_${nis}_${nama.replace(/\s+/g, '_')}.jpg`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        await new Promise(r => setTimeout(r, 300));
-    }
-
-    if (document.body.contains(tempBox)) {
-        document.body.removeChild(tempBox);
-    }
-    Modal('customDialogModal');
-    showCustomAlert("SELESAI", "Seluruh gambar kartu JPG anggota berhasil diunduh secara massal!");
-}
-// OPSI 2: Cetak Kartu Ukuran Fisik (6,5 cm x 10,5 cm)
-function printCardSingle() {
-    closeModal('choiceModal');
-    const cardHtml = document.getElementById("idCardPrintArea").outerHTML;
-    const printWin = window.open('', '_blank');
-    
-    printWin.document.write(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Cetak Kartu Anggota</title>
-            <link href="https://fonts.cdnfonts.com/css/american-captain" rel="stylesheet">
-            <style>
-                @page { size: 6.5cm 10.5cm; margin: 0; }
-                body { margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; background: #fff; }
-                * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-            </style>
-        </head>
-        <body onload="window.print(); window.close();">
-            ${cardHtml}
-        </body>
-        </html>
-    `);
-    printWin.document.close();
-}
-
-// Buka Folder Google Drive Publik
-function openGoogleDriveFolder() {
-    window.open(GOOGLE_DRIVE_FOLDER_URL, '_blank');
-}
-  // ============================================================================
-// PERBAIKAN DOWNLOAD QR PER ANGGOTA (DENGAN JEDA RENDER QR SANGAT AKURAT)
-// ============================================================================
-async function downloadSingleQrJpg(nis, nama, kelas, jabatan) {
-    showCustomAlert("MEMPROSES KARTU", `Sedang mengunduh Kartu JPG untuk ${nama}...`, "fa-spinner fa-spin");
-
-    // Wadah Kartu Sementara (Dipasang ke DOM dengan visibilitas tersembunyi agar QR dirender sempurna)
-    let tempBox = document.createElement("div");
-    tempBox.style.position = "fixed";
-    tempBox.style.top = "-9999px";
-    tempBox.style.left = "-9999px";
-    tempBox.style.zIndex = "-9999";
-    
-    tempBox.innerHTML = `
-        <div id="singleCardJpgArea" style="
-            width: 380px; 
-            height: 610px; 
-            background: #32000a; 
-            border: 3px solid #ffd700; 
-            border-radius: 14px; 
-            padding: 20px 15px; 
-            color: #fff; 
-            text-align: center; 
-            box-sizing: border-box; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: space-between;
-            font-family: 'American Captain', 'Segoe UI', sans-serif;">
-            
-            <!-- HEADER LOGO & JUDUL -->
-            <div>
-                <img src="assets/logo-paskibra.png" style="width: 52px; height: 52px; margin-bottom: 4px; object-fit: contain;">
-                <h4 style="color: #ffd700; margin: 0; font-size: 1.15rem; letter-spacing: 1px; line-height: 1.1;">PASKIBRA MAN 6 CIAMIS</h4>
-                <p style="font-size: 0.75rem; color: #ffcc66; margin-top: 3px; letter-spacing: 1px;">KARTU TANDA ANGGOTA</p>
-                <div style="width: 85%; height: 1px; background: rgba(255, 215, 0, 0.4); margin: 8px auto;"></div>
-            </div>
-
-            <!-- DETAIL NAMA & KELAS -->
-            <div>
-                <h3 style="color: #ffffff; font-size: 1.35rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; line-height: 1.1;">${nama}</h3>
-                <p style="color: #ffcc66; font-size: 0.9rem; margin-top: 4px; letter-spacing: 1px;">${kelas} | ${jabatan}</p>
-            </div>
-
-            <!-- AREA QR CODE -->
-            <div>
-                <div id="singleTempQrBox" style="background: #ffffff; padding: 8px; border-radius: 8px; display: inline-block; line-height: 0;"></div>
-                <p style="color: #ffd700; font-size: 1.15rem; font-weight: bold; margin-top: 8px; letter-spacing: 1.5px;">${nis}</p>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(tempBox);
-
-    const qrContainer = document.getElementById("singleTempQrBox");
-    qrContainer.innerHTML = "";
-
-    // Render QR Code
-    new QRCode(qrContainer, {
-        text: String(nis),
-        width: 140,
-        height: 140,
-        correctLevel: QRCode.CorrectLevel.H
-    });
-
-    // Wajib beri jeda 500ms agar library QR Code selesai menggambar canvas/img di DOM
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    try {
-        const targetElement = document.getElementById("singleCardJpgArea");
-        const canvas = await html2canvas(targetElement, {
-            scale: 3,
-            useCORS: true,
-            allowTaint: true,
-            backgroundColor: "#32000a"
-        });
-
-        const image = canvas.toDataURL("image/jpeg", 1.0);
-        const link = document.createElement("a");
-        link.href = image;
-        link.download = `Kartu_Paskibra_${nis}_${nama.replace(/\s+/g, '_')}.jpg`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        closeModal('customDialogModal');
-    } catch (err) {
-        closeModal('customDialogModal');
-        showCustomAlert("GAGAL", "Gagal mengunduh gambar kartu JPG.", "fa-times-circle");
-    } finally {
-        if (document.body.contains(tempBox)) {
-            document.body.removeChild(tempBox);
+    function printAllCardsMassal() {
+        if (!globalDataMaster || globalDataMaster.length === 0) {
+            return showCustomAlert("PERINGATAN", "Tidak ada data anggota untuk dicetak!", "fa-exclamation-circle");
         }
+
+        let hiddenContainer = document.createElement("div");
+        hiddenContainer.id = "tempMassalContainer";
+        hiddenContainer.style.position = "absolute";
+        hiddenContainer.style.left = "-9999px";
+        document.body.appendChild(hiddenContainer);
+
+        let cardsHTML = "";
+
+        globalDataMaster.forEach((a, idx) => {
+            let nis = a["NRA"] || a["nra"] || a["NIS/NISN"] || a["NIS"] || a["nis"] || "-";
+            let nama = a["NAMA LENGKAP"] || a["Nama_Lengkap"] || a["nama"] || "-";
+            let kelas = a["KELAS"] || a["Kelas"] || a["kelas"] || "-";
+            let jabatan = a["JABATAN"] || a["Jabatan"] || "Anggota";
+            let qrContainerId = `qr_massal_${idx}`;
+
+            cardsHTML += `
+                <div class="card-item" style="
+                    width: 6.5cm; 
+                    height: 10.5cm; 
+                    background: #32000a; 
+                    border: 2px solid #ffd700; 
+                    border-radius: 12px; 
+                    padding: 15px; 
+                    color: #fff; 
+                    text-align: center; 
+                    box-sizing: border-box; 
+                    display: flex; 
+                    flex-direction: column; 
+                    align-items: center; 
+                    justify-content: space-between;
+                    page-break-inside: avoid;
+                    font-family: 'American Captain', 'Segoe UI', sans-serif;">
+                    
+                    <div>
+                        <img src="assets/logo-paskibra.png" style="width: 48px; height: 48px; margin-bottom: 6px; object-fit: contain;">
+                        <h4 style="color: #ffd700; margin: 0; font-size: 1.05rem; letter-spacing: 1px; line-height: 1.1;">PASKIBRA MAN 6 CIAMIS</h4>
+                        <p style="font-size: 0.7rem; color: #ffcc66; margin-top: 2px; letter-spacing: 1px;">KARTU TANDA ANGGOTA</p>
+                        <div style="width: 80%; height: 1px; background: rgba(255, 215, 0, 0.4); margin: 6px auto;"></div>
+                    </div>
+
+                    <div>
+                        <h3 style="color: #ffffff; font-size: 1.25rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; line-height: 1.1;">${nama}</h3>
+                        <p style="color: #ffcc66; font-size: 0.85rem; margin-top: 3px; letter-spacing: 1px;">${kelas} | ${jabatan}</p>
+                    </div>
+
+                    <div>
+                        <div id="${qrContainerId}" class="qr-box" style="background: #ffffff; padding: 6px; border-radius: 6px; display: inline-block; line-height: 0;"></div>
+                        <p style="color: #ffd700; font-size: 1.05rem; font-weight: bold; margin-top: 6px; letter-spacing: 1.5px;">${nis}</p>
+                    </div>
+                </div>
+            `;
+        });
+
+        hiddenContainer.innerHTML = cardsHTML;
+
+        globalDataMaster.forEach((a, idx) => {
+            let nis = a["NRA"] || a["nra"] || a["NIS/NISN"] || a["NIS"] || a["nis"] || "-";
+            new QRCode(document.getElementById(`qr_massal_${idx}`), {
+                text: String(nis),
+                width: 110,
+                height: 110,
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        });
+
+        setTimeout(() => {
+            const fullContent = hiddenContainer.innerHTML;
+            document.body.removeChild(hiddenContainer);
+
+            const printWin = window.open('', '_blank');
+            printWin.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Cetak Massal Kartu Anggota</title>
+                    <link href="https://fonts.cdnfonts.com/css/american-captain" rel="stylesheet">
+                    <style>
+                        @page { size: A4 portrait; margin: 1cm; }
+                        body { margin: 0; padding: 0; background: #fff; font-family: sans-serif; }
+                        .grid-container {
+                            display: flex;
+                            flex-wrap: wrap;
+                            gap: 0.5cm;
+                            justify-content: flex-start;
+                        }
+                        .card-item {
+                            -webkit-print-color-adjust: exact !important; 
+                            print-color-adjust: exact !important;
+                        }
+                    </style>
+                </head>
+                <body onload="setTimeout(function(){ window.print(); window.close(); }, 500);">
+                    <div class="grid-container">
+                        ${fullContent}
+                    </div>
+                </body>
+                </html>
+            `);
+            printWin.document.close();
+        }, 400);
     }
-}
-    // ============================================================================
-// LOGIKA CETAK KARTU PERORANGAN & DOWNLOAD JPG (OPTIMIZED QR CODE)
-// ============================================================================
-
-// 1. Membuka Modal Kartu Single & Generate QR Code
-function openCardModal(nis, nama, kelas, jabatan) {
-    document.getElementById("cardNama").innerText = nama;
-    document.getElementById("cardKelasJabatan").innerText = `${kelas} | ${jabatan}`;
-    document.getElementById("cardNra").innerText = nis;
-
-    const qrBox = document.getElementById("qrcodeBox");
-    qrBox.innerHTML = "";
-
-    new QRCode(qrBox, {
-        text: String(nis || "-"),
-        width: 120,
-        height: 120,
-        correctLevel: QRCode.CorrectLevel.H
-    });
-
-    document.getElementById("cardModal").style.display = "flex";
-}
-
-// 2. Fungsi Download PDF Menggantikan JPG
-async function downloadCardAsPdf() {
-    const cardArea = document.getElementById("idCardPrintArea");
-    const namaText = document.getElementById("cardNama") ? document.getElementById("cardNama").innerText : "Anggota";
-    const nraText = document.getElementById("cardNra") ? document.getElementById("cardNra").innerText : "NRA";
-
-    if (!cardArea) {
-        return showCustomAlert("GAGAL", "Area kartu tidak ditemukan!", "fa-times-circle");
-    }
-
-    closeModal('choiceModal');
-    showCustomAlert("MEMPROSES PDF", "Sedang mengunduh kartu format PDF...", "fa-spinner fa-spin");
-
-    // Paksa konversi elemen <canvas> QR Code ke tag <img> Base64 murni agar terbaca di PDF
-    const qrBox = document.getElementById("qrcodeBox");
-    if (qrBox) {
-        const qrCanvas = qrBox.querySelector("canvas");
-        if (qrCanvas) {
-            const qrDataUrl = qrCanvas.toDataURL("image/png");
-            qrBox.innerHTML = `<img src="${qrDataUrl}" style="width:120px; height:120px; display:block; margin:0 auto;">`;
+    
+    async function sendDataToSheet(payload) {
+        try {
+            await fetch(SCRIPT_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "text/plain" },
+                body: JSON.stringify(payload)
+            });
+            setTimeout(() => { loadData(); }, 1200);
+        } catch (err) { 
+            console.error("Gagal terhubung ke server Google Sheets.", err); 
         }
     }
 
-    await new Promise(resolve => setTimeout(resolve, 300));
-
-    try {
-        const canvas = await html2canvas(cardArea, {
-            scale: 3,
-            useCORS: true,
-            allowTaint: true,
-            backgroundColor: "#32000a",
-            logging: false
-        });
-
-        const imgData = canvas.toDataURL("image/png");
-
-        // Buat PDF Presisi Ukuran Kartu (65 mm x 105 mm)
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF({
-            orientation: 'portrait',
-            unit: 'mm',
-            format: [65, 105]
-        });
-
-        pdf.addImage(imgData, 'PNG', 0, 0, 65, 105);
-        pdf.save(`Kartu_Paskibra_${nraText}_${namaText.replace(/\s+/g, '_')}.pdf`);
-
-        closeModal('customDialogModal');
-    } catch (err) {
-        console.error("Error download PDF:", err);
-        closeModal('customDialogModal');
-        showCustomAlert("GAGAL", "Gagal mengunduh kartu format PDF.", "fa-times-circle");
-    }
-}
     initDefaultDateAdmin();
     checkLoginStatus();
     loadData();
