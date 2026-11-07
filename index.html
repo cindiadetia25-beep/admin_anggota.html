@@ -12,6 +12,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <!-- LIBRARY UNTUK CONVERT HTML KARTU KE GAMBAR JPG -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<!-- Library jsPDF untuk Export Kartu ke PDF Presisi -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <!-- ======================================================================
          1. STYLE CSS UTAMA
     ======================================================================= -->
@@ -936,7 +938,6 @@
                 <p id="cardKelasJabatan" style="color: #ffcc66; font-size: 0.85rem; margin-top: 3px; letter-spacing: 1px;">-</p>
             </div>
 
-            <!-- AREA QR CODE DENGAN CONTAINER BERSIH -->
             <div>
                 <div id="qrcodeBox" style="background: #ffffff; padding: 6px; border-radius: 6px; display: inline-block; line-height: 0; min-width: 120px; min-height: 120px;"></div>
                 <p id="cardNra" style="color: #ffd700; font-size: 1.05rem; font-weight: bold; margin-top: 6px; letter-spacing: 1.5px;">-</p>
@@ -945,21 +946,24 @@
 
         <div class="modal-actions" style="margin-top:20px; display: flex; gap: 10px; justify-content: center;">
             <button class="btn btn-primary" onclick="confirmCardOutputChoice()" style="flex: 1;"><i class="fas fa-download"></i> CETAK / DOWNLOAD</button>
-            <button class="btn btn-delete" onclick="closeModal('')" style="flex: 1;">TUTUP</button>
+            <!-- FIX TOMBOL TUTUP KARTU -->
+            <button type="button" class="btn btn-delete" onclick="closeModal('cardModal')" style="flex: 1;">TUTUP</button>
         </div>
     </div>
 </div>
 
-<!-- MODAL DIALOG KONFIRMASI OPSI CETAK / DOWNLOAD -->
+<!-- MODAL OPSI CETAK / DOWNLOAD PDF -->
 <div id="choiceModal" class="modal">
     <div class="modal-content" style="max-width: 400px; text-align: center;">
         <h3 style="color: #ffd700;"><i class="fas fa-question-circle"></i> PILIH ACTION KARTU</h3>
         <hr class="section-divider">
         <p style="color: #ffcc66; margin-bottom: 20px;">Silakan pilih format output kartu yang Anda inginkan:</p>
         <div style="display: flex; flex-direction: column; gap: 12px;">
-            <button class="btn btn-primary" onclick="downloadCardAsJpg()"><i class="fas fa-file-image"></i> DOWNLOAD GAMBAR (JPG PAS HP)</button>
-            <button class="btn btn-download" onclick="printCardSingle()"><i class="fas fa-print"></i> CETAK UKURAN FISIK (6.5 x 10.5 CM)</button>
-            <button class="btn btn-delete" onclick="closeModal('choiceModal')">BATAL</button>
+            <!-- GANTI DOWNLOAD JPG MENJADI DOWNLOAD PDF -->
+            <button class="btn btn-primary" onclick="downloadCardAsPdf()"><i class="fas fa-file-pdf"></i> DOWNLOAD KARTU (PDF)</button>
+            <button class="btn btn-download" onclick="printCardSingle()"><i class="fas fa-print"></i> CETAK UKURAN FISIK (6.5 X 10.5 CM)</button>
+            <!-- FIX TOMBOL BATAL -->
+            <button type="button" class="btn btn-delete" onclick="closeModal('choiceModal')">BATAL</button>
         </div>
     </div>
 </div>
@@ -1209,9 +1213,13 @@ function printCard() {
         document.getElementById("customDialogModal").style.display = "flex";
     }
 
+   // 1. Fungsi Penutup Modal (Menjamin Tombol TUTUP & BATAL Bekerja 100%)
     function closeModal(modalId) {
-        document.getElementById(modalId).style.display = "none";
+    const targetModal = document.getElementById(modalId);
+    if (targetModal) {
+        targetModal.style.display = "none";
     }
+}
 
     function switchTab(tabId, btnElement) {
         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -1378,7 +1386,7 @@ function printCard() {
         const kelas = document.getElementById("editKelas").value;
         const jabatan = document.getElementById("editJabatan").value;
 
-        closeModal('editModal');
+        Modal('editModal');
 
         const idx = globalDataMaster.findIndex(a => {
             let rNis = String(a["NRA"] || a["nra"] || a["NIS/NISN"] || a["NIS"] || a["nis"] || "").trim();
@@ -1702,7 +1710,7 @@ function printCard() {
         const keterangan = document.getElementById("editAbsensiKeterangan").value;
         const rawTs = document.getElementById("editAbsensiRawTs").value;
 
-        closeModal("editAbsensiModal");
+        Modal("editAbsensiModal");
 
         const idx = globalAbsensi.findIndex(a => {
             const rNama = a.Nama_Lengkap || a.nama_lengkap || a.Nama || "";
@@ -2107,12 +2115,12 @@ function printCardSingle() {
                 * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
             </style>
         </head>
-        <body onload="window.print(); window.close();">
+        <body onload="window.print(); window.();">
             ${cardHtml}
         </body>
         </html>
     `);
-    printWin.document.close();
+    printWin.document.();
 }
 
 // 3. Fungsi Cetak Massal (Banyak Kartu per Lembar A4/F4 Otomatis Grid)
@@ -2212,14 +2220,14 @@ function printAllCardsMassal() {
                     }
                 </style>
             </head>
-            <body onload="setTimeout(function(){ window.print(); window.close(); }, 500);">
+            <body onload="setTimeout(function(){ window.print(); window.(); }, 500);">
                 <div class="grid-container">
                     ${fullContent}
                 </div>
             </body>
             </html>
         `);
-        printWin.document.close();
+        printWin.document.();
     }, 400);
 }
     // ============================================================================
@@ -2344,7 +2352,7 @@ async function downloadAllCardsJpgMassal() {
     if (document.body.contains(tempBox)) {
         document.body.removeChild(tempBox);
     }
-    closeModal('customDialogModal');
+    Modal('customDialogModal');
     showCustomAlert("SELESAI", "Seluruh gambar kartu JPG anggota berhasil diunduh secara massal!");
 }
 // OPSI 2: Cetak Kartu Ukuran Fisik (6,5 cm x 10,5 cm)
@@ -2494,16 +2502,20 @@ function openCardModal(nis, nama, kelas, jabatan) {
     document.getElementById("cardModal").style.display = "flex";
 }
 
-// 2. Download Kartu Single Format JPG (Konversi Canvas ke Tag <img> Murni)
-async function downloadCardAsJpg() {
+// 2. Fungsi Download PDF Menggantikan JPG
+async function downloadCardAsPdf() {
     const cardArea = document.getElementById("idCardPrintArea");
     const namaText = document.getElementById("cardNama") ? document.getElementById("cardNama").innerText : "Anggota";
     const nraText = document.getElementById("cardNra") ? document.getElementById("cardNra").innerText : "NRA";
 
-    closeModal('choiceModal');
-    showCustomAlert("MEMPROSES GAMBAR", "Sedang mengunduh kartu dalam format JPG...", "fa-spinner fa-spin");
+    if (!cardArea) {
+        return showCustomAlert("GAGAL", "Area kartu tidak ditemukan!", "fa-times-circle");
+    }
 
-    // Paksa konversi elemen <canvas> QR Code ke tag <img> murni
+    closeModal('choiceModal');
+    showCustomAlert("MEMPROSES PDF", "Sedang mengunduh kartu format PDF...", "fa-spinner fa-spin");
+
+    // Paksa konversi elemen <canvas> QR Code ke tag <img> Base64 murni agar terbaca di PDF
     const qrBox = document.getElementById("qrcodeBox");
     if (qrBox) {
         const qrCanvas = qrBox.querySelector("canvas");
@@ -2513,7 +2525,6 @@ async function downloadCardAsJpg() {
         }
     }
 
-    // Jeda 300ms agar browser sempat merender tag <img> ke DOM
     await new Promise(resolve => setTimeout(resolve, 300));
 
     try {
@@ -2525,35 +2536,26 @@ async function downloadCardAsJpg() {
             logging: false
         });
 
-        const image = canvas.toDataURL("image/jpeg", 1.0);
-        const link = document.createElement("a");
-        link.href = image;
-        link.download = `Kartu_Paskibra_${nraText}_${namaText.replace(/\s+/g, '_')}.jpg`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        const imgData = canvas.toDataURL("image/png");
+
+        // Buat PDF Presisi Ukuran Kartu (65 mm x 105 mm)
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({
+            orientation: 'portrait',
+            unit: 'mm',
+            format: [65, 105]
+        });
+
+        pdf.addImage(imgData, 'PNG', 0, 0, 65, 105);
+        pdf.save(`Kartu_Paskibra_${nraText}_${namaText.replace(/\s+/g, '_')}.pdf`);
 
         closeModal('customDialogModal');
     } catch (err) {
-        console.error("Error download JPG:", err);
+        console.error("Error download PDF:", err);
         closeModal('customDialogModal');
-        showCustomAlert("GAGAL", "Gagal mengunduh gambar kartu.", "fa-times-circle");
+        showCustomAlert("GAGAL", "Gagal mengunduh kartu format PDF.", "fa-times-circle");
     }
 }
-    async function sendDataToSheet(payload) {
-        try {
-            await fetch(SCRIPT_URL, {
-                method: "POST",
-                mode: "no-cors",
-                headers: { "Content-Type": "text/plain" },
-                body: JSON.stringify(payload)
-            });
-            setTimeout(() => { loadData(); }, 1200);
-        } catch (err) { 
-            console.error("Gagal terhubung ke server Google Sheets.", err); 
-        }
-    }
-
     initDefaultDateAdmin();
     checkLoginStatus();
     loadData();
