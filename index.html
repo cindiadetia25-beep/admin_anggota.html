@@ -900,7 +900,6 @@
     </div>
 </div>
     
-<!-- MODAL CETAK KARTU ANGGOTA -->
 <!-- MODAL CETAK KARTU ANGGOTA PERORANGAN -->
 <div id="cardModal" class="modal">
     <div class="modal-content" style="max-width: 450px; background: rgba(50, 0, 10, 0.95); border: 2px solid #ffd700;">
@@ -937,16 +936,16 @@
                 <p id="cardKelasJabatan" style="color: #ffcc66; font-size: 0.85rem; margin-top: 3px; letter-spacing: 1px;">-</p>
             </div>
 
+            <!-- AREA QR CODE DENGAN CONTAINER BERSIH -->
             <div>
-                <div id="qrcodeBox" style="background: #ffffff; padding: 6px; border-radius: 6px; display: inline-block; line-height: 0;"></div>
+                <div id="qrcodeBox" style="background: #ffffff; padding: 6px; border-radius: 6px; display: inline-block; line-height: 0; min-width: 120px; min-height: 120px;"></div>
                 <p id="cardNra" style="color: #ffd700; font-size: 1.05rem; font-weight: bold; margin-top: 6px; letter-spacing: 1.5px;">-</p>
             </div>
         </div>
 
         <div class="modal-actions" style="margin-top:20px; display: flex; gap: 10px; justify-content: center;">
-            <!-- Tombol Utama Memicu Konfirmasi Opsi -->
             <button class="btn btn-primary" onclick="confirmCardOutputChoice()" style="flex: 1;"><i class="fas fa-download"></i> CETAK / DOWNLOAD</button>
-            <button class="btn btn-delete" onclick="closeModal('cardModal')" style="flex: 1;">TUTUP</button>
+            <button class="btn btn-delete" onclick="closeModal('')" style="flex: 1;">TUTUP</button>
         </div>
     </div>
 </div>
@@ -991,23 +990,35 @@
     let globalDokumentasi = [];
     let html5QrcodeScanner = null;
 
-// Fungsi Membuka Kamera Scanner
+// ============================================================================
+// LOGIKA SCANNER QR CODE OTOMATIS (LANGSUNG MASUK REKAP WITHOUT POP-UP)
+// ============================================================================
+
+let lastScannedNra = "";
+let lastScanTime = 0;
+
+// 1. Membuka Kamera Scanner
 function startQRScanner() {
+    const pertemuan = document.getElementById("absensiPertemuan").value;
+    if (!pertemuan) {
+        return showCustomAlert("PERINGATAN", "Pilih Pertemuan Latihan terlebih dahulu sebelum membuka kamera!", "fa-exclamation-circle");
+    }
+
     document.getElementById("btnStopScan").style.display = "inline-flex";
     html5QrcodeScanner = new Html5Qrcode("reader");
     
-    const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+    const config = { fps: 15, qrbox: { width: 250, height: 250 } };
     
     html5QrcodeScanner.start(
-        { facingMode: "environment" }, // Menggunakan kamera belakang HP
+        { facingMode: "environment" },
         config,
-        onScanSuccess
+        onScanSuccessAuto
     ).catch(err => {
-        showCustomAlert("KAMERA ERROR", "Gagal mengakses kamera. Pastikan izin kamera diizinkan!", "fa-exclamation-circle");
+        showCustomAlert("KAMERA ERROR", "Gagal mengakses kamera. Pastikan izin kamera diberikan!", "fa-exclamation-circle");
     });
 }
 
-// Fungsi Menghentikan Kamera
+// 2. Menghentikan Kamera
 function stopQRScanner() {
     if (html5QrcodeScanner) {
         html5QrcodeScanner.stop().then(() => {
@@ -1017,98 +1028,100 @@ function stopQRScanner() {
     }
 }
 
-// Fungsi Ketika QR Code Berhasil Terbaca
-function onScanSuccess(decodedText) {
-    // decodedText berisi nilai NRA dari QR Code
+// 3. Suara Beep Khas Scanner
+function playBeepSound() {
+    try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
+        gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        oscillator.start();
+        oscillator.stop(audioCtx.currentTime + 0.15);
+    } catch (e) { console.log(e); }
+}
+
+// 4. LOGIKA SCAN OTOMATIS BERUNTUN (LANGSUNG INPUT ABSEN)
+async function onScanSuccessAuto(decodedText) {
+    const now = Date.now();
     const scannedNra = decodedText.trim();
-    
-    // Cari data anggota berdasarkan NRA
+
+    // Anti double-scan (Jeda 3 detik untuk NRA/kartu yang sama)
+    if (scannedNra === lastScannedNra && (now - lastScanTime) < 3000) {
+        return;
+    }
+
+    lastScannedNra = scannedNra;
+    lastScanTime = now;
+
+    // Cari anggota di Data Master
     const anggota = globalDataMaster.find(a => {
-        let rNra = String(a["NRA"] || a["nra"] || a["NIS/NISN"] || "").trim();
+        let rNra = String(a["NRA"] || a["nra"] || a["NIS/NISN"] || a["NIS"] || "").trim();
         return rNra.toLowerCase() === scannedNra.toLowerCase();
     });
 
-    if (anggota) {
-        const selectNama = document.getElementById("absensiSelectNama");
-        selectNama.value = anggota["NAMA LENGKAP"] || anggota["Nama_Lengkap"];
-        
-        // Membunyikan suara beep pendek jika perlu
-        showCustomAlert("QR TERDETEKSI", `Anggota Ditemukan: ${selectNama.value} [NRA: ${scannedNra}]`);
-        
-        // Hentikan sementara kamera setelah berhasil scan
-        stopQRScanner();
-    } else {
-        showCustomAlert("TIDAK DITEMUKAN", `NRA [${scannedNra}] tidak terdaftar di Data Master!`, "fa-times-circle");
-    }
-}
-        // 2. TAMBAHKAN FUNGSI BEEP SUARA HASIL SCAN
-    function playBeepSound() {
-        try {
-            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const oscillator = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-
-            oscillator.type = 'sine';
-            oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); // Nada Beep (880 Hz)
-            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
-
-            oscillator.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-
-            oscillator.start();
-            oscillator.stop(audioCtx.currentTime + 0.15); // Durasi beep 0.15 detik
-        } catch (e) {
-            console.log("Audio tidak didukung browser:", e);
-        }
+    if (!anggota) {
+        playBeepSound();
+        console.warn(`NRA [${scannedNra}] tidak terdaftar di Data Master.`);
+        return;
     }
 
-    // 3. EDIT FUNGSI ON SCAN SUCCESS AGAR MEMBUNYIKAN SUARA & MUNCUL POP-UP
-    function onScanSuccess(decodedText) {
-        const scannedNra = decodedText.trim();
-        
-        // Cari anggota berdasarkan NRA / NIS
-        const anggota = globalDataMaster.find(a => {
-            let rNra = String(a["NRA"] || a["nra"] || a["NIS/NISN"] || a["NIS"] || "").trim();
-            return rNra.toLowerCase() === scannedNra.toLowerCase();
-        });
+    const nama = anggota["NAMA LENGKAP"] || anggota["Nama_Lengkap"] || anggota["nama"] || "-";
+    const kelas = anggota["KELAS"] || anggota["Kelas"] || anggota["kelas"] || "-";
+    const pertemuan = document.getElementById("absensiPertemuan").value || "Pertemuan 1 (Senin)";
+    const status = document.getElementById("absensiStatus") ? document.getElementById("absensiStatus").value : "Hadir";
+    const dateVal = document.getElementById("absensiTanggalInput").value || new Date().toISOString().split('T')[0];
+    const formattedDateIndo = formatDateIndo(dateVal);
 
-        if (anggota) {
-            // Putar Suara Beep
-            playBeepSound();
-
-            const selectNama = document.getElementById("absensiSelectNama");
-            const namaLengkap = anggota["NAMA LENGKAP"] || anggota["Nama_Lengkap"] || anggota["nama"];
-            selectNama.value = namaLengkap;
-            
-            // Tampilkan Pop-Up Berhasil
-            showCustomAlert("SCAN QR BERHASIL", `Presensi terdeteksi!\n\nNama: ${namaLengkap}\nNRA: ${scannedNra}`);
-            
-            // Matikan kamera setelah scan berhasil
-            stopQRScanner();
-        } else {
-            showCustomAlert("TIDAK DITEMUKAN", `Anggota dengan NRA [${scannedNra}] tidak ditemukan di Data Master!`, "fa-times-circle");
-        }
-    }
-    // Fungsi Membuka Kartu & Generate QR Code
-// Membuka Modal Kartu Single & Generate QR Code (Dipastikan Render ke Tag Canvas & IMG)
-function openCardModal(nis, nama, kelas, jabatan) {
-    document.getElementById("cardNama").innerText = nama;
-    document.getElementById("cardKelasJabatan").innerText = `${kelas} | ${jabatan}`;
-    document.getElementById("cardNra").innerText = nis;
-
-    const qrBox = document.getElementById("qrcodeBox");
-    qrBox.innerHTML = "";
-
-    new QRCode(qrBox, {
-        text: String(nis || "-"),
-        width: 130,
-        height: 130,
-        correctLevel: QRCode.CorrectLevel.H
+    // Cek apakah sudah absen hari ini
+    const isDuplicate = globalAbsensi.some(a => {
+        const rNama = a.Nama_Lengkap || a.nama_lengkap || a.Nama || "";
+        const rawTs = a.TimeStamp || a.Timestamp || a.timestamp || "";
+        const dStr = formatDateIndo(rawTs);
+        return rNama.toLowerCase() === nama.toLowerCase() && dStr === formattedDateIndo;
     });
 
-    document.getElementById("cardModal").style.display = "flex";
-}
+    if (isDuplicate) {
+        playBeepSound();
+        console.log(`Anggota ${nama} sudah absen untuk tanggal ${formattedDateIndo}`);
+        return;
+    }
 
+    // Input Otomatis ke State Lokal
+    globalAbsensi.unshift({
+        TimeStamp: formattedDateIndo,
+        NRA: scannedNra,
+        NIS: scannedNra,
+        Nama_Lengkap: nama,
+        Kelas: kelas,
+        Pertemuan: pertemuan,
+        Keterangan: status
+    });
+
+    // Bunyikan Beep Indikator Berhasil
+    playBeepSound();
+
+    // Render ulang tabel preview secara instan
+    renderPreviewAbsensi();
+
+    // Kirim data ke Google Sheets di background tanpa menghentikan kamera
+    sendDataToSheet({
+        action: "addAbsensi",
+        nra: scannedNra,
+        nama_lengkap: nama,
+        kelas: kelas,
+        pertemuan: pertemuan,
+        keterangan: status,
+        timestamp: formattedDateIndo
+    });
+}
+    // Fungsi Membuka Kartu & Generate QR Code
 // Fungsi Perintah Cetak
 function printCard() {
     const printContent = document.getElementById("idCardPrintArea").innerHTML;
@@ -2077,24 +2090,6 @@ function printCard() {
 // LOGIKA CETAK KARTU PERORANGAN & MASSAL (QR CODE INTEGRATED)
 // ============================================================================
 
-// 1. Membuka Modal Kartu Single & Generate QR Code
-function openCardModal(nis, nama, kelas, jabatan) {
-    document.getElementById("cardNama").innerText = nama;
-    document.getElementById("cardKelasJabatan").innerText = `${kelas} | ${jabatan}`;
-    document.getElementById("cardNra").innerText = nis;
-
-    document.getElementById("qrcodeBox").innerHTML = "";
-
-    new QRCode(document.getElementById("qrcodeBox"), {
-        text: nis,
-        width: 110,
-        height: 110,
-        correctLevel: QRCode.CorrectLevel.H
-    });
-
-    document.getElementById("cardModal").style.display = "flex";
-}
-
 // 2. Fungsi Cetak Single (1 Kartu Ukuran 6,5 cm x 10,5 cm)
 function printCardSingle() {
     const cardHtml = document.getElementById("idCardPrintArea").outerHTML;
@@ -2352,103 +2347,6 @@ async function downloadAllCardsJpgMassal() {
     closeModal('customDialogModal');
     showCustomAlert("SELESAI", "Seluruh gambar kartu JPG anggota berhasil diunduh secara massal!");
 }
-// ============================================================================
-// PERBAIKAN DOWNLOAD JPG DARI MODAL KARTU (PASTI MENCETAK QR CODE TERANG)
-// ============================================================================
-// PERBAIKAN TOTAL: DOWNLOAD KARTU SINGLE DENGAN RE-GENERATE QR PASTI MUNCUL
-async function downloadCardAsJpg() {
-    const namaText = document.getElementById("cardNama") ? document.getElementById("cardNama").innerText : "Anggota";
-    const nraText = document.getElementById("cardNra") ? document.getElementById("cardNra").innerText : "NRA";
-    const kelasText = document.getElementById("cardKelasJabatan") ? document.getElementById("cardKelasJabatan").innerText : "-";
-
-    showCustomAlert("MEMPROSES GAMBAR", "Sedang membuat kartu gambar HD...", "fa-spinner fa-spin");
-
-    // Tutup dialog modal konfirmasi agar tidak menghalangi rendering
-    closeModal('choiceModal');
-
-    // Buat wadah tersembunyi khusus render JPG HD
-    let tempContainer = document.createElement("div");
-    tempContainer.style.position = "fixed";
-    tempContainer.style.top = "-9999px";
-    tempContainer.style.left = "-9999px";
-    tempContainer.style.zIndex = "-9999";
-
-    tempContainer.innerHTML = `
-        <div id="renderJpgArea" style="
-            width: 380px; 
-            height: 610px; 
-            background: #32000a; 
-            border: 3px solid #ffd700; 
-            border-radius: 14px; 
-            padding: 20px 15px; 
-            color: #fff; 
-            text-align: center; 
-            box-sizing: border-box; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: space-between;
-            font-family: 'American Captain', 'Segoe UI', sans-serif;">
-            
-            <div>
-                <img src="assets/logo-paskibra.png" style="width: 52px; height: 52px; margin-bottom: 4px; object-fit: contain;">
-                <h4 style="color: #ffd700; margin: 0; font-size: 1.15rem; letter-spacing: 1px; line-height: 1.1;">PASKIBRA MAN 6 CIAMIS</h4>
-                <p style="font-size: 0.75rem; color: #ffcc66; margin-top: 3px; letter-spacing: 1px;">KARTU TANDA ANGGOTA</p>
-                <div style="width: 85%; height: 1px; background: rgba(255, 215, 0, 0.4); margin: 8px auto;"></div>
-            </div>
-
-            <div>
-                <h3 style="color: #ffffff; font-size: 1.35rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; line-height: 1.1;">${namaText}</h3>
-                <p style="color: #ffcc66; font-size: 0.9rem; margin-top: 4px; letter-spacing: 1px;">${kelasText}</p>
-            </div>
-
-            <div>
-                <div id="tempQrRenderBox" style="background: #ffffff; padding: 8px; border-radius: 8px; display: inline-block; line-height: 0;"></div>
-                <p style="color: #ffd700; font-size: 1.15rem; font-weight: bold; margin-top: 8px; letter-spacing: 1.5px;">${nraText}</p>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(tempContainer);
-
-    // Generate QR Code baru di wadah tersembunyi
-    new QRCode(document.getElementById("tempQrRenderBox"), {
-        text: String(nraText),
-        width: 140,
-        height: 140,
-        correctLevel: QRCode.CorrectLevel.H
-    });
-
-    // Beri jeda 500ms agar QR Code ter-render sempurna sebelum di-capture
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    try {
-        const renderTarget = document.getElementById("renderJpgArea");
-        const canvas = await html2canvas(renderTarget, {
-            scale: 3,
-            useCORS: true,
-            allowTaint: true,
-            backgroundColor: "#32000a"
-        });
-
-        const image = canvas.toDataURL("image/jpeg", 1.0);
-        const link = document.createElement("a");
-        link.href = image;
-        link.download = `Kartu_Paskibra_${nraText}_${namaText.replace(/\s+/g, '_')}.jpg`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        closeModal('customDialogModal');
-    } catch (err) {
-        console.error("Error download JPG:", err);
-        closeModal('customDialogModal');
-        showCustomAlert("GAGAL", "Gagal mengunduh gambar kartu.", "fa-times-circle");
-    } finally {
-        if (document.body.contains(tempContainer)) {
-            document.body.removeChild(tempContainer);
-        }
-    }
-}
 // OPSI 2: Cetak Kartu Ukuran Fisik (6,5 cm x 10,5 cm)
 function printCardSingle() {
     closeModal('choiceModal');
@@ -2573,7 +2471,75 @@ async function downloadSingleQrJpg(nis, nama, kelas, jabatan) {
         }
     }
 }
-    
+    // ============================================================================
+// LOGIKA CETAK KARTU PERORANGAN & DOWNLOAD JPG (OPTIMIZED QR CODE)
+// ============================================================================
+
+// 1. Membuka Modal Kartu Single & Generate QR Code
+function openCardModal(nis, nama, kelas, jabatan) {
+    document.getElementById("cardNama").innerText = nama;
+    document.getElementById("cardKelasJabatan").innerText = `${kelas} | ${jabatan}`;
+    document.getElementById("cardNra").innerText = nis;
+
+    const qrBox = document.getElementById("qrcodeBox");
+    qrBox.innerHTML = "";
+
+    new QRCode(qrBox, {
+        text: String(nis || "-"),
+        width: 120,
+        height: 120,
+        correctLevel: QRCode.CorrectLevel.H
+    });
+
+    document.getElementById("cardModal").style.display = "flex";
+}
+
+// 2. Download Kartu Single Format JPG (Konversi Canvas ke Tag <img> Murni)
+async function downloadCardAsJpg() {
+    const cardArea = document.getElementById("idCardPrintArea");
+    const namaText = document.getElementById("cardNama") ? document.getElementById("cardNama").innerText : "Anggota";
+    const nraText = document.getElementById("cardNra") ? document.getElementById("cardNra").innerText : "NRA";
+
+    closeModal('choiceModal');
+    showCustomAlert("MEMPROSES GAMBAR", "Sedang mengunduh kartu dalam format JPG...", "fa-spinner fa-spin");
+
+    // Paksa konversi elemen <canvas> QR Code ke tag <img> murni
+    const qrBox = document.getElementById("qrcodeBox");
+    if (qrBox) {
+        const qrCanvas = qrBox.querySelector("canvas");
+        if (qrCanvas) {
+            const qrDataUrl = qrCanvas.toDataURL("image/png");
+            qrBox.innerHTML = `<img src="${qrDataUrl}" style="width:120px; height:120px; display:block; margin:0 auto;">`;
+        }
+    }
+
+    // Jeda 300ms agar browser sempat merender tag <img> ke DOM
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    try {
+        const canvas = await html2canvas(cardArea, {
+            scale: 3,
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: "#32000a",
+            logging: false
+        });
+
+        const image = canvas.toDataURL("image/jpeg", 1.0);
+        const link = document.createElement("a");
+        link.href = image;
+        link.download = `Kartu_Paskibra_${nraText}_${namaText.replace(/\s+/g, '_')}.jpg`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        closeModal('customDialogModal');
+    } catch (err) {
+        console.error("Error download JPG:", err);
+        closeModal('customDialogModal');
+        showCustomAlert("GAGAL", "Gagal mengunduh gambar kartu.", "fa-times-circle");
+    }
+}
     async function sendDataToSheet(payload) {
         try {
             await fetch(SCRIPT_URL, {
