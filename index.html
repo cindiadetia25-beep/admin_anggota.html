@@ -2101,113 +2101,147 @@
         printWin.document.close();
     }
 
-    function printAllCardsMassal() {
-        if (!globalDataMaster || globalDataMaster.length === 0) {
-            return showCustomAlert("PERINGATAN", "Tidak ada data anggota untuk dicetak!", "fa-exclamation-circle");
-        }
+// ============================================================================
+// FUNGSI CETAK MASSAL OTOMATIS FIT A4/F4 (TIDAK AKAN TERPOTONG PER LEMBAR)
+// ============================================================================
+function printAllCardsMassal() {
+    if (!globalDataMaster || globalDataMaster.length === 0) {
+        return showCustomAlert("PERINGATAN", "Tidak ada data anggota untuk dicetak!", "fa-exclamation-circle");
+    }
 
-        let hiddenContainer = document.createElement("div");
-        hiddenContainer.id = "tempMassalContainer";
-        hiddenContainer.style.position = "absolute";
-        hiddenContainer.style.left = "-9999px";
-        document.body.appendChild(hiddenContainer);
+    let hiddenContainer = document.createElement("div");
+    hiddenContainer.id = "tempMassalContainer";
+    hiddenContainer.style.position = "absolute";
+    hiddenContainer.style.left = "-9999px";
+    document.body.appendChild(hiddenContainer);
 
-        let cardsHTML = "";
-
-        globalDataMaster.forEach((a, idx) => {
+    // Hitung pembagian halaman (Per lembar A4/F4 muat 6 kartu: 2 kolom x 3 baris)
+    const CARDS_PER_PAGE = 6;
+    let pagesHTML = "";
+    
+    for (let i = 0; i < globalDataMaster.length; i += CARDS_PER_PAGE) {
+        const pageCards = globalDataMaster.slice(i, i + CARDS_PER_PAGE);
+        
+        pagesHTML += `<div class="print-page">`;
+        
+        pageCards.forEach((a, idxInPage) => {
+            const globalIdx = i + idxInPage;
             let nis = a["NRA"] || a["nra"] || a["NIS/NISN"] || a["NIS"] || a["nis"] || "-";
             let nama = a["NAMA LENGKAP"] || a["Nama_Lengkap"] || a["nama"] || "-";
             let kelas = a["KELAS"] || a["Kelas"] || a["kelas"] || "-";
             let jabatan = a["JABATAN"] || a["Jabatan"] || "Anggota";
-            let qrContainerId = `qr_massal_${idx}`;
+            let qrContainerId = `qr_massal_${globalIdx}`;
 
-            cardsHTML += `
-                <div class="card-item" style="
-                    width: 6.5cm; 
-                    height: 10.5cm; 
-                    background: #32000a; 
-                    border: 2px solid #ffd700; 
-                    border-radius: 12px; 
-                    padding: 15px; 
-                    color: #fff; 
-                    text-align: center; 
-                    box-sizing: border-box; 
-                    display: flex; 
-                    flex-direction: column; 
-                    align-items: center; 
-                    justify-content: space-between;
-                    page-break-inside: avoid;
-                    font-family: 'American Captain', 'Segoe UI', sans-serif;">
-                    
-                    <div>
-                        <img src="assets/logo-paskibra.png" style="width: 48px; height: 48px; margin-bottom: 6px; object-fit: contain;">
-                        <h4 style="color: #ffd700; margin: 0; font-size: 1.05rem; letter-spacing: 1px; line-height: 1.1;">PASKIBRA MAN 6 CIAMIS</h4>
-                        <p style="font-size: 0.7rem; color: #ffcc66; margin-top: 2px; letter-spacing: 1px;">KARTU TANDA ANGGOTA</p>
-                        <div style="width: 80%; height: 1px; background: rgba(255, 215, 0, 0.4); margin: 6px auto;"></div>
-                    </div>
+            pagesHTML += `
+                <div class="card-item-wrapper">
+                    <div class="card-item" style="
+                        width: 6.5cm; 
+                        height: 10.5cm; 
+                        background: #32000a; 
+                        border: 2px solid #ffd700; 
+                        border-radius: 12px; 
+                        padding: 12px; 
+                        color: #fff; 
+                        text-align: center; 
+                        box-sizing: border-box; 
+                        display: flex; 
+                        flex-direction: column; 
+                        align-items: center; 
+                        justify-content: space-between;
+                        font-family: 'American Captain', 'Segoe UI', sans-serif;">
+                        
+                        <div>
+                            <img src="assets/logo-paskibra.png" style="width: 44px; height: 44px; margin-bottom: 4px; object-fit: contain;">
+                            <h4 style="color: #ffd700; margin: 0; font-size: 1rem; letter-spacing: 1px; line-height: 1.1;">PASKIBRA MAN 6 CIAMIS</h4>
+                            <p style="font-size: 0.68rem; color: #ffcc66; margin-top: 2px; letter-spacing: 1px;">KARTU TANDA ANGGOTA</p>
+                            <div style="width: 80%; height: 1px; background: rgba(255, 215, 0, 0.4); margin: 5px auto;"></div>
+                        </div>
 
-                    <div>
-                        <h3 style="color: #ffffff; font-size: 1.25rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; line-height: 1.1;">${nama}</h3>
-                        <p style="color: #ffcc66; font-size: 0.85rem; margin-top: 3px; letter-spacing: 1px;">${kelas} | ${jabatan}</p>
-                    </div>
+                        <div>
+                            <h3 style="color: #ffffff; font-size: 1.2rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; line-height: 1.1;">${nama}</h3>
+                            <p style="color: #ffcc66; font-size: 0.82rem; margin-top: 3px; letter-spacing: 1px;">${kelas} | ${jabatan}</p>
+                        </div>
 
-                    <div>
-                        <div id="${qrContainerId}" class="qr-box" style="background: #ffffff; padding: 6px; border-radius: 6px; display: inline-block; line-height: 0;"></div>
-                        <p style="color: #ffd700; font-size: 1.05rem; font-weight: bold; margin-top: 6px; letter-spacing: 1.5px;">${nis}</p>
+                        <div>
+                            <div id="${qrContainerId}" class="qr-box" style="background: #ffffff; padding: 5px; border-radius: 6px; display: inline-block; line-height: 0;"></div>
+                            <p style="color: #ffd700; font-size: 1rem; font-weight: bold; margin-top: 5px; letter-spacing: 1.5px;">${nis}</p>
+                        </div>
                     </div>
                 </div>
             `;
         });
-
-        hiddenContainer.innerHTML = cardsHTML;
-
-        globalDataMaster.forEach((a, idx) => {
-            let nis = a["NRA"] || a["nra"] || a["NIS/NISN"] || a["NIS"] || a["nis"] || "-";
-            new QRCode(document.getElementById(`qr_massal_${idx}`), {
-                text: String(nis),
-                width: 110,
-                height: 110,
-                correctLevel: QRCode.CorrectLevel.H
-            });
-        });
-
-        setTimeout(() => {
-            const fullContent = hiddenContainer.innerHTML;
-            document.body.removeChild(hiddenContainer);
-
-            const printWin = window.open('', '_blank');
-            printWin.document.write(`
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <title>Cetak Massal Kartu Anggota</title>
-                    <link href="https://fonts.cdnfonts.com/css/american-captain" rel="stylesheet">
-                    <style>
-                        @page { size: A4 portrait; margin: 1cm; }
-                        body { margin: 0; padding: 0; background: #fff; font-family: sans-serif; }
-                        .grid-container {
-                            display: flex;
-                            flex-wrap: wrap;
-                            gap: 0.5cm;
-                            justify-content: flex-start;
-                        }
-                        .card-item {
-                            -webkit-print-color-adjust: exact !important; 
-                            print-color-adjust: exact !important;
-                        }
-                    </style>
-                </head>
-                <body onload="setTimeout(function(){ window.print(); window.close(); }, 500);">
-                    <div class="grid-container">
-                        ${fullContent}
-                    </div>
-                </body>
-                </html>
-            `);
-            printWin.document.close();
-        }, 400);
+        
+        pagesHTML += `</div>`; // End print-page
     }
-    
+
+    hiddenContainer.innerHTML = pagesHTML;
+
+    // Generate QR Code untuk seluruh kartu
+    globalDataMaster.forEach((a, idx) => {
+        let nis = a["NRA"] || a["nra"] || a["NIS/NISN"] || a["NIS"] || a["nis"] || "-";
+        new QRCode(document.getElementById(`qr_massal_${idx}`), {
+            text: String(nis),
+            width: 105,
+            height: 105,
+            correctLevel: QRCode.CorrectLevel.H
+        });
+    });
+
+    setTimeout(() => {
+        const fullContent = hiddenContainer.innerHTML;
+        document.body.removeChild(hiddenContainer);
+
+        const printWin = window.open('', '_blank');
+        printWin.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Cetak Massal Kartu Anggota</title>
+                <link href="https://fonts.cdnfonts.com/css/american-captain" rel="stylesheet">
+                <style>
+                    @page { 
+                        size: A4 portrait; 
+                        margin: 0.8cm; 
+                    }
+                    body { 
+                        margin: 0; 
+                        padding: 0; 
+                        background: #fff; 
+                        font-family: sans-serif; 
+                    }
+                    .print-page {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: 0.4cm 0.6cm;
+                        justify-content: center;
+                        align-content: flex-start;
+                        width: 100%;
+                        height: 27.5cm; /* Menyesuaikan tinggi printable area A4/F4 */
+                        page-break-after: always;
+                        box-sizing: border-box;
+                    }
+                    .print-page:last-child {
+                        page-break-after: avoid;
+                    }
+                    .card-item-wrapper {
+                        box-sizing: border-box;
+                        display: inline-block;
+                    }
+                    .card-item {
+                        -webkit-print-color-adjust: exact !important; 
+                        print-color-adjust: exact !important;
+                    }
+                </style>
+            </head>
+            <body onload="setTimeout(function(){ window.print(); window.close(); }, 500);">
+                ${fullContent}
+            </body>
+            </html>
+        `);
+        printWin.document.close();
+    }, 500);
+}
+ 
     async function sendDataToSheet(payload) {
         try {
             await fetch(SCRIPT_URL, {
