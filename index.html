@@ -2102,7 +2102,7 @@
     }
 
 // ============================================================================
-// FUNGSI CETAK MASSAL OTOMATIS FIT A4/F4 (TIDAK AKAN TERPOTONG PER LEMBAR)
+// FUNGSI CETAK MASSAL OTOMATIS (4 KARTU PER LEMBAR A4/F4 - GUARANTEED FIT)
 // ============================================================================
 function printAllCardsMassal() {
     if (!globalDataMaster || globalDataMaster.length === 0) {
@@ -2115,8 +2115,8 @@ function printAllCardsMassal() {
     hiddenContainer.style.left = "-9999px";
     document.body.appendChild(hiddenContainer);
 
-    // Hitung pembagian halaman (Per lembar A4/F4 muat 6 kartu: 2 kolom x 3 baris)
-    const CARDS_PER_PAGE = 6;
+    // KUNCI PERBAIKAN: Membatasi maksimal 4 kartu per lembar (2 kolom x 2 baris)
+    const CARDS_PER_PAGE = 4;
     let pagesHTML = "";
     
     for (let i = 0; i < globalDataMaster.length; i += CARDS_PER_PAGE) {
@@ -2140,7 +2140,7 @@ function printAllCardsMassal() {
                         background: #32000a; 
                         border: 2px solid #ffd700; 
                         border-radius: 12px; 
-                        padding: 12px; 
+                        padding: 14px; 
                         color: #fff; 
                         text-align: center; 
                         box-sizing: border-box; 
@@ -2151,20 +2151,20 @@ function printAllCardsMassal() {
                         font-family: 'American Captain', 'Segoe UI', sans-serif;">
                         
                         <div>
-                            <img src="assets/logo-paskibra.png" style="width: 44px; height: 44px; margin-bottom: 4px; object-fit: contain;">
-                            <h4 style="color: #ffd700; margin: 0; font-size: 1rem; letter-spacing: 1px; line-height: 1.1;">PASKIBRA MAN 6 CIAMIS</h4>
-                            <p style="font-size: 0.68rem; color: #ffcc66; margin-top: 2px; letter-spacing: 1px;">KARTU TANDA ANGGOTA</p>
-                            <div style="width: 80%; height: 1px; background: rgba(255, 215, 0, 0.4); margin: 5px auto;"></div>
+                            <img src="assets/logo-paskibra.png" style="width: 46px; height: 46px; margin-bottom: 4px; object-fit: contain;">
+                            <h4 style="color: #ffd700; margin: 0; font-size: 1.05rem; letter-spacing: 1px; line-height: 1.1;">PASKIBRA MAN 6 CIAMIS</h4>
+                            <p style="font-size: 0.7rem; color: #ffcc66; margin-top: 2px; letter-spacing: 1px;">KARTU TANDA ANGGOTA</p>
+                            <div style="width: 80%; height: 1px; background: rgba(255, 215, 0, 0.4); margin: 6px auto;"></div>
                         </div>
 
                         <div>
-                            <h3 style="color: #ffffff; font-size: 1.2rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; line-height: 1.1;">${nama}</h3>
-                            <p style="color: #ffcc66; font-size: 0.82rem; margin-top: 3px; letter-spacing: 1px;">${kelas} | ${jabatan}</p>
+                            <h3 style="color: #ffffff; font-size: 1.25rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; line-height: 1.1;">${nama}</h3>
+                            <p style="color: #ffcc66; font-size: 0.85rem; margin-top: 3px; letter-spacing: 1px;">${kelas} | ${jabatan}</p>
                         </div>
 
                         <div>
-                            <div id="${qrContainerId}" class="qr-box" style="background: #ffffff; padding: 5px; border-radius: 6px; display: inline-block; line-height: 0;"></div>
-                            <p style="color: #ffd700; font-size: 1rem; font-weight: bold; margin-top: 5px; letter-spacing: 1.5px;">${nis}</p>
+                            <div id="${qrContainerId}" class="qr-box" style="background: #ffffff; padding: 6px; border-radius: 6px; display: inline-block; line-height: 0;"></div>
+                            <p style="color: #ffd700; font-size: 1.05rem; font-weight: bold; margin-top: 6px; letter-spacing: 1.5px;">${nis}</p>
                         </div>
                     </div>
                 </div>
@@ -2181,8 +2181,8 @@ function printAllCardsMassal() {
         let nis = a["NRA"] || a["nra"] || a["NIS/NISN"] || a["NIS"] || a["nis"] || "-";
         new QRCode(document.getElementById(`qr_massal_${idx}`), {
             text: String(nis),
-            width: 105,
-            height: 105,
+            width: 110,
+            height: 110,
             correctLevel: QRCode.CorrectLevel.H
         });
     });
@@ -2200,8 +2200,8 @@ function printAllCardsMassal() {
                 <link href="https://fonts.cdnfonts.com/css/american-captain" rel="stylesheet">
                 <style>
                     @page { 
-                        size: A4 portrait; 
-                        margin: 0.8cm; 
+                        size: portrait; 
+                        margin: 1cm; 
                     }
                     body { 
                         margin: 0; 
@@ -2212,11 +2212,11 @@ function printAllCardsMassal() {
                     .print-page {
                         display: flex;
                         flex-wrap: wrap;
-                        gap: 0.4cm 0.6cm;
+                        gap: 1cm 1cm; /* Jarak aman antar kartu horizontal & vertikal */
                         justify-content: center;
-                        align-content: flex-start;
+                        align-content: center;
                         width: 100%;
-                        height: 27.5cm; /* Menyesuaikan tinggi printable area A4/F4 */
+                        height: 25cm; /* Sangat aman untuk A4 (29.7cm) & F4 (33cm) */
                         page-break-after: always;
                         box-sizing: border-box;
                     }
@@ -2241,7 +2241,6 @@ function printAllCardsMassal() {
         printWin.document.close();
     }, 500);
 }
- 
     async function sendDataToSheet(payload) {
         try {
             await fetch(SCRIPT_URL, {
