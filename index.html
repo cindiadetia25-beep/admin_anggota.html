@@ -2022,60 +2022,133 @@
         document.getElementById("choiceModal").style.display = "flex";
     }
 
-    async function downloadCardAsPdf() {
-        const cardArea = document.getElementById("idCardPrintArea");
-        const namaText = document.getElementById("cardNama") ? document.getElementById("cardNama").innerText : "Anggota";
-        const nraText = document.getElementById("cardNra") ? document.getElementById("cardNra").innerText : "NRA";
+// ============================================================================
+// FUNGSI DOWNLOAD PDF PRESISI & DIJAMIN QR CODE TAMPIL NORMAL 100%
+// ============================================================================
+async function downloadCardAsPdf() {
+    const namaText = document.getElementById("cardNama") ? document.getElementById("cardNama").innerText : "Anggota";
+    const nraText = document.getElementById("cardNra") ? document.getElementById("cardNra").innerText : "NRA";
+    const kelasText = document.getElementById("cardKelasJabatan") ? document.getElementById("cardKelasJabatan").innerText : "-";
 
-        if (!cardArea) {
-            return showCustomAlert("GAGAL", "Area kartu tidak ditemukan!", "fa-times-circle");
-        }
+    // 1. Tutup modal opsi jika sedang terbuka
+    closeModal('choiceModal');
+    showCustomAlert("MEMPROSES PDF", "Sedang mengunduh kartu format PDF...", "fa-spinner fa-spin");
 
-        closeModal('choiceModal');
-        showCustomAlert("MEMPROSES PDF", "Sedang mengunduh kartu format PDF...", "fa-spinner fa-spin");
+    // 2. Buat Wadah Render Khusus di GPU (Off-screen)
+    const tempContainer = document.createElement("div");
+    tempContainer.style.position = "fixed";
+    tempContainer.style.top = "0";
+    tempContainer.style.left = "0";
+    tempContainer.style.zIndex = "-99999";
+    tempContainer.style.opacity = "0.01";
+    tempContainer.style.pointerEvents = "none";
 
-        // Paksa konversi elemen <canvas> QR Code ke tag <img> Base64 murni agar 100% terbaca
-        const qrBox = document.getElementById("qrcodeBox");
-        if (qrBox) {
-            const qrCanvas = qrBox.querySelector("canvas");
-            if (qrCanvas) {
-                const qrDataUrl = qrCanvas.toDataURL("image/png");
-                qrBox.innerHTML = `<img src="${qrDataUrl}" style="width:120px; height:120px; display:block; margin:0 auto;">`;
-            }
-        }
+    tempContainer.innerHTML = `
+        <div id="pdfCaptureTarget" style="
+            width: 380px; 
+            height: 610px; 
+            background: #32000a; 
+            border: 3px solid #ffd700; 
+            border-radius: 14px; 
+            padding: 20px 15px; 
+            color: #fff; 
+            text-align: center; 
+            box-sizing: border-box; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: space-between;
+            font-family: 'American Captain', 'Segoe UI', sans-serif;">
+            
+            <div>
+                <img src="assets/logo-paskibra.png" style="width: 52px; height: 52px; margin-bottom: 4px; object-fit: contain;">
+                <h4 style="color: #ffd700; margin: 0; font-size: 1.15rem; letter-spacing: 1px; line-height: 1.1;">PASKIBRA MAN 6 CIAMIS</h4>
+                <p style="font-size: 0.75rem; color: #ffcc66; margin-top: 3px; letter-spacing: 1px;">KARTU TANDA ANGGOTA</p>
+                <div style="width: 85%; height: 1px; background: rgba(255, 215, 0, 0.4); margin: 8px auto;"></div>
+            </div>
 
-        await new Promise(resolve => setTimeout(resolve, 300));
+            <div>
+                <h3 style="color: #ffffff; font-size: 1.35rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; line-height: 1.1;">${namaText}</h3>
+                <p style="color: #ffcc66; font-size: 0.9rem; margin-top: 4px; letter-spacing: 1px;">${kelasText}</p>
+            </div>
 
-        try {
-            const canvas = await html2canvas(cardArea, {
-                scale: 3,
-                useCORS: true,
-                allowTaint: true,
-                backgroundColor: "#32000a",
-                logging: false
-            });
+            <div>
+                <div id="pdfQrHolder" style="background: #ffffff; padding: 8px; border-radius: 8px; display: inline-block; line-height: 0;"></div>
+                <p style="color: #ffd700; font-size: 1.15rem; font-weight: bold; margin-top: 8px; letter-spacing: 1.5px;">${nraText}</p>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(tempContainer);
 
-            const imgData = canvas.toDataURL("image/png");
+    // 3. Render QR Code khusus & konversi ke Base64 murni
+    const qrHolder = document.getElementById("pdfQrHolder");
+    const tempQrDiv = document.createElement("div");
+    
+    new QRCode(tempQrDiv, {
+        text: String(nraText || "-"),
+        width: 140,
+        height: 140,
+        correctLevel: QRCode.CorrectLevel.H
+    });
 
-            // Buat PDF Presisi Ukuran Fisik Kartu ID (65 mm x 105 mm)
-            const { jsPDF } = window.jspdf;
-            const pdf = new jsPDF({
-                orientation: 'portrait',
-                unit: 'mm',
-                format: [65, 105]
-            });
+    await new Promise(r => setTimeout(r, 300));
 
-            pdf.addImage(imgData, 'PNG', 0, 0, 65, 105);
-            pdf.save(`Kartu_Paskibra_${nraText}_${namaText.replace(/\s+/g, '_')}.pdf`);
-
-            closeModal('customDialogModal');
-        } catch (err) {
-            console.error("Error download PDF:", err);
-            closeModal('customDialogModal');
-            showCustomAlert("GAGAL", "Gagal mengunduh kartu format PDF.", "fa-times-circle");
-        }
+    let qrDataUrl = "";
+    let qrCanvas = tempQrDiv.querySelector("canvas");
+    if (qrCanvas) {
+        qrDataUrl = qrCanvas.toDataURL("image/png");
+    } else {
+        let qrImgElement = tempQrDiv.querySelector("img");
+        if (qrImgElement) qrDataUrl = qrImgElement.src;
     }
 
+    const finalQrImg = new Image();
+    finalQrImg.src = qrDataUrl;
+    finalQrImg.style.width = "140px";
+    finalQrImg.style.height = "140px";
+    finalQrImg.style.display = "block";
+
+    await new Promise((resolve) => {
+        finalQrImg.onload = resolve;
+        setTimeout(resolve, 300);
+    });
+
+    qrHolder.appendChild(finalQrImg);
+
+    // 4. Capture & PDF Export (6.5cm x 10.5cm)
+    try {
+        const targetElement = document.getElementById("pdfCaptureTarget");
+        const canvas = await html2canvas(targetElement, {
+            scale: 3,
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: "#32000a",
+            logging: false
+        });
+
+        const imgData = canvas.toDataURL("image/png");
+
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({
+            orientation: 'portrait',
+            unit: 'mm',
+            format: [65, 105]
+        });
+
+        pdf.addImage(imgData, 'PNG', 0, 0, 65, 105);
+        pdf.save(`Kartu_Paskibra_${nraText}_${namaText.replace(/\s+/g, '_')}.pdf`);
+
+        closeModal('customDialogModal');
+    } catch (err) {
+        console.error("Error Download PDF:", err);
+        closeModal('customDialogModal');
+        showCustomAlert("GAGAL", "Gagal mengunduh kartu format PDF.", "fa-times-circle");
+    } finally {
+        if (document.body.contains(tempContainer)) {
+            document.body.removeChild(tempContainer);
+        }
+    }
+}
     function printCardSingle() {
         closeModal('choiceModal');
         const cardHtml = document.getElementById("idCardPrintArea").outerHTML;
