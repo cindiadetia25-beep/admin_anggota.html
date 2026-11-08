@@ -7,15 +7,15 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.cdnfonts.com/css/american-captain" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <!-- Library Scan QR Code -->
+    
+    <!-- Library QR Code & HTML capture -->
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <!-- LIBRARY UNTUK CONVERT HTML KARTU KE GAMBAR & PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <!-- ======================================================================
-         1. STYLE CSS UTAMA
+         1. STYLE CSS UTAMA (RESPONSIF UNIVERSAL ALL OS & MOBILE)
     ======================================================================= -->
     <style>
         * { 
@@ -27,7 +27,11 @@
             font-weight: normal;
         }
 
-        body { 
+        html, body { 
+            width: 100%;
+            max-width: 100vw;
+            overflow-x: hidden;
+            touch-action: manipulation;
             background: linear-gradient(135deg, #4a000b 0%, #2b0006 50%, #800000 100%);
             min-height: 100vh; 
             color: #fff; 
@@ -261,7 +265,7 @@
             border: 1px solid rgba(255, 215, 0, 0.3); 
             background: rgba(0, 0, 0, 0.4); 
             color: #fff; 
-            font-size: 0.95rem;
+            font-size: 1rem;
         }
         .form-group option { background: #2b0006; color: #fff; }
         
@@ -278,6 +282,7 @@
             gap: 8px; 
             transition: 0.3s; 
             text-transform: uppercase;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .btn-primary { background: linear-gradient(45deg, #ffd700, #ffaa00); }
@@ -292,7 +297,6 @@
         .file-input-wrapper { position: relative; overflow: hidden; display: inline-block; }
         .file-input-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; }
 
-        /* GALERI DOKUMENTASI */
         .doc-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -379,17 +383,17 @@
         .modal-actions { display: flex; gap: 12px; justify-content: center; }
 
         @media screen and (max-width: 768px) {
-            header { padding: 15px 10px !important; }
-            .header-content h1 { font-size: 1.4rem !important; line-height: 1.2 !important; }
-            .header-content p { font-size: 0.85rem !important; margin-bottom: 10px !important; }
-            #clockContainer { font-size: 0.8rem !important; padding: 4px 10px !important; }
+            body { padding: 8px; }
+            header { padding: 10px 5px !important; }
+            .header-content h1 { font-size: 1.35rem !important; line-height: 1.2 !important; }
+            .header-content p { font-size: 0.8rem !important; margin-bottom: 8px !important; }
             .nav-tabs { display: flex !important; flex-direction: column !important; gap: 8px !important; width: 100% !important; }
-            .tab-btn { width: 100% !important; text-align: center !important; padding: 10px !important; font-size: 0.9rem !important; }
+            .tab-btn { width: 100% !important; text-align: center !important; padding: 10px !important; font-size: 0.95rem !important; }
             .action-box { display: flex !important; flex-direction: column !important; gap: 8px !important; width: 100% !important; }
             .action-box .btn { width: 100% !important; justify-content: center !important; margin: 0 !important; }
-            .table-container, .table-responsive { width: 100% !important; overflow-x: auto !important; -webkit-overflow-scrolling: touch; border-radius: 8px; }
+            .table-wrapper { width: 100% !important; overflow-x: auto !important; -webkit-overflow-scrolling: touch; border-radius: 8px; }
             table { min-width: 650px !important; }
-            .modal-content { width: 92% !important; max-width: 92% !important; padding: 15px !important; margin: 10px auto !important; }
+            .modal-content { width: 94% !important; max-width: 94% !important; padding: 15px !important; margin: 10px auto !important; }
             .modal-actions { flex-direction: column !important; gap: 8px !important; }
             .modal-actions .btn { width: 100% !important; }
         }
@@ -428,7 +432,7 @@
 <div class="container">
     <header>
         <div class="version-badge">
-            <i class="fas fa-code-branch"></i> VERSI APLIKASI: v2.6 (INSTANT QR ABSEN & PDF INTEGRATED)
+            <i class="fas fa-code-branch"></i> VERSI APLIKASI: v2.7 (CROSS-PLATFORM UNIVERSAL READY)
         </div>
 
         <div class="header-content" style="text-align: center; width: 100%;">
@@ -461,9 +465,7 @@
 
     <hr class="section-divider">
 
-    <!-- ==================================================================
-         4. TAB 1: DATA MASTER ANGGOTA
-    =================================================================== -->
+    <!-- TAB 1: DATA MASTER ANGGOTA -->
     <div id="tab-anggota" class="card tab-content active">
         <h2>DAFTAR ANGGOTA PASKIBRA (DATA MASTER)</h2>
         
@@ -529,9 +531,7 @@
         </div>
     </div>
 
-    <!-- ==================================================================
-         5. TAB 2: ABSENSI LATIHAN RUTIN & DOKUMENTASI
-    =================================================================== -->
+    <!-- TAB 2: ABSENSI LATIHAN RUTIN & DOKUMENTASI -->
     <div id="tab-absensi" class="card tab-content">
         <h2>UPLOAD DOKUMENTASI FOTO LATIHAN</h2>
         
@@ -573,7 +573,6 @@
                 <button type="button" class="btn btn-delete" id="btnStopScan" onclick="stopQRScanner()" style="display: none;"><i class="fas fa-stop-circle"></i> STOP KAMERA</button>
             </div>
 
-            <!-- Area Video Kamera -->
             <div id="reader" style="width: 100%; max-width: 400px; margin: 0 auto; border-radius: 10px; overflow: hidden;"></div>
         </div>
 
@@ -669,9 +668,7 @@
         </div>
     </div>
 
-    <!-- ==================================================================
-         6. TAB 3: OPEN RECRUITMENT
-    =================================================================== -->
+    <!-- TAB 3: OPEN RECRUITMENT -->
     <div id="tab-recruitment" class="card tab-content">
         <h2>TAMBAH CALON ANGGOTA MANUAL (OR)</h2>
         <form onsubmit="submitORManualAdmin(event)" style="margin-bottom: 20px;">
@@ -765,7 +762,6 @@
 <!-- ======================================================================
      7. MODAL DIALOG POPUP (EDIT & KONFIRMASI)
 ======================================================================= -->
-<!-- MODAL EDIT DATA ANGGOTA MASTER -->
 <div id="editModal" class="modal">
     <div class="modal-content">
         <h3><i class="fas fa-user-edit"></i> EDIT DATA ANGGOTA</h3>
@@ -797,7 +793,6 @@
     </div>
 </div>
 
-<!-- MODAL EDIT DATA ABSENSI -->
 <div id="editAbsensiModal" class="modal">
     <div class="modal-content">
         <h3><i class="fas fa-edit"></i> EDIT DATA ABSENSI</h3>
@@ -840,7 +835,7 @@
         <h3 style="color: #ffd700; margin-bottom: 15px;"><i class="fas fa-id-card"></i> KARTU ANGGOTA PASKIBRA</h3>
         <hr class="section-divider" style="margin: 10px 0 20px 0;">
         
-        <!-- Wadah Kartu (Ukuran 6.5 cm x 10.5 cm) -->
+        <!-- Wadah Kartu (6.5 cm x 10.5 cm) -->
         <div id="idCardPrintArea" style="
             width: 6.5cm; 
             height: 10.5cm; 
@@ -897,7 +892,6 @@
     </div>
 </div>
     
-<!-- CUSTOM DIALOG NOTIFIKASI & KONFIRMASI -->
 <div id="customDialogModal" class="modal">
     <div class="modal-content">
         <h3 id="dialogTitle"><i class="fas fa-info-circle"></i> KONFIRMASI</h3>
@@ -911,7 +905,7 @@
 </div>
 
 <!-- ======================================================================
-     8. LOGIKA JAVASCRIPT SYSTEM
+     8. LOGIKA JAVASCRIPT SYSTEM (CROSS-PLATFORM LOGIC)
 ======================================================================= -->
 <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxzQmY4XGvBLnoeHRo6W4gMFXQAbNESiv8ZLN0fkGIgtMxLA_riQmBRFp-hyCLXDG6D/exec";
@@ -927,7 +921,7 @@
     let lastScanTime = 0;
 
     // ============================================================================
-    // LOGIKA SCANNER QR CODE OTOMATIS (LANGSUNG PRESENSI WITHOUT POP-UP)
+    // LOGIKA SCANNER QR CODE UNIVERSAL (DUAL CAMERA FALLBACK ALL DEVICES)
     // ============================================================================
 
     function startQRScanner() {
@@ -939,14 +933,27 @@
         document.getElementById("btnStopScan").style.display = "inline-flex";
         html5QrcodeScanner = new Html5Qrcode("reader");
         
-        const config = { fps: 15, qrbox: { width: 250, height: 250 } };
+        const qrboxSize = Math.min(window.innerWidth * 0.7, 250);
+        const config = { 
+            fps: 15, 
+            qrbox: { width: qrboxSize, height: qrboxSize },
+            aspectRatio: 1.0
+        };
         
+        // Coba kamera belakang (HP Android & iOS) terlebih dahulu
         html5QrcodeScanner.start(
-            { facingMode: "environment" },
+            { facingMode: { exact: "environment" } },
             config,
             onScanSuccessAuto
-        ).catch(err => {
-            showCustomAlert("KAMERA ERROR", "Gagal mengakses kamera. Pastikan izin kamera diberikan!", "fa-exclamation-circle");
+        ).catch(() => {
+            // Fallback ke kamera default / Webcam PC Windows jika kamera belakang tidak ada
+            html5QrcodeScanner.start(
+                { facingMode: "user" },
+                config,
+                onScanSuccessAuto
+            ).catch(err => {
+                showCustomAlert("KAMERA ERROR", "Gagal mengakses kamera. Pastikan izin kamera diberikan di browser Anda!", "fa-exclamation-circle");
+            });
         });
     }
 
@@ -981,7 +988,6 @@
         const now = Date.now();
         const scannedNra = decodedText.trim();
 
-        // Anti double-scan (Jeda 3 detik untuk NRA yang sama)
         if (scannedNra === lastScannedNra && (now - lastScanTime) < 3000) {
             return;
         }
@@ -1997,7 +2003,7 @@
     }
 
     // ============================================================================
-    // LOGIKA CARD MODAL & EXPORT KARTU KE FORMAT PDF (PRESISI 6.5 x 10.5 CM)
+    // LOGIKA CARD MODAL & EXPORT KARTU KE FORMAT PDF (CROSS-PLATFORM GUARANTEED)
     // ============================================================================
 
     function openCardModal(nis, nama, kelas, jabatan) {
@@ -2023,31 +2029,97 @@
     }
 
     async function downloadCardAsPdf() {
-        const cardArea = document.getElementById("idCardPrintArea");
         const namaText = document.getElementById("cardNama") ? document.getElementById("cardNama").innerText : "Anggota";
         const nraText = document.getElementById("cardNra") ? document.getElementById("cardNra").innerText : "NRA";
-
-        if (!cardArea) {
-            return showCustomAlert("GAGAL", "Area kartu tidak ditemukan!", "fa-times-circle");
-        }
+        const kelasText = document.getElementById("cardKelasJabatan") ? document.getElementById("cardKelasJabatan").innerText : "-";
 
         closeModal('choiceModal');
         showCustomAlert("MEMPROSES PDF", "Sedang mengunduh kartu format PDF...", "fa-spinner fa-spin");
 
-        // Paksa konversi elemen <canvas> QR Code ke tag <img> Base64 murni agar 100% terbaca
-        const qrBox = document.getElementById("qrcodeBox");
-        if (qrBox) {
-            const qrCanvas = qrBox.querySelector("canvas");
-            if (qrCanvas) {
-                const qrDataUrl = qrCanvas.toDataURL("image/png");
-                qrBox.innerHTML = `<img src="${qrDataUrl}" style="width:120px; height:120px; display:block; margin:0 auto;">`;
-            }
+        // Wadah Render Sementara di GPU (Menjamin Render QR Sempurna Tanpa Pengaruh Modal Hidden)
+        const tempContainer = document.createElement("div");
+        tempContainer.style.position = "fixed";
+        tempContainer.style.top = "0";
+        tempContainer.style.left = "0";
+        tempContainer.style.zIndex = "-99999";
+        tempContainer.style.opacity = "0.01";
+        tempContainer.style.pointerEvents = "none";
+
+        tempContainer.innerHTML = `
+            <div id="pdfCaptureTarget" style="
+                width: 380px; 
+                height: 610px; 
+                background: #32000a; 
+                border: 3px solid #ffd700; 
+                border-radius: 14px; 
+                padding: 20px 15px; 
+                color: #fff; 
+                text-align: center; 
+                box-sizing: border-box; 
+                display: flex; 
+                flex-direction: column; 
+                align-items: center; 
+                justify-content: space-between;
+                font-family: 'American Captain', 'Segoe UI', sans-serif;">
+                
+                <div>
+                    <img src="assets/logo-paskibra.png" style="width: 52px; height: 52px; margin-bottom: 4px; object-fit: contain;">
+                    <h4 style="color: #ffd700; margin: 0; font-size: 1.15rem; letter-spacing: 1px; line-height: 1.1;">PASKIBRA MAN 6 CIAMIS</h4>
+                    <p style="font-size: 0.75rem; color: #ffcc66; margin-top: 3px; letter-spacing: 1px;">KARTU TANDA ANGGOTA</p>
+                    <div style="width: 85%; height: 1px; background: rgba(255, 215, 0, 0.4); margin: 8px auto;"></div>
+                </div>
+
+                <div>
+                    <h3 style="color: #ffffff; font-size: 1.35rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; line-height: 1.1;">${namaText}</h3>
+                    <p style="color: #ffcc66; font-size: 0.9rem; margin-top: 4px; letter-spacing: 1px;">${kelasText}</p>
+                </div>
+
+                <div>
+                    <div id="pdfQrHolder" style="background: #ffffff; padding: 8px; border-radius: 8px; display: inline-block; line-height: 0;"></div>
+                    <p style="color: #ffd700; font-size: 1.15rem; font-weight: bold; margin-top: 8px; letter-spacing: 1.5px;">${nraText}</p>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(tempContainer);
+
+        const qrHolder = document.getElementById("pdfQrHolder");
+        const tempQrDiv = document.createElement("div");
+        
+        new QRCode(tempQrDiv, {
+            text: String(nraText || "-"),
+            width: 140,
+            height: 140,
+            correctLevel: QRCode.CorrectLevel.H
+        });
+
+        await new Promise(r => setTimeout(r, 300));
+
+        let qrCanvas = tempQrDiv.querySelector("canvas");
+        let qrDataUrl = "";
+        
+        if (qrCanvas) {
+            qrDataUrl = qrCanvas.toDataURL("image/png");
+        } else {
+            let qrImgElement = tempQrDiv.querySelector("img");
+            if (qrImgElement) qrDataUrl = qrImgElement.src;
         }
 
-        await new Promise(resolve => setTimeout(resolve, 300));
+        const finalQrImg = new Image();
+        finalQrImg.src = qrDataUrl;
+        finalQrImg.style.width = "140px";
+        finalQrImg.style.height = "140px";
+        finalQrImg.style.display = "block";
+
+        await new Promise((resolve) => {
+            finalQrImg.onload = resolve;
+            setTimeout(resolve, 300);
+        });
+
+        qrHolder.appendChild(finalQrImg);
 
         try {
-            const canvas = await html2canvas(cardArea, {
+            const targetElement = document.getElementById("pdfCaptureTarget");
+            const canvas = await html2canvas(targetElement, {
                 scale: 3,
                 useCORS: true,
                 allowTaint: true,
@@ -2057,7 +2129,6 @@
 
             const imgData = canvas.toDataURL("image/png");
 
-            // Buat PDF Presisi Ukuran Fisik Kartu ID (65 mm x 105 mm)
             const { jsPDF } = window.jspdf;
             const pdf = new jsPDF({
                 orientation: 'portrait',
@@ -2070,9 +2141,13 @@
 
             closeModal('customDialogModal');
         } catch (err) {
-            console.error("Error download PDF:", err);
+            console.error("Error Download PDF:", err);
             closeModal('customDialogModal');
-            showCustomAlert("GAGAL", "Gagal mengunduh kartu format PDF.", "fa-times-circle");
+            showCustomAlert("GAGAL", "Gagal membuat berkas PDF kartu.", "fa-times-circle");
+        } finally {
+            if (document.body.contains(tempContainer)) {
+                document.body.removeChild(tempContainer);
+            }
         }
     }
 
