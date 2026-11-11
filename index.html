@@ -1492,114 +1492,114 @@
         }
     }
 
-    function renderPreviewAbsensi() {
-        const tbody = document.getElementById("tablePreviewAbsensi");
-        const tipeWaktu = document.getElementById("filterRekapTipe").value;
-        const tipePertemuan = document.getElementById("filterRekapPertemuan").value;
-        const tipeStatus = document.getElementById("filterRekapStatus").value;
-        tbody.innerHTML = "";
+    // ============================================================================
+// REKAP ABSENSI OTOMATIS: PEMBATAS PER TANGGAL & PERTEMUAN (AUTO GROUPING)
+// ============================================================================
+function renderPreviewAbsensi() {
+    const tbody = document.getElementById("tablePreviewAbsensi");
+    const tipeWaktu = document.getElementById("filterRekapTipe").value;
+    const tipePertemuan = document.getElementById("filterRekapPertemuan").value;
+    const tipeStatus = document.getElementById("filterRekapStatus").value;
+    tbody.innerHTML = "";
 
-        if (!globalAbsensi.length) {
-            tbody.innerHTML = "<tr><td colspan='8' style='text-align:center;'>Belum ada data absensi.</td></tr>";
-            currentFilteredAbsensi = [];
-            return;
-        }
-
-        const now = new Date();
-        currentFilteredAbsensi = globalAbsensi.filter(a => {
-            const ket = a.Keterangan || a.keterangan || "Hadir";
-            if (tipeStatus !== 'semua' && ket.toLowerCase() !== tipeStatus.toLowerCase()) {
-                return false;
-            }
-
-            let p = a["Pertemuan Ke -"] || a.Pertemuan || a.pertemuan || "";
-            if (!p.includes("Pertemuan") && a.Keterangan && a.Keterangan.includes("Pertemuan")) {
-                p = a.Keterangan;
-            }
-
-            if (tipePertemuan !== 'semua' && !p.toLowerCase().includes(tipePertemuan.toLowerCase())) {
-                return false;
-            }
-
-            if (tipeWaktu === 'semua') return true;
-            const rawTs = a.TimeStamp || a.Timestamp || a.timestamp || "";
-            const d = parseDateSafe(rawTs);
-            if (!d) return true;
-            
-            const diffDays = (now - d) / (1000 * 60 * 60 * 24);
-            if (tipeWaktu === 'mingguan') return diffDays <= 7 && diffDays >= 0;
-            if (tipeWaktu === 'bulanan') return diffDays <= 30 && diffDays >= 0;
-            return true;
-        });
-
-        if (!currentFilteredAbsensi.length) {
-            tbody.innerHTML = "<tr><td colspan='8' style='text-align:center;'>Tidak ada data absensi yang sesuai filter.</td></tr>";
-            return;
-        }
-
-        const pertemuanGroup = { "Pertemuan 1 (Senin)": [], "Pertemuan 2 (Selasa)": [], "Pertemuan 3 (Rabu)": [] };
-
-        currentFilteredAbsensi.forEach(item => {
-            let p = item["Pertemuan Ke -"] || item.Pertemuan || item.pertemuan || "";
-            if (!p.includes("Pertemuan") && item.Keterangan && item.Keterangan.includes("Pertemuan")) {
-                p = item.Keterangan;
-            }
-
-            if (p.includes("Pertemuan 1")) {
-                pertemuanGroup["Pertemuan 1 (Senin)"].push(item);
-            } else if (p.includes("Pertemuan 2")) {
-                pertemuanGroup["Pertemuan 2 (Selasa)"].push(item);
-            } else {
-                pertemuanGroup["Pertemuan 3 (Rabu)"].push(item);
-            }
-        });
-
-        Object.keys(pertemuanGroup).forEach(groupTitle => {
-            if (pertemuanGroup[groupTitle].length > 0) {
-                tbody.innerHTML += `
-                    <tr class="divider-pertemuan">
-                        <td colspan="8"><i class="fas fa-bookmark"></i> PEMBATAS: ${groupTitle.toUpperCase()}</td>
-                    </tr>`;
-
-                let groupIndex = 1;
-
-                pertemuanGroup[groupTitle].forEach(row => {
-                    const rawTs = row.TimeStamp || row.Timestamp || row.timestamp || "";
-                    let formattedDate = formatDateIndo(rawTs);
-
-                    let rawNis = row.NRA || row.nra || row.NIS || row.nis || '-';
-                    const nis = rawNis.toString().trim() || "-";
-                    const nama = row.Nama_Lengkap || row.nama_lengkap || row.Nama || '-';
-                    
-                    let kelas = row.Kelas || row.kelas || getKelasByNamaOrNis(nama, nis);
-                    let pertemuan = row["Pertemuan Ke -"] || row.Pertemuan || '-';
-                    let keterangan = row.Keterangan || row.keterangan || 'Hadir';
-
-                    if (pertemuan.includes("Hadir") || pertemuan.includes("Izin") || pertemuan.includes("Sakit") || pertemuan.includes("Alpha")) {
-                        let tempKet = pertemuan;
-                        pertemuan = keterangan;
-                        keterangan = tempKet;
-                    }
-
-                    tbody.innerHTML += `
-                        <tr>
-                            <td style="text-align:center; white-space:nowrap;"><strong>${groupIndex++}</strong></td>
-                            <td style="white-space:nowrap;"><strong>${formattedDate}</strong></td>
-                            <td style="white-space:nowrap;"><strong>${nis}</strong></td>
-                            <td style="white-space:nowrap;">${nama}</td>
-                            <td style="text-align:center; white-space:nowrap;">${kelas}</td>
-                            <td style="white-space:nowrap;">${pertemuan}</td>
-                            <td style="white-space:nowrap;"><strong>${keterangan}</strong></td>
-                            <td style="text-align:center; white-space:nowrap;">
-                                <button class="btn btn-edit" onclick="openEditAbsensiModal('${nama.replace(/'/g, "\\'")}', '${pertemuan}', '${keterangan}', '${rawTs}')"><i class="fas fa-edit"></i> Edit</button>
-                                <button class="btn btn-delete" onclick="deleteAbsensi('${nama.replace(/'/g, "\\'")}', '${rawTs}')"><i class="fas fa-trash-alt"></i> Hapus</button>
-                            </td>
-                        </tr>`;
-                });
-            }
-        });
+    if (!globalAbsensi.length) {
+        tbody.innerHTML = "<tr><td colspan='8' style='text-align:center;'>Belum ada data absensi.</td></tr>";
+        currentFilteredAbsensi = [];
+        return;
     }
 
+    const now = new Date();
+    currentFilteredAbsensi = globalAbsensi.filter(a => {
+        const ket = a.Keterangan || a.keterangan || "Hadir";
+        if (tipeStatus !== 'semua' && ket.toLowerCase() !== tipeStatus.toLowerCase()) return false;
+
+        let p = a["Pertemuan Ke -"] || a.Pertemuan || a.pertemuan || "";
+        if (!p.includes("Pertemuan") && a.Keterangan && a.Keterangan.includes("Pertemuan")) {
+            p = a.Keterangan;
+        }
+
+        if (tipePertemuan !== 'semua' && !p.toLowerCase().includes(tipePertemuan.toLowerCase())) return false;
+
+        if (tipeWaktu === 'semua') return true;
+        const rawTs = a.TimeStamp || a.Timestamp || a.timestamp || "";
+        const d = parseDateSafe(rawTs);
+        if (!d) return true;
+        
+        const diffDays = (now - d) / (1000 * 60 * 60 * 24);
+        if (tipeWaktu === 'mingguan') return diffDays <= 7 && diffDays >= 0;
+        if (tipeWaktu === 'bulanan') return diffDays <= 30 && diffDays >= 0;
+        return true;
+    });
+
+    if (!currentFilteredAbsensi.length) {
+        tbody.innerHTML = "<tr><td colspan='8' style='text-align:center;'>Tidak ada data absensi yang sesuai filter.</td></tr>";
+        return;
+    }
+
+    // 1. Grouping Otomatis Berdasarkan Kombinasi (Tanggal + Pertemuan)
+    const groupedData = {};
+
+    currentFilteredAbsensi.forEach(item => {
+        const rawTs = item.TimeStamp || item.Timestamp || item.timestamp || "";
+        let formattedDate = formatDateIndo(rawTs);
+
+        let p = item["Pertemuan Ke -"] || item.Pertemuan || item.pertemuan || "Pertemuan 1 (Senin)";
+        if (!p.includes("Pertemuan") && item.Keterangan && item.Keterangan.includes("Pertemuan")) {
+            p = item.Keterangan;
+        }
+
+        // Kunci unik gabungan Tanggal dan Pertemuan
+        const groupKey = `${formattedDate} - ${p}`;
+        if (!groupedData[groupKey]) {
+            groupedData[groupKey] = [];
+        }
+        groupedData[groupKey].push(item);
+    });
+
+    // 2. Render Pembatas Otomatis Setiap Tanggal / Pertemuan Berbeda
+    Object.keys(groupedData).forEach(groupKey => {
+        const rows = groupedData[groupKey];
+
+        tbody.innerHTML += `
+            <tr class="divider-pertemuan">
+                <td colspan="8"><i class="fas fa-calendar-alt"></i> PEMBATAS: ${groupKey.toUpperCase()}</td>
+            </tr>`;
+
+        rows.forEach((row, groupIndex) => {
+            const rawTs = row.TimeStamp || row.Timestamp || row.timestamp || "";
+            let formattedDate = formatDateIndo(rawTs);
+
+            let rawNis = row.NRA || row.nra || row.NIS || row.nis || '-';
+            const nis = rawNis.toString().trim() || "-";
+            const nama = row.Nama_Lengkap || row.nama_lengkap || row.Nama || '-';
+            
+            let kelas = row.Kelas || row.kelas || getKelasByNamaOrNis(nama, nis);
+            let pertemuan = row["Pertemuan Ke -"] || row.Pertemuan || '-';
+            let keterangan = row.Keterangan || row.keterangan || 'Hadir';
+
+            if (pertemuan.includes("Hadir") || pertemuan.includes("Izin") || pertemuan.includes("Sakit") || pertemuan.includes("Alpha")) {
+                let tempKet = pertemuan;
+                pertemuan = keterangan;
+                keterangan = tempKet;
+            }
+
+            tbody.innerHTML += `
+                <tr>
+                    <td style="text-align:center; white-space:nowrap;"><strong>${groupIndex + 1}</strong></td>
+                    <td style="white-space:nowrap;"><strong>${formattedDate}</strong></td>
+                    <td style="white-space:nowrap;"><strong>${nis}</strong></td>
+                    <td style="white-space:nowrap;">${nama}</td>
+                    <td style="text-align:center; white-space:nowrap;">${kelas}</td>
+                    <td style="white-space:nowrap;">${pertemuan}</td>
+                    <td style="white-space:nowrap;"><strong>${keterangan}</strong></td>
+                    <td style="text-align:center; white-space:nowrap;">
+                        <button class="btn btn-edit" onclick="openEditAbsensiModal('${nama.replace(/'/g, "\\'")}', '${pertemuan}', '${keterangan}', '${rawTs}')"><i class="fas fa-edit"></i> Edit</button>
+                        <button class="btn btn-delete" onclick="deleteAbsensi('${nama.replace(/'/g, "\\'")}', '${rawTs}')"><i class="fas fa-trash-alt"></i> Hapus</button>
+                    </td>
+                </tr>`;
+        });
+    });
+}
     function openEditAbsensiModal(nama, pertemuan, keterangan, rawTs) {
         document.getElementById("editAbsensiNama").value = nama;
         document.getElementById("editAbsensiNamaView").value = nama;
