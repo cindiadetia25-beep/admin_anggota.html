@@ -1358,84 +1358,106 @@
         });
     }
 
-    function submitDokumentasiFoto(e) {
-        e.preventDefault();
-        const pertemuan = document.getElementById("docPertemuan").value;
-        const ket = document.getElementById("docKet").value.trim();
-        const fileInput = document.getElementById("docFileInput");
+// ============================================================================
+// LOGIKA DOKUMENTASI FOTO REAL-TIME CROSS-DEVICE (GOOGLE CLOUD/SHEETS INTEGRATION)
+// ============================================================================
 
-        if (!fileInput.files || !fileInput.files[0]) {
-            return showCustomAlert("PERINGATAN", "Pilih file foto terlebih dahulu!", "fa-exclamation-circle");
-        }
+async function submitDokumentasiFoto(e) {
+    e.preventDefault();
+    const pertemuan = document.getElementById("docPertemuan").value;
+    const ket = document.getElementById("docKet").value.trim();
+    const fileInput = document.getElementById("docFileInput");
 
-        const reader = new FileReader();
-        reader.onload = function(evt) {
-            const docObj = {
-                id: Date.now(),
-                pertemuan: pertemuan,
-                ket: ket,
-                imgData: evt.target.result,
-                tanggal: formatDateIndo(new Date())
-            };
+    if (!fileInput.files || !fileInput.files[0]) {
+        return showCustomAlert("PERINGATAN", "Pilih file foto terlebih dahulu!", "fa-exclamation-circle");
+    }
 
-            globalDokumentasi.unshift(docObj);
-            localStorage.setItem("paskibra_docs", JSON.stringify(globalDokumentasi));
-            renderDokumentasi();
+    showCustomAlert("UPLOADING", "Sedang mengunggah foto ke server...", "fa-spinner fa-spin");
 
-            showCustomAlert("BERHASIL", "Foto dokumentasi latihan berhasil diunggah!");
-            e.target.reset();
+    const reader = new FileReader();
+    reader.onload = async function(evt) {
+        const base64Image = evt.target.result;
+        const tanggalIndo = formatDateIndo(new Date());
+
+        // 1. Simpan ke array global lokal sementara
+        const docObj = {
+            id: Date.now(),
+            pertemuan: pertemuan,
+            ket: ket,
+            imgData: base64Image,
+            tanggal: tanggalIndo
         };
-        reader.readAsDataURL(fileInput.files[0]);
-    }
 
-    function loadDokumentasiLocal() {
-        const saved = localStorage.getItem("paskibra_docs");
-        if (saved) {
-            try {
-                globalDokumentasi = JSON.parse(saved);
-            } catch (e) { globalDokumentasi = []; }
-        }
+        if (!globalDokumentasi) globalDokumentasi = [];
+        globalDokumentasi.unshift(docObj);
         renderDokumentasi();
-    }
 
-    function renderDokumentasi() {
-        const gallery = document.getElementById("docGallery");
-        gallery.innerHTML = "";
+        closeModal('customDialogModal');
+        showCustomAlert("BERHASIL", "Foto dokumentasi berhasil diunggah!");
+        e.target.reset();
 
-        if (!globalDokumentasi.length) {
-            gallery.innerHTML = `<p style="color:#ffcc66; font-size:0.95rem;">Belum ada foto dokumentasi yang diunggah.</p>`;
-            return;
-        }
-
-        globalDokumentasi.forEach(item => {
-            const fileName = `Dokumentasi_${item.pertemuan.replace(/\s+/g, '_')}_${item.tanggal.replace(/\//g, '-')}.png`;
-
-            gallery.innerHTML += `
-                <div class="doc-card">
-                    <img src="${item.imgData}" alt="Dokumentasi Latihan">
-                    <div class="doc-title">${item.pertemuan}</div>
-                    <div class="doc-desc">${item.ket} (${item.tanggal})</div>
-                    
-                    <div style="display: flex; gap: 6px; justify-content: center; margin-top: 4px;">
-                        <a href="${item.imgData}" download="${fileName}" class="btn btn-download" style="padding:4px 8px; font-size:0.8rem; text-decoration:none;">
-                            <i class="fas fa-download"></i> Download
-                        </a>
-                        <button class="btn btn-delete" style="padding:4px 8px; font-size:0.8rem;" onclick="deleteDokumentasi(${item.id})">
-                            <i class="fas fa-trash-alt"></i> Hapus
-                        </button>
-                    </div>
-                </div>`;
+        // 2. Kirim ke Google Apps Script agar tersimpan permanen di cloud/database
+        sendDataToSheet({
+            action: "uploadDokumentasi",
+            id: docObj.id,
+            pertemuan: pertemuan,
+            ket: ket,
+            imgData: base64Image,
+            tanggal: tanggalIndo
         });
+    };
+    reader.readAsDataURL(fileInput.files[0]);
+}
+
+function loadDokumentasiLocal() {
+    // Render dari data sinkronisasi server Apps Script
+    renderDokumentasi();
+}
+
+function renderDokumentasi() {
+    const gallery = document.getElementById("docGallery");
+    if (!gallery) return;
+    gallery.innerHTML = "";
+
+    if (!globalDokumentasi || !globalDokumentasi.length) {
+        gallery.innerHTML = `<p style="color:#ffcc66; font-size:0.95rem;">Belum ada foto dokumentasi yang diunggah.</p>`;
+        return;
     }
 
-    function deleteDokumentasi(id) {
-        showCustomConfirm("HAPUS FOTO", "Apakah Anda yakin ingin menghapus foto dokumentasi ini?", () => {
-            globalDokumentasi = globalDokumentasi.filter(d => d.id !== id);
-            localStorage.setItem("paskibra_docs", JSON.stringify(globalDokumentasi));
-            renderDokumentasi();
-            showCustomAlert("TERHAPUS", "Foto dokumentasi berhasil dihapus!");
+    globalDokumentasi.forEach(item => {
+        const fileName = `Dokumentasi_${(item.pertemuan || '').replace(/\s+/g, '_')}_${(item.tanggal || '').replace(/\//g, '-')}.png`;
+        const imgSrc = item.imgData || item.url || '';
+
+        gallery.innerHTML += `
+            <div class="doc-card">
+                <img src="${imgSrc}" alt="Dokumentasi Latihan" style="width:100%; height:140px; object-fit:cover; border-radius:8px; border:1px solid #ffd700;">
+                <div class="doc-title" style="color:#ffd700; font-weight:bold; margin-top:5px;">${item.pertemuan || '-'}</div>
+                <div class="doc-desc" style="color:#ffcc66; font-size:0.85rem;">${item.ket || ''} (${item.tanggal || ''})</div>
+                
+                <div style="display: flex; gap: 6px; justify-content: center; margin-top: 8px;">
+                    <a href="${imgSrc}" download="${fileName}" class="btn btn-download" style="padding:4px 8px; font-size:0.8rem; text-decoration:none;">
+                        <i class="fas fa-download"></i> Download
+                    </a>
+                    <button class="btn btn-delete" style="padding:4px 8px; font-size:0.8rem;" onclick="deleteDokumentasi('${item.id}')">
+                        <i class="fas fa-trash-alt"></i> Hapus
+                    </button>
+                </div>
+            </div>`;
+    });
+}
+
+function deleteDokumentasi(id) {
+    showCustomConfirm("HAPUS FOTO", "Apakah Anda yakin ingin menghapus foto dokumentasi ini dari server?", () => {
+        globalDokumentasi = globalDokumentasi.filter(d => String(d.id) !== String(id));
+        renderDokumentasi();
+        showCustomAlert("TERHAPUS", "Foto dokumentasi berhasil dihapus!");
+
+        sendDataToSheet({
+            action: "deleteDokumentasi",
+            id: id
         });
-    }
+    });
+}
 
     function formatDateIndo(rawTs) {
         if (!rawTs) return '-';
