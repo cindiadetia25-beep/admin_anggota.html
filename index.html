@@ -454,10 +454,12 @@
     <hr class="section-divider">
 
     <div class="nav-tabs">
-        <button class="tab-btn active" onclick="switchTab('tab-anggota', this)"><i class="fas fa-address-book"></i> DAFTAR ANGGOTA PASKIBRA</button>
-        <button class="tab-btn" onclick="switchTab('tab-absensi', this)"><i class="fas fa-calendar-check"></i> ABSENSI LATIHAN RUTIN</button>
-        <button class="tab-btn" onclick="switchTab('tab-recruitment', this)"><i class="fas fa-user-plus"></i> OPEN RECRUITMENT</button>
-    </div>
+    <button class="tab-btn active" onclick="switchTab('tab-anggota', this)"><i class="fas fa-address-book"></i> DAFTAR ANGGOTA PASKIBRA</button>
+    <button class="tab-btn" onclick="switchTab('tab-absensi', this)"><i class="fas fa-calendar-check"></i> ABSENSI LATIHAN RUTIN</button>
+    <!-- TAB BARU DIREKAP LATIHAN RUTIN -->
+    <button class="tab-btn" onclick="switchTab('tab-rekap', this)"><i class="fas fa-list-alt"></i> REKAP LATIHAN RUTIN</button>
+    <button class="tab-btn" onclick="switchTab('tab-recruitment', this)"><i class="fas fa-user-plus"></i> OPEN RECRUITMENT</button>
+</div>
 
     <hr class="section-divider">
 
@@ -612,62 +614,65 @@
             </div>
             <button type="submit" class="btn btn-primary" style="width: 100%;"><i class="fas fa-save"></i> SIMPAN ABSENSI LATIHAN</button>
         </form>
+    </div>
+    <!-- ==================================================================
+     TAB BARU: REKAP LATIHAN RUTIN
+    =================================================================== -->
+    <div id="tab-rekap" class="card tab-content">
+    <h2>REKAP ABSENSI LATIHAN RUTIN</h2>
+    
+    <div class="action-box">
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <span><strong>Filter Waktu:</strong></span>
+            <select id="filterRekapTipe" onchange="renderPreviewAbsensi()" style="padding: 8px; border-radius: 6px; background: #2b0006; color: #fff; border: 1px solid #ffd700;">
+                <option value="semua">Semua Riwayat</option>
+                <option value="mingguan">Rekap Mingguan</option>
+                <option value="bulanan">Rekap Bulanan</option>
+            </select>
 
-        <hr class="section-divider">
+            <span><strong>Filter Pertemuan:</strong></span>
+            <select id="filterRekapPertemuan" onchange="renderPreviewAbsensi()" style="padding: 8px; border-radius: 6px; background: #2b0006; color: #fff; border: 1px solid #ffd700;">
+                <option value="semua">Semua Pertemuan</option>
+                <option value="Pertemuan 1">Pertemuan 1 (Senin)</option>
+                <option value="Pertemuan 2">Pertemuan 2 (Selasa)</option>
+                <option value="Pertemuan 3">Pertemuan 3 (Rabu)</option>
+            </select>
 
-        <h2>PREVIEW REKAP ABSENSI LATIHAN</h2>
-        <div class="action-box">
-            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                <span><strong>Filter Waktu:</strong></span>
-                <select id="filterRekapTipe" onchange="renderPreviewAbsensi()" style="padding: 8px; border-radius: 6px; background: #2b0006; color: #fff; border: 1px solid #ffd700;">
-                    <option value="semua">Semua Riwayat</option>
-                    <option value="mingguan">Rekap Mingguan</option>
-                    <option value="bulanan">Rekap Bulanan</option>
-                </select>
-
-                <span><strong>Filter Pertemuan:</strong></span>
-                <select id="filterRekapPertemuan" onchange="renderPreviewAbsensi()" style="padding: 8px; border-radius: 6px; background: #2b0006; color: #fff; border: 1px solid #ffd700;">
-                    <option value="semua">Semua Pertemuan</option>
-                    <option value="Pertemuan 1">Pertemuan 1 (Senin)</option>
-                    <option value="Pertemuan 2">Pertemuan 2 (Selasa)</option>
-                    <option value="Pertemuan 3">Pertemuan 3 (Rabu)</option>
-                </select>
-
-                <span><strong>Filter Keterangan:</strong></span>
-                <select id="filterRekapStatus" onchange="renderPreviewAbsensi()" style="padding: 8px; border-radius: 6px; background: #2b0006; color: #fff; border: 1px solid #ffd700;">
-                    <option value="semua">Semua Status</option>
-                    <option value="Hadir">Hadir</option>
-                    <option value="Izin">Izin</option>
-                    <option value="Sakit">Sakit</option>
-                    <option value="Alpha">Alpha</option>
-                </select>
-            </div>
-            <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                <button class="btn btn-download" onclick="downloadExcelDenganKop('absensi')"><i class="fas fa-file-download"></i> DOWNLOAD REKAP EXCEL</button>
-                <button class="btn btn-danger-all" onclick="confirmClearAll('absensi')"><i class="fas fa-trash-restore"></i> HAPUS SEMUA REKAP ABSENSI</button>
-            </div>
+            <span><strong>Filter Keterangan:</strong></span>
+            <select id="filterRekapStatus" onchange="renderPreviewAbsensi()" style="padding: 8px; border-radius: 6px; background: #2b0006; color: #fff; border: 1px solid #ffd700;">
+                <option value="semua">Semua Status</option>
+                <option value="Hadir">Hadir</option>
+                <option value="Izin">Izin</option>
+                <option value="Sakit">Sakit</option>
+                <option value="Alpha">Alpha</option>
+            </select>
         </div>
-
-        <div class="table-wrapper">
-            <table>
-                <thead>
-                    <tr>
-                        <th style="width:40px; text-align:center; white-space:nowrap;">NO.</th>
-                        <th style="width:100px; white-space:nowrap;">TANGGAL</th>
-                        <th style="width:100px; white-space:nowrap;">NRA</th>
-                        <th style="min-width:160px; white-space:nowrap;">NAMA LENGKAP</th>
-                        <th style="width:80px; text-align:center; white-space:nowrap;">KELAS</th>
-                        <th style="min-width:150px; white-space:nowrap;">PERTEMUAN</th>
-                        <th style="width:120px; white-space:nowrap;">KETERANGAN</th>
-                        <th style="width:130px; text-align:center; white-space:nowrap;">AKSI</th>
-                    </tr>
-                </thead>
-                <tbody id="tablePreviewAbsensi">
-                    <tr><td colspan="8" style="text-align:center;"><i class="fas fa-spinner fa-spin"></i> Memuat preview rekap absensi...</td></tr>
-                </tbody>
-            </table>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="btn btn-download" onclick="downloadExcelDenganKop('absensi')"><i class="fas fa-file-download"></i> DOWNLOAD REKAP EXCEL</button>
+            <button class="btn btn-danger-all" onclick="confirmClearAll('absensi')"><i class="fas fa-trash-restore"></i> HAPUS SEMUA REKAP ABSENSI</button>
         </div>
     </div>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:40px; text-align:center; white-space:nowrap;">NO.</th>
+                    <th style="width:100px; white-space:nowrap;">TANGGAL</th>
+                    <th style="width:100px; white-space:nowrap;">NRA</th>
+                    <th style="min-width:160px; white-space:nowrap;">NAMA LENGKAP</th>
+                    <th style="width:80px; text-align:center; white-space:nowrap;">KELAS</th>
+                    <th style="min-width:150px; white-space:nowrap;">PERTEMUAN</th>
+                    <th style="width:120px; white-space:nowrap;">KETERANGAN</th>
+                    <th style="width:130px; text-align:center; white-space:nowrap;">AKSI</th>
+                </tr>
+            </thead>
+            <tbody id="tablePreviewAbsensi">
+                <tr><td colspan="8" style="text-align:center;"><i class="fas fa-spinner fa-spin"></i> Memuat preview rekap absensi...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
 
     <!-- ==================================================================
          6. TAB 3: OPEN RECRUITMENT
@@ -1869,7 +1874,8 @@
         if (isDuplicate) {
             return showCustomAlert("SISTEM PENGAMANAN", `Anggota bernama ${nama} sudah memiliki data absensi untuk tanggal ${formattedDateIndo}! Pengisian ganda ditolak.`, "fa-times-circle");
         }
-
+        // Tambahkan di akhir fungsi submitAbsensi() & onScanSuccessAuto() setelah absensi berhasil di-input:
+        switchTab('tab-rekap', document.querySelectorAll('.tab-btn')[2]);
         globalAbsensi.unshift({
             TimeStamp: formattedDateIndo,
             NRA: nis,
