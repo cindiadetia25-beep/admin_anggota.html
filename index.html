@@ -2222,10 +2222,11 @@ async function downloadCardAsPdf() {
         // 1. Tempel desain kartu utama
         pdf.addImage(cardBgData, 'PNG', 0, 0, 65, 105);
 
-        // 2. Tempel QR Code LANGSUNG ke atas kotak putih di PDF (Posisi presisi di tengah kotak putih)
+       // 2. Tempel QR Code LANGSUNG ke atas kotak putih di PDF (Presisi Center)
         if (qrBase64) {
-            // Ukuran kotak putih di PDF sekitar 31mm x 31mm, QR ditempel 28mm x 28mm tepat di tengahnya
-            pdf.addImage(qrBase64, 'PNG', 18.5, 62.5, 28, 28);
+            // Ukuran kotak putih: 31mm x 31mm (di posisi X=17mm, Y=64.5mm)
+            // Ukuran QR Code diperkecil sedikit menjadi 26mm x 26mm di titik X=19.5mm, Y=67mm
+            pdf.addImage(qrBase64, 'PNG', 19.5, 67.0, 26, 26);
         }
 
         pdf.save(`Kartu_Paskibra_${nraText}_${namaText.replace(/\s+/g, '_')}.pdf`);
