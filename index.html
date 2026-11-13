@@ -2124,43 +2124,32 @@ async function downloadCardAsPdf() {
     const kelasText = document.getElementById("cardKelasJabatan") ? document.getElementById("cardKelasJabatan").innerText : "-";
 
     closeModal('choiceModal');
-    showCustomAlert("MEMPROSES PDF", "Sedang membuat kartu PDF beresolusi tinggi...", "fa-spinner fa-spin");
+    showCustomAlert("MEMPROSES PDF", "Sedang membuat kartu PDF...", "fa-spinner fa-spin");
 
-    // 1. Generate QR Code resolusi tinggi pada elemen nyata (opacity: 1) di luar layar
-    const qrTempBox = document.createElement("div");
-    qrTempBox.style.position = "fixed";
-    qrTempBox.style.left = "-9999px";
-    qrTempBox.style.top = "0";
-    document.body.appendChild(qrTempBox);
-
-    new QRCode(qrTempBox, {
-        text: String(nraText || "-"),
-        width: 240,
-        height: 240,
-        colorDark: "#000000",
-        colorLight: "#ffffff",
-        correctLevel: QRCode.CorrectLevel.H
-    });
-
-    // Tunggu sebentar agar canvas QR selesai digambar oleh browser
-    await new Promise(r => setTimeout(r, 250));
-
+    // 1. Ambil atau buat ulang QR Code murni dari Canvas
     let qrBase64 = "";
-    const qrCanvas = qrTempBox.querySelector("canvas");
-    if (qrCanvas) {
-        qrBase64 = qrCanvas.toDataURL("image/png");
+    const existingCanvas = document.querySelector("#qrcodeBox canvas");
+    if (existingCanvas) {
+        qrBase64 = existingCanvas.toDataURL("image/png");
     } else {
-        const qrImg = qrTempBox.querySelector("img");
-        if (qrImg) qrBase64 = qrImg.src;
+        // Fallback jika canvas tidak ditemukan
+        const tempQr = document.createElement("div");
+        new QRCode(tempQr, {
+            text: String(nraText || "-"),
+            width: 300,
+            height: 300,
+            correctLevel: QRCode.CorrectLevel.H
+        });
+        await new Promise(r => setTimeout(r, 200));
+        const c = tempQr.querySelector("canvas");
+        if (c) qrBase64 = c.toDataURL("image/png");
     }
-    document.body.removeChild(qrTempBox);
 
-    // 2. Buat wadah kartu dengan desain yang 100% IDENTIK dengan tampilan cetak (Screenshot 1)
+    // 2. Buat template desain kartu (tanpa QR dulu, karena QR akan ditempel langsung oleh jsPDF)
     const cardWrapper = document.createElement("div");
     cardWrapper.style.position = "fixed";
     cardWrapper.style.left = "-9999px";
     cardWrapper.style.top = "0";
-    cardWrapper.style.zIndex = "99999";
 
     cardWrapper.innerHTML = `
         <div id="pdfExactCardTarget" style="
@@ -2192,49 +2181,54 @@ async function downloadCardAsPdf() {
             </div>
 
             <div style="width: 100%;">
-                <div style="background: #ffffff; padding: 8px; border-radius: 8px; display: inline-block; line-height: 0;">
-                    <img src="${qrBase64}" style="width: 145px; height: 145px; display: block;">
-                </div>
+                <!-- Kotak putih dudukan QR Code -->
+                <div style="width: 155px; height: 155px; background: #ffffff; border-radius: 8px; margin: 0 auto;"></div>
                 <p style="color: #ffd700; font-size: 1.25rem; font-weight: bold; margin-top: 8px; letter-spacing: 1.5px;">${nraText}</p>
             </div>
         </div>
     `;
     document.body.appendChild(cardWrapper);
 
-    // Tunggu seluruh gambar (logo & QR Base64) selesai dimuat ke DOM
-    const images = cardWrapper.querySelectorAll("img");
-    await Promise.all(Array.from(images).map(img => {
-        if (img.complete) return Promise.resolve();
-        return new Promise(resolve => {
-            img.onload = resolve;
-            img.onerror = resolve;
+    // Tunggu logo selesai dimuat
+    const logoImg = cardWrapper.querySelector("img");
+    if (logoImg && !logoImg.complete) {
+        await new Promise(resolve => {
+            logoImg.onload = resolve;
+            logoImg.onerror = resolve;
         });
-    }));
-    await new Promise(r => setTimeout(r, 200));
+    }
+    await new Promise(r => setTimeout(r, 150));
 
     try {
         const targetElement = document.getElementById("pdfExactCardTarget");
         const canvas = await html2canvas(targetElement, {
-            scale: 4, // Resolusi ultra-tajam agar QR Code 100% terbaca kamera
+            scale: 3,
             useCORS: true,
             allowTaint: true,
             backgroundColor: "#32000a",
             logging: false
         });
 
-        const imgData = canvas.toDataURL("image/png");
+        const cardBgData = canvas.toDataURL("image/png");
         const { jsPDF } = window.jspdf;
 
-        // Ukuran presisi kartu fisik 65mm x 105mm (6.5cm x 10.5cm)
+        // Ukuran kartu 65mm x 105mm (6.5cm x 10.5cm)
         const pdf = new jsPDF({
             orientation: 'portrait',
             unit: 'mm',
             format: [65, 105]
         });
 
-        pdf.addImage(imgData, 'PNG', 0, 0, 65, 105);
-        pdf.save(`Kartu_Paskibra_${nraText}_${namaText.replace(/\s+/g, '_')}.pdf`);
+        // 1. Tempel desain kartu utama
+        pdf.addImage(cardBgData, 'PNG', 0, 0, 65, 105);
 
+        // 2. Tempel QR Code LANGSUNG ke atas kotak putih di PDF (Posisi presisi di tengah kotak putih)
+        if (qrBase64) {
+            // Ukuran kotak putih di PDF sekitar 31mm x 31mm, QR ditempel 28mm x 28mm tepat di tengahnya
+            pdf.addImage(qrBase64, 'PNG', 18.5, 62.5, 28, 28);
+        }
+
+        pdf.save(`Kartu_Paskibra_${nraText}_${namaText.replace(/\s+/g, '_')}.pdf`);
         closeModal('customDialogModal');
     } catch (err) {
         console.error("Error Download PDF:", err);
