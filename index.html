@@ -2116,34 +2116,60 @@ function renderPreviewAbsensi() {
     }
 
 // ============================================================================
-// FUNGSI DOWNLOAD PDF PRESISI & DIJAMIN QR CODE TAMPIL NORMAL 100%
+// 1. FUNGSI DOWNLOAD PDF (DESAIN IDENTIK 100% + QR CODE TAJAM SIAP SCAN)
 // ============================================================================
 async function downloadCardAsPdf() {
     const namaText = document.getElementById("cardNama") ? document.getElementById("cardNama").innerText : "Anggota";
     const nraText = document.getElementById("cardNra") ? document.getElementById("cardNra").innerText : "NRA";
     const kelasText = document.getElementById("cardKelasJabatan") ? document.getElementById("cardKelasJabatan").innerText : "-";
 
-    // 1. Tutup modal opsi jika sedang terbuka
     closeModal('choiceModal');
-    showCustomAlert("MEMPROSES PDF", "Sedang mengunduh kartu format PDF...", "fa-spinner fa-spin");
+    showCustomAlert("MEMPROSES PDF", "Sedang membuat kartu PDF beresolusi tinggi...", "fa-spinner fa-spin");
 
-    // 2. Buat Wadah Render Khusus di GPU (Off-screen)
-    const tempContainer = document.createElement("div");
-    tempContainer.style.position = "fixed";
-    tempContainer.style.top = "0";
-    tempContainer.style.left = "0";
-    tempContainer.style.zIndex = "-99999";
-    tempContainer.style.opacity = "0.01";
-    tempContainer.style.pointerEvents = "none";
+    // 1. Generate QR Code resolusi tinggi pada elemen nyata (opacity: 1) di luar layar
+    const qrTempBox = document.createElement("div");
+    qrTempBox.style.position = "fixed";
+    qrTempBox.style.left = "-9999px";
+    qrTempBox.style.top = "0";
+    document.body.appendChild(qrTempBox);
 
-    tempContainer.innerHTML = `
-        <div id="pdfCaptureTarget" style="
-            width: 380px; 
-            height: 610px; 
+    new QRCode(qrTempBox, {
+        text: String(nraText || "-"),
+        width: 240,
+        height: 240,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+    });
+
+    // Tunggu sebentar agar canvas QR selesai digambar oleh browser
+    await new Promise(r => setTimeout(r, 250));
+
+    let qrBase64 = "";
+    const qrCanvas = qrTempBox.querySelector("canvas");
+    if (qrCanvas) {
+        qrBase64 = qrCanvas.toDataURL("image/png");
+    } else {
+        const qrImg = qrTempBox.querySelector("img");
+        if (qrImg) qrBase64 = qrImg.src;
+    }
+    document.body.removeChild(qrTempBox);
+
+    // 2. Buat wadah kartu dengan desain yang 100% IDENTIK dengan tampilan cetak (Screenshot 1)
+    const cardWrapper = document.createElement("div");
+    cardWrapper.style.position = "fixed";
+    cardWrapper.style.left = "-9999px";
+    cardWrapper.style.top = "0";
+    cardWrapper.style.zIndex = "99999";
+
+    cardWrapper.innerHTML = `
+        <div id="pdfExactCardTarget" style="
+            width: 325px; 
+            height: 525px; 
             background: #32000a; 
             border: 3px solid #ffd700; 
             border-radius: 14px; 
-            padding: 20px 15px; 
+            padding: 20px 16px; 
             color: #fff; 
             text-align: center; 
             box-sizing: border-box; 
@@ -2153,66 +2179,43 @@ async function downloadCardAsPdf() {
             justify-content: space-between;
             font-family: 'American Captain', 'Segoe UI', sans-serif;">
             
-            <div>
-                <img src="assets/logo-paskibra.png" style="width: 52px; height: 52px; margin-bottom: 4px; object-fit: contain;">
-                <h4 style="color: #ffd700; margin: 0; font-size: 1.15rem; letter-spacing: 1px; line-height: 1.1;">PASKIBRA MAN 6 CIAMIS</h4>
-                <p style="font-size: 0.75rem; color: #ffcc66; margin-top: 3px; letter-spacing: 1px;">KARTU TANDA ANGGOTA</p>
-                <div style="width: 85%; height: 1px; background: rgba(255, 215, 0, 0.4); margin: 8px auto;"></div>
+            <div style="width: 100%;">
+                <img src="assets/logo-paskibra.png" crossorigin="anonymous" style="width: 55px; height: 55px; margin-bottom: 6px; object-fit: contain;">
+                <h4 style="color: #ffd700; margin: 0; font-size: 1.25rem; letter-spacing: 1px; line-height: 1.15;">PASKIBRA MAN 6 CIAMIS</h4>
+                <p style="font-size: 0.8rem; color: #ffcc66; margin-top: 3px; letter-spacing: 1px;">KARTU TANDA ANGGOTA</p>
+                <div style="width: 85%; height: 1.5px; background: rgba(255, 215, 0, 0.45); margin: 8px auto 0 auto;"></div>
             </div>
 
-            <div>
-                <h3 style="color: #ffffff; font-size: 1.35rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; line-height: 1.1;">${namaText}</h3>
-                <p style="color: #ffcc66; font-size: 0.9rem; margin-top: 4px; letter-spacing: 1px;">${kelasText}</p>
+            <div style="width: 100%; padding: 0 5px;">
+                <h3 style="color: #ffffff; font-size: 1.45rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; line-height: 1.15;">${namaText}</h3>
+                <p style="color: #ffcc66; font-size: 0.95rem; margin-top: 5px; letter-spacing: 1px;">${kelasText}</p>
             </div>
 
-            <div>
-                <div id="pdfQrHolder" style="background: #ffffff; padding: 8px; border-radius: 8px; display: inline-block; line-height: 0;"></div>
-                <p style="color: #ffd700; font-size: 1.15rem; font-weight: bold; margin-top: 8px; letter-spacing: 1.5px;">${nraText}</p>
+            <div style="width: 100%;">
+                <div style="background: #ffffff; padding: 8px; border-radius: 8px; display: inline-block; line-height: 0;">
+                    <img src="${qrBase64}" style="width: 145px; height: 145px; display: block;">
+                </div>
+                <p style="color: #ffd700; font-size: 1.25rem; font-weight: bold; margin-top: 8px; letter-spacing: 1.5px;">${nraText}</p>
             </div>
         </div>
     `;
-    document.body.appendChild(tempContainer);
+    document.body.appendChild(cardWrapper);
 
-    // 3. Render QR Code khusus & konversi ke Base64 murni
-    const qrHolder = document.getElementById("pdfQrHolder");
-    const tempQrDiv = document.createElement("div");
-    
-    new QRCode(tempQrDiv, {
-        text: String(nraText || "-"),
-        width: 140,
-        height: 140,
-        correctLevel: QRCode.CorrectLevel.H
-    });
+    // Tunggu seluruh gambar (logo & QR Base64) selesai dimuat ke DOM
+    const images = cardWrapper.querySelectorAll("img");
+    await Promise.all(Array.from(images).map(img => {
+        if (img.complete) return Promise.resolve();
+        return new Promise(resolve => {
+            img.onload = resolve;
+            img.onerror = resolve;
+        });
+    }));
+    await new Promise(r => setTimeout(r, 200));
 
-    await new Promise(r => setTimeout(r, 300));
-
-    let qrDataUrl = "";
-    let qrCanvas = tempQrDiv.querySelector("canvas");
-    if (qrCanvas) {
-        qrDataUrl = qrCanvas.toDataURL("image/png");
-    } else {
-        let qrImgElement = tempQrDiv.querySelector("img");
-        if (qrImgElement) qrDataUrl = qrImgElement.src;
-    }
-
-    const finalQrImg = new Image();
-    finalQrImg.src = qrDataUrl;
-    finalQrImg.style.width = "140px";
-    finalQrImg.style.height = "140px";
-    finalQrImg.style.display = "block";
-
-    await new Promise((resolve) => {
-        finalQrImg.onload = resolve;
-        setTimeout(resolve, 300);
-    });
-
-    qrHolder.appendChild(finalQrImg);
-
-    // 4. Capture & PDF Export (6.5cm x 10.5cm)
     try {
-        const targetElement = document.getElementById("pdfCaptureTarget");
+        const targetElement = document.getElementById("pdfExactCardTarget");
         const canvas = await html2canvas(targetElement, {
-            scale: 3,
+            scale: 4, // Resolusi ultra-tajam agar QR Code 100% terbaca kamera
             useCORS: true,
             allowTaint: true,
             backgroundColor: "#32000a",
@@ -2220,8 +2223,9 @@ async function downloadCardAsPdf() {
         });
 
         const imgData = canvas.toDataURL("image/png");
-
         const { jsPDF } = window.jspdf;
+
+        // Ukuran presisi kartu fisik 65mm x 105mm (6.5cm x 10.5cm)
         const pdf = new jsPDF({
             orientation: 'portrait',
             unit: 'mm',
@@ -2235,37 +2239,73 @@ async function downloadCardAsPdf() {
     } catch (err) {
         console.error("Error Download PDF:", err);
         closeModal('customDialogModal');
-        showCustomAlert("GAGAL", "Gagal mengunduh kartu format PDF.", "fa-times-circle");
+        showCustomAlert("GAGAL", "Gagal membuat file PDF kartu.", "fa-times-circle");
     } finally {
-        if (document.body.contains(tempContainer)) {
-            document.body.removeChild(tempContainer);
+        if (document.body.contains(cardWrapper)) {
+            document.body.removeChild(cardWrapper);
         }
     }
 }
-    function printCardSingle() {
-        closeModal('choiceModal');
-        const cardHtml = document.getElementById("idCardPrintArea").outerHTML;
-        const printWin = window.open('', '_blank');
-        
-        printWin.document.write(`
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>Cetak Kartu Anggota</title>
-                <link href="https://fonts.cdnfonts.com/css/american-captain" rel="stylesheet">
-                <style>
-                    @page { size: 6.5cm 10.5cm; margin: 0; }
-                    body { margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; background: #fff; }
-                    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-                </style>
-            </head>
-            <body onload="window.print(); window.close();">
-                ${cardHtml}
-            </body>
-            </html>
-        `);
-        printWin.document.close();
+
+// ============================================================================
+// 2. FUNGSI CETAK FISIK (POSISI UJUNG KANAN ATAS & AMAN TIDAK TERPOTONG)
+// ============================================================================
+function printCardSingle() {
+    closeModal('choiceModal');
+
+    // Ambil isi kartu dan pastikan gambar QR dikonversi ke img Base64 agar tidak hilang saat window.open
+    const cardClone = document.getElementById("idCardPrintArea").cloneNode(true);
+    const origCanvas = document.querySelector("#idCardPrintArea canvas");
+    if (origCanvas) {
+        const qrContainerClone = cardClone.querySelector("#qrcodeBox");
+        qrContainerClone.innerHTML = `<img src="${origCanvas.toDataURL('image/png')}" style="width:120px; height:120px; display:block;">`;
     }
+
+    const cardHtml = cardClone.outerHTML;
+    const printWin = window.open('', '_blank');
+    
+    printWin.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Cetak Kartu Anggota</title>
+            <link href="https://fonts.cdnfonts.com/css/american-captain" rel="stylesheet">
+            <style>
+                @page { 
+                    size: auto; 
+                    margin: 0mm; /* Menghilangkan header/footer URL browser */
+                }
+                html, body { 
+                    width: 100%;
+                    height: 100%;
+                    margin: 0; 
+                    padding: 0; 
+                    background: #fff; 
+                }
+                .print-wrapper {
+                    width: 100%;
+                    display: flex;
+                    justify-content: flex-end; /* Posisi di ujung kanan */
+                    align-items: flex-start;   /* Posisi di bagian atas */
+                    padding-top: 1.5cm;        /* Jarak aman dari tepi atas agar tidak terpotong */
+                    padding-right: 1.5cm;      /* Jarak aman dari tepi kanan agar tidak terpotong */
+                    box-sizing: border-box;
+                }
+                * { 
+                    -webkit-print-color-adjust: exact !important; 
+                    print-color-adjust: exact !important; 
+                }
+            </style>
+        </head>
+        <body onload="setTimeout(function(){ window.print(); window.close(); }, 400);">
+            <div class="print-wrapper">
+                ${cardHtml}
+            </div>
+        </body>
+        </html>
+    `);
+    printWin.document.close();
+}
 
 // ============================================================================
 // FUNGSI CETAK MASSAL OTOMATIS (4 KARTU PER LEMBAR A4/F4 - GUARANTEED FIT)
