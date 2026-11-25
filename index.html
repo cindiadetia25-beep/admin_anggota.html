@@ -456,7 +456,7 @@
     <div class="nav-tabs">
     <button class="tab-btn active" onclick="switchTab('tab-anggota', this)"><i class="fas fa-address-book"></i> DAFTAR ANGGOTA PASKIBRA</button>
     <button class="tab-btn" onclick="switchTab('tab-absensi', this)"><i class="fas fa-calendar-check"></i> ABSENSI LATIHAN RUTIN</button>
-    <!-- TAB BARU DIREKAP LATIHAN RUTIN -->
+    <button class="tab-btn" onclick="switchTab('tab-khusus', this)"><i class="fas fa-star"></i> ABSENSI LATIHAN KHUSUS</button>
     <button class="tab-btn" onclick="switchTab('tab-rekap', this)"><i class="fas fa-list-alt"></i> REKAP LATIHAN RUTIN</button>
     <button class="tab-btn" onclick="switchTab('tab-recruitment', this)"><i class="fas fa-user-plus"></i> OPEN RECRUITMENT</button>
 </div>
@@ -673,7 +673,94 @@
         </table>
     </div>
 </div>
+<!-- TAB BARU: ABSENSI LATIHAN KHUSUS -->
+    <div id="tab-khusus" class="card tab-content">
+        <div class="card" style="background: rgba(0,0,0,0.3); border: 1px solid #ffd700; text-align: center; margin-bottom: 20px;">
+            <h3><i class="fas fa-qrcode"></i> SCAN QR CODE LATIHAN KHUSUS (INSTANT SCAN)</h3>
+            <p style="color: #ffcc66; font-size: 0.9rem; margin-bottom: 10px;">Isi Nama Kegiatan & Pilih Tanggal terlebih dahulu sebelum membuka kamera</p>
+            
+            <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 15px;">
+                <button type="button" class="btn btn-primary" onclick="startQRScannerKhusus()"><i class="fas fa-camera"></i> BUKA KAMERA</button>
+                <button type="button" class="btn btn-delete" id="btnStopScanKhusus" onclick="stopQRScannerKhusus()" style="display: none;"><i class="fas fa-stop-circle"></i> STOP KAMERA</button>
+            </div>
 
+            <div id="readerKhusus" style="width: 100%; max-width: 400px; margin: 0 auto; border-radius: 10px; overflow: hidden;"></div>
+        </div>
+
+        <h2>INPUT ABSENSI LATIHAN KHUSUS (HARIAN / INSIDENTAL)</h2>
+        <form id="formAbsensiKhusus" onsubmit="submitAbsensiKhusus(event)">
+            <div class="form-group">
+                <label>Cari / Pilih Anggota</label>
+                <select id="khususSelectNama" required style="width:100%; margin-bottom:5px;">
+                    <option value="">-- PILIH ANGGOTA BERURUTAN --</option>
+                </select>
+                <input type="text" id="khususSearchInput" placeholder="Atau ketik pencarian NRA / Nama di sini..." oninput="filterDropdownKhusus(this.value)">
+            </div>
+            
+            <div class="form-group">
+                <label>Nama Kegiatan / Keterangan Latihan Khusus</label>
+                <input type="text" id="khususKegiatan" placeholder="Contoh: Latihan Lomba LKBB / Persiapan Upacara" required>
+            </div>
+
+            <div class="form-group">
+                <label>PILIH TANGGAL LATIHAN</label>
+                <input type="date" id="khususTanggalInput" required>
+            </div>
+
+            <div class="form-group">
+                <label>Keterangan Kehadiran</label>
+                <select id="khususStatus" required>
+                    <option value="Hadir">Hadir</option>
+                    <option value="Izin">Izin</option>
+                    <option value="Sakit">Sakit</option>
+                    <option value="Alpha">Alpha</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;"><i class="fas fa-save"></i> SIMPAN ABSENSI KHUSUS</button>
+        </form>
+    </div>
+
+    <!-- TAB BARU: REKAP LATIHAN KHUSUS -->
+    <div id="tab-rekap-khusus" class="card tab-content">
+        <h2>REKAP ABSENSI LATIHAN KHUSUS</h2>
+        
+        <div class="action-box">
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <span><strong>Filter Status:</strong></span>
+                <select id="filterKhususStatus" onchange="renderPreviewKhusus()" style="padding: 8px; border-radius: 6px; background: #2b0006; color: #fff; border: 1px solid #ffd700;">
+                    <option value="semua">Semua Status</option>
+                    <option value="Hadir">Hadir</option>
+                    <option value="Izin">Izin</option>
+                    <option value="Sakit">Sakit</option>
+                    <option value="Alpha">Alpha</option>
+                </select>
+            </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <button class="btn btn-download" onclick="downloadExcelDenganKop('absensiKhusus')"><i class="fas fa-file-download"></i> DOWNLOAD REKAP EXCEL</button>
+                <button class="btn btn-danger-all" onclick="confirmClearAll('absensiKhusus')"><i class="fas fa-trash-restore"></i> HAPUS SEMUA REKAP KHUSUS</button>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:40px; text-align:center;">NO.</th>
+                        <th style="width:100px;">TANGGAL</th>
+                        <th style="width:100px;">NRA</th>
+                        <th style="min-width:160px;">NAMA LENGKAP</th>
+                        <th style="width:80px; text-align:center;">KELAS</th>
+                        <th style="min-width:160px;">KEGIATAN</th>
+                        <th style="width:110px;">KETERANGAN</th>
+                        <th style="width:100px; text-align:center;">AKSI</th>
+                    </tr>
+                </thead>
+                <tbody id="tablePreviewKhusus">
+                    <tr><td colspan="8" style="text-align:center;">Belum ada data absensi khusus.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
     <!-- ==================================================================
          6. TAB 3: OPEN RECRUITMENT
     =================================================================== -->
@@ -927,6 +1014,8 @@
     let currentFilteredAbsensi = [];
     let globalDokumentasi = [];
     let html5QrcodeScanner = null;
+    let globalAbsensiKhusus = [];
+    let html5QrcodeScannerKhusus = null;
 
     let lastScannedNra = "";
     let lastScanTime = 0;
@@ -1078,6 +1167,8 @@
         const adminDateInput = document.getElementById("absensiTanggalInput");
         if (adminDateInput) {
             adminDateInput.value = today;
+        const khususDateInput = document.getElementById("khususTanggalInput");
+        if (khususDateInput) khususDateInput.value = today;
         }
     }
 
@@ -1200,7 +1291,8 @@
             globalAbsensi = data.absensi || [];
             globalRecruitment = data.recruitment || [];
             globalDokumentasi = data.dokumentasi || []; // <-- KUNCI SINKRONISASI FOTO LINTAS PERANGKAT
-
+            globalAbsensiKhusus = data.absensiKhusus || [];
+            
             renderAllTables();
             loadDokumentasiLocal();
         } catch (err) {
@@ -1216,6 +1308,7 @@
         renderPreviewAbsensi();
         populateFilterOROptions();
         renderTableOR();
+        renderPreviewKhusus();
     }
 
     function populateFilterAnggotaOptions() {
@@ -1364,7 +1457,8 @@
             if (section === 'anggota') globalDataMaster = [];
             else if (section === 'absensi') { globalAbsensi = []; currentFilteredAbsensi = []; }
             else if (section === 'recruitment') globalRecruitment = [];
-
+            else if (section === 'absensiKhusus') { globalAbsensiKhusus = []; renderPreviewKhusus(); }
+            
             renderAllTables();
             showCustomAlert("PEMBERSIHAN DATA", `Seluruh isi ${sectionName} telah dihapus!`);
             sendDataToSheet({ action: "clearAll", section: section });
@@ -1380,6 +1474,8 @@
             const nama = a["NAMA LENGKAP"] || a["Nama_Lengkap"] || a["nama"] || "-";
             const kelas = a["KELAS"] || a["Kelas"] || a["kelas"] || "-";
             select.innerHTML += `<option value="${nama}" data-nis="${nis}">[${nis}] ${nama} - ${kelas}</option>`;
+            const selectKhusus = document.getElementById("khususSelectNama");
+            if (selectKhusus) selectKhusus.innerHTML = select.innerHTML;
         });
     }
 
@@ -2016,79 +2112,62 @@ function renderPreviewAbsensi() {
     }
 
     function downloadExcelDenganKop(tipe) {
-        let title = "";
-        let dataToExport = [];
-        let filename = "";
+    let title = "";
+    let dataToExport = [];
+    let filename = "";
 
-        if (tipe === 'anggota') {
-            title = "LAPORAN DATA MASTER ANGGOTA PASKIBRA MAN 6 CIAMIS";
-            dataToExport = globalDataMaster;
-            filename = "Data_Anggota_Paskibra.xls";
-        } else if (tipe === 'absensi') {
-            const filterTipe = document.getElementById("filterRekapTipe").value;
-            const filterPertemuan = document.getElementById("filterRekapPertemuan").value;
-            const filterStatus = document.getElementById("filterRekapStatus").value;
-            title = `REKAP ABSENSI LATIHAN PASKIBRA (${filterTipe.toUpperCase()} - PERTEMUAN: ${filterPertemuan.toUpperCase()} - STATUS: ${filterStatus.toUpperCase()})`;
-            filename = `Rekap_Absensi_${filterTipe}_${filterPertemuan}_${filterStatus}.xls`;
-            dataToExport = currentFilteredAbsensi.length ? currentFilteredAbsensi : globalAbsensi;
-        } else if (tipe === 'recruitment') {
-            title = "LAPORAN PENDAFTARAN OPEN RECRUITMENT PASKIBRA";
-            dataToExport = globalRecruitment;
-            filename = "Data_Pendaftar_OR_Paskibra.xls";
-        }
-
-        if (!dataToExport || !dataToExport.length) return showCustomAlert("INFORMASI", "Tidak ada data untuk didownload!", "fa-info-circle");
-
-        let htmlTemplate = `
-            <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
-            <head>
-                <style>
-                    body { font-family: 'Segoe UI', Arial, sans-serif; }
-                    .header-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-                    .header-table td { border: none; text-align: center; vertical-align: middle; }
-                    .title { font-size: 16pt; font-weight: bold; color: #4a000b; }
-                    .subtitle { font-size: 11pt; color: #555; }
-                    .data-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-                    .data-table th { background-color: #ffd700; color: #4a000b; font-weight: bold; border: 1px solid #999; padding: 8px; }
-                    .data-table td { border: 1px solid #ccc; padding: 6px; text-align: left; }
-                </style>
-            </head>
-            <body>
-                <table class="header-table">
-                    <tr>
-                        <td width="100%">
-                            <div class="title">${title}</div>
-                            <div class="subtitle">PASKIBRA MAN 6 CIAMIS</div>
-                            <div class="subtitle">Dicetak Pada: ${formatDateIndo(new Date())}</div>
-                        </td>
-                    </tr>
-                </table>
-                <br>
-                <table class="data-table">
-                    <thead><tr><th>NO.</th>`;
-
-        const headers = Object.keys(dataToExport[0]);
-        headers.forEach(h => { htmlTemplate += `<th>${h}</th>`; });
-        htmlTemplate += `</tr></thead><tbody>`;
-
-        dataToExport.forEach((row, idx) => {
-            htmlTemplate += `<tr><td>${idx + 1}</td>`;
-            headers.forEach(h => { htmlTemplate += `<td>${row[h] !== undefined ? row[h] : ''}</td>`; });
-            htmlTemplate += `</tr>`;
-        });
-
-        htmlTemplate += `</tbody></table></body></html>`;
-
-        const blob = new Blob([htmlTemplate], { type: 'application/vnd.ms-excel' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+    if (tipe === 'anggota') {
+        title = "LAPORAN DATA MASTER ANGGOTA PASKIBRA MAN 6 CIAMIS";
+        dataToExport = globalDataMaster;
+        filename = "Data_Anggota_Paskibra.xlsx";
+    } else if (tipe === 'absensi') {
+        const filterTipe = document.getElementById("filterRekapTipe").value;
+        const filterPertemuan = document.getElementById("filterRekapPertemuan").value;
+        const filterStatus = document.getElementById("filterRekapStatus").value;
+        title = `REKAP ABSENSI LATIHAN RUTIN (${filterTipe.toUpperCase()} - ${filterPertemuan.toUpperCase()} - ${filterStatus.toUpperCase()})`;
+        filename = `Rekap_Absensi_Rutin_${filterTipe}_${filterPertemuan}.xlsx`;
+        dataToExport = currentFilteredAbsensi.length ? currentFilteredAbsensi : globalAbsensi;
+    } else if (tipe === 'absensiKhusus') {
+        title = "REKAP ABSENSI LATIHAN KHUSUS PASKIBRA MAN 6 CIAMIS";
+        filename = "Rekap_Absensi_Latihan_Khusus.xlsx";
+        dataToExport = typeof globalAbsensiKhusus !== "undefined" ? globalAbsensiKhusus : [];
+    } else if (tipe === 'recruitment') {
+        title = "LAPORAN PENDAFTARAN OPEN RECRUITMENT PASKIBRA";
+        dataToExport = globalRecruitment;
+        filename = "Data_Pendaftar_OR_Paskibra.xlsx";
     }
 
+    if (!dataToExport || !dataToExport.length) {
+        return showCustomAlert("INFORMASI", "Tidak ada data untuk didownload!", "fa-info-circle");
+    }
+
+    // 1. Susun Kop Surat + Header + Baris Data dalam format Array 2D murni
+    const headers = Object.keys(dataToExport[0]);
+    const sheetRows = [
+        [title],
+        ["PASKIBRA MAN 6 CIAMIS"],
+        [`Dicetak Pada: ${formatDateIndo(new Date())}`],
+        [], // Baris kosong pemisah
+        ["NO.", ...headers] // Baris header tabel
+    ];
+
+    dataToExport.forEach((row, idx) => {
+        const rowValues = headers.map(h => (row[h] !== undefined && row[h] !== null ? String(row[h]) : ""));
+        sheetRows.push([idx + 1, ...rowValues]);
+    });
+
+    // 2. Buat Workbook & Worksheet Excel asli (.xlsx) menggunakan library XLSX
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(sheetRows);
+
+    // Atur lebar kolom otomatis agar teks tidak terpotong
+    const colWidths = [{ wch: 6 }];
+    headers.forEach(h => colWidths.push({ wch: Math.max(h.length + 5, 18) }));
+    ws['!cols'] = colWidths;
+
+    XLSX.utils.book_append_sheet(wb, ws, "Laporan");
+    XLSX.writeFile(wb, filename);
+}
     // ============================================================================
     // LOGIKA CARD MODAL & EXPORT KARTU KE FORMAT PDF (PRESISI 6.5 x 10.5 CM)
     // ============================================================================
