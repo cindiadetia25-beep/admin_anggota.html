@@ -57,6 +57,8 @@
         .tab-content.active { display: block; }
         .action-box { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; align-items: center; justify-content: space-between; background: rgba(0, 0, 0, 0.3); padding: 12px; border-radius: 10px; border: 1px solid rgba(255, 215, 0, 0.15); }
         .table-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .aksi-group { display: flex; flex-direction: row; flex-wrap: nowrap; gap: 6px; justify-content: center; align-items: center; }
+        .aksi-group .btn { padding: 6px 10px; font-size: 0.85rem; white-space: nowrap; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; min-width: 750px; }
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 0.95rem; word-break: break-word; }
         th { background: rgba(255, 215, 0, 0.2); color: #ffd700; font-size: 1.1rem; }
@@ -231,7 +233,7 @@
                         <th style="min-width:180px;">NAMA LENGKAP</th>
                         <th style="width:100px; text-align:center;">KELAS</th>
                         <th style="width:140px;">JABATAN</th>
-                        <th style="width:140px; text-align:center;">AKSI</th>
+                        <th style="width:230px; text-align:center;">AKSI</th>
                     </tr>
                 </thead>
                 <tbody id="tableAnggota">
@@ -408,7 +410,7 @@
                         <th style="width:80px; text-align:center;">KELAS</th>
                         <th style="min-width:150px;">PERTEMUAN</th>
                         <th style="width:120px;">KETERANGAN</th>
-                        <th style="width:130px; text-align:center;">AKSI</th>
+                        <th style="width:170px; text-align:center;">AKSI</th>
                     </tr>
                 </thead>
                 <tbody id="tablePreviewAbsensi">
@@ -1039,10 +1041,12 @@
                         <td style="text-align:center;">${kelas}</td>
                         <td>${jabatan}</td>
                         <td style="text-align:center;">
-                            <button class="btn btn-edit" onclick="openEditModal('${nis}', '${nama.replace(/'/g, "\\'")}', '${kelas}', '${jabatan}')"><i class="fas fa-edit"></i> Edit</button>
-                            <button class="btn btn-delete" onclick="deleteAnggota('${nis}', '${nama.replace(/'/g, "\\'")}')"><i class="fas fa-trash-alt"></i> Hapus</button>
-                            <button class="btn btn-download" style="padding: 5px 10px; font-size: 0.85rem;" onclick="openCardModal('${nis}', '${nama.replace(/'/g, "\\'")}', '${kelas}', '${jabatan}')"><i class="fas fa-id-card"></i> Kartu</button>
-                        </td>
+                         <div class="aksi-group">
+                             <button class="btn btn-edit" onclick="openEditModal('${nis}', '${nama.replace(/'/g, "\\'")}', '${kelas}', '${jabatan}')"><i class="fas fa-edit"></i> Edit</button>
+                             <button class="btn btn-delete" onclick="deleteAnggota('${nis}', '${nama.replace(/'/g, "\\'")}')"><i class="fas fa-trash-alt"></i> Hapus</button>
+                             <button class="btn btn-download" onclick="openCardModal('${nis}', '${nama.replace(/'/g, "\\'")}', '${kelas}', '${jabatan}')"><i class="fas fa-id-card"></i> Kartu</button>
+                         </div>
+                     </td>
                     </tr>`;
             });
         } else {
@@ -1331,9 +1335,11 @@
                         <td>${pertemuan}</td>
                         <td><strong>${keterangan}</strong></td>
                         <td style="text-align:center;">
-                            <button class="btn btn-edit" onclick="openEditAbsensiModal('${nama.replace(/'/g, "\\'")}', '${pertemuan}', '${keterangan}', '${rawTs}')"><i class="fas fa-edit"></i> Edit</button>
-                            <button class="btn btn-delete" onclick="deleteAbsensi('${nama.replace(/'/g, "\\'")}', '${rawTs}')"><i class="fas fa-trash-alt"></i> Hapus</button>
-                        </td>
+                         <div class="aksi-group">
+                             <button class="btn btn-edit" onclick="openEditAbsensiModal('${nama.replace(/'/g, "\\'")}', '${pertemuan}', '${keterangan}', '${rawTs}')"><i class="fas fa-edit"></i> Edit</button>
+                             <button class="btn btn-delete" onclick="deleteAbsensi('${nama.replace(/'/g, "\\'")}', '${rawTs}')"><i class="fas fa-trash-alt"></i> Hapus</button>
+                         </div>
+                     </td>
                     </tr>`;
             });
         });
